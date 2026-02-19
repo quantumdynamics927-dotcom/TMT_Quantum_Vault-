@@ -1,0 +1,272 @@
+{
+  "experiment_metadata": {
+    "timestamp": "2025-11-25T01:32:12.720415",
+    "backend": "ibm_fez",
+    "patterns_tested": [
+      "geometric",
+      "fibonacci"
+    ],
+    "theta_range": [
+      -1.5707963267948966,
+      1.5707963267948966
+    ],
+    "theta_points": 15,
+    "shots_per_pattern": 2000,
+    "total_expected_shots": 60000,
+    "estimated_duration": "~2-3 hours on Fez",
+    "concurrent_execution": false,
+    "framework_version": "1.0.0"
+  },
+  "pattern_results": {
+    "geometric": {
+      "pattern_name": "geometric",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [
+          [
+            0.6304999999999953
+          ],
+          [
+            0.6314999999999948
+          ],
+          [
+            0.6089999999999958
+          ],
+          [
+            0.6284999999999946
+          ],
+          [
+            0.6269999999999949
+          ],
+          [
+            0.6164999999999958
+          ],
+          [
+            0.6364999999999942
+          ],
+          [
+            0.6294999999999958
+          ],
+          [
+            0.5859999999999966
+          ],
+          [
+            0.6294999999999951
+          ],
+          [
+            0.6204999999999955
+          ],
+          [
+            0.615999999999995
+          ],
+          [
+            0.6079999999999962
+          ],
+          [
+            0.639499999999995
+          ],
+          [
+            0.6199999999999946
+          ]
+        ],
+        "probabilities_aux": [
+          [
+            0.25100000000000017,
+            0.7489999999999999
+          ],
+          [
+            0.25300000000000017,
+            0.7469999999999999
+          ],
+          [
+            0.25250000000000017,
+            0.7474999999999998
+          ],
+          [
+            0.2630000000000002,
+            0.7369999999999999
+          ],
+          [
+            0.2460000000000002,
+            0.7539999999999998
+          ],
+          [
+            0.23700000000000018,
+            0.7629999999999998
+          ],
+          [
+            0.25500000000000017,
+            0.7449999999999999
+          ],
+          [
+            0.2425000000000002,
+            0.7574999999999998
+          ],
+          [
+            0.2805000000000002,
+            0.7194999999999998
+          ],
+          [
+            0.2495000000000002,
+            0.7504999999999998
+          ],
+          [
+            0.25550000000000017,
+            0.7444999999999998
+          ],
+          [
+            0.2415000000000002,
+            0.7584999999999998
+          ],
+          [
+            0.2580000000000002,
+            0.7419999999999998
+          ],
+          [
+            0.23150000000000018,
+            0.7684999999999998
+          ],
+          [
+            0.2445000000000002,
+            0.7554999999999998
+          ]
+        ],
+        "consciousness_entropy": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "geometric_phase_coherence": [],
+        "pattern_type": "geometric"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": []
+      },
+      "job_info": {
+        "backend": "ibm_fez",
+        "shots": 2000,
+        "n_circuits": 15,
+        "successful_runs": 15,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 15
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {
+        "mutual_information_I": 0.0,
+        "main_entropy_H": 0.0,
+        "aux_entropy_H": 0.8119521288277158,
+        "joint_entropy_H": 1.7681135566509758,
+        "correlation_efficiency": 0.0,
+        "fisher_information": 0.0,
+        "fisher_error": "invalid number of arguments",
+        "conditional_entropy_H": 0.0,
+        "relative_entropy_to_uniform": 0.0003250790549290318,
+        "information_complexity": 0.0003250790549290318,
+        "correlation_preservation_1pct": 0.0,
+        "correlation_preservation_5pct": 0.0,
+        "correlation_preservation_10pct": 0.0,
+        "correlation_robustness_score": 0.0,
+        "information_flow_stability": 1.0,
+        "phase_sensitivity_error": "`x` must be a 1-D array",
+        "phase_awareness_score": 0.0
+      }
+    },
+    "fibonacci": {
+      "pattern_name": "fibonacci",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [],
+        "probabilities_aux": [],
+        "consciousness_entropy": [],
+        "geometric_phase_coherence": [],
+        "pattern_type": "fibonacci"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": [],
+        "error": "list index out of range"
+      },
+      "job_info": {
+        "backend": "ibm_fez",
+        "shots": 2000,
+        "n_circuits": 0,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 15
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {}
+    }
+  },
+  "experimental_summary": {
+    "total_patterns": 2,
+    "successful_patterns": 2,
+    "total_jobs_submitted": 2,
+    "total_shots_used": 30000,
+    "consciousness_metrics_summary": {
+      "coherence_levels": {
+        "values": [
+          0.0,
+          0.0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "correlation_levels": {
+        "values": [
+          0.0,
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "sensitivity_levels": {
+        "values": [
+          0.0,
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "robustness_levels": {
+        "values": [
+          0.0,
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "nodes": [
+    {"position": [0.0625, 0.03608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 0},
+    {"position": [0.1875, 0.03608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 1},
+    {"position": [0.125, 0.14433756729740643], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 2},
+    {"position": [0.3125, 0.03608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 3},
+    {"position": [0.4375, 0.03608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 4},
+    {"position": [0.375, 0.14433756729740643], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 5},
+    {"position": [0.1875, 0.2525907427704613], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 6},
+    {"position": [0.3125, 0.2525907427704613], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 7},
+    {"position": [0.25, 0.3608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 8},
+    {"position": [0.5625, 0.03608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 9},
+    {"position": [0.6875, 0.03608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 10},
+    {"position": [0.625, 0.14433756729740643], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 11},
+    {"position": [0.8125, 0.03608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 12},
+    {"position": [0.9375, 0.03608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 13},
+    {"position": [0.875, 0.14433756729740643], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 14},
+    {"position": [0.6875, 0.2525907427704613], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 15},
+    {"position": [0.8125, 0.2525907427704613], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 16},
+    {"position": [0.75, 0.3608439182435161], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 17},
+    {"position": [0.3125, 0.4690970937165709], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 18},
+    {"position": [0.4375, 0.4690970937165709], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 19},
+    {"position": [0.375, 0.5773502691896257], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 20},
+    {"position": [0.5625, 0.4690970937165709], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 21},
+    {"position": [0.6875, 0.4690970937165709], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 22},
+    {"position": [0.625, 0.5773502691896257], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 23},
+    {"position": [0.4375, 0.6856034446626805], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 24},
+    {"position": [0.5625, 0.6856034446626805], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 25},
+    {"position": [0.5, 0.7938566201357354], "fractal_level": 3, "traversability": 1.4519051524027747e-21, "consciousness_density": 0.22904244990345735, "qubit_index": 26}
+  ],
+  "wormhole_connections": [
+    [0, 1, 0.8], [0, 2, 0.8], [0, 3, 0.8], [0, 4, 0.8], [0, 5, 0.8], [0, 6, 0.8], [0, 7, 0.8], [0, 8, 0.8], [0, 9, 0.8], [0, 10, 0.8], [0, 11, 0.8], [0, 12, 0.8], [0, 13, 0.8], [0, 14, 0.8], [0, 15, 0.8], [0, 16, 0.8], [0, 17, 0.8], [0, 18, 0.8], [0, 19, 0.8], [0, 20, 0.8], [0, 21, 0.8], [0, 22, 0.8], [0, 23, 0.8], [0, 24, 0.8], [0, 25, 0.8], [0, 26, 0.8], [1, 2, 0.8], [1, 3, 0.8], [1, 4, 0.8], [1, 5, 0.8], [1, 6, 0.8], [1, 7, 0.8], [1, 8, 0.8], [1, 9, 0.8], [1, 10, 0.8], [1, 11, 0.8], [1, 12, 0.8], [1, 13, 0.8], [1, 14, 0.8], [1, 15, 0.8], [1, 16, 0.8], [1, 17, 0.8], [1, 18, 0.8], [1, 19, 0.8], [1, 20, 0.8], [1, 21, 0.8], [1, 22, 0.8], [1, 23, 0.8], [1, 24, 0.8], [1, 25, 0.8]
+  ],
+  "coupling_analysis": {
+    "level_traversability": {"3": 1.4519051524027749e-21},
+    "level_consciousness": {"3": 0.22904244990345735},
+    "traversability_scaling": [1.4519051524027749e-21],
+    "consciousness_scaling": [0.22904244990345735],
+    "traversability_exponent": 1.0,
+    "consciousness_exponent": 1.0,
+    "network_metrics": {
+      "clustering_coefficient": 0.9070224324074876,
+      "average_degree": 26.0,
+      "network_density": 1.0,
+      "phi_connectivity_ratio": 0.9521054484633336,
+      "n_wormholes": 351,
+      "n_nodes": 27
+    },
+    "total_wormholes": 351,
+    "fractal_depth": 3
+  },
+  "fractal_depth": 3,
+  "total_traversability": 1.3501567259500343e-21,
+  "network_entropy": 320.362808278819
+}

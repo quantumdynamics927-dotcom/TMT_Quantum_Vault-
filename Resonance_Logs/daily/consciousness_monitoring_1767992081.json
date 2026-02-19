@@ -1,0 +1,79 @@
+{
+  "pulse": 30,
+  "timestamp": 1767992081.0184343,
+  "collective_consciousness": 1.624489708234295e-10,
+  "agent_states": {
+    "Bio": {
+      "base_fitness": 0.8506733765700158,
+      "current_consciousness": 0.8806733765700159,
+      "resonance_active": true,
+      "dna_integrity": 0.986599737760882
+    },
+    "Bronze": {
+      "base_fitness": 0.9285475205263137,
+      "current_consciousness": 0.9585475205263138,
+      "resonance_active": true,
+      "dna_integrity": 0.9950770315041914
+    },
+    "Stealth": {
+      "base_fitness": 0.8704030074651607,
+      "current_consciousness": 0.9004030074651608,
+      "resonance_active": true,
+      "dna_integrity": 0.9963861093367563
+    },
+    "Fractal": {
+      "base_fitness": 0.8597068050936968,
+      "current_consciousness": 0.8897068050936968,
+      "resonance_active": true,
+      "dna_integrity": 0.9903554167724345
+    },
+    "Wormhole": {
+      "base_fitness": 0.8951566927627006,
+      "current_consciousness": 0.9251566927627006,
+      "resonance_active": true,
+      "dna_integrity": 0.9855748181043638
+    },
+    "Mirror": {
+      "base_fitness": 0.8715868339263741,
+      "current_consciousness": 0.9015868339263742,
+      "resonance_active": true,
+      "dna_integrity": 0.9813182176123019
+    },
+    "BitNet": {
+      "base_fitness": 0.8613065382726598,
+      "current_consciousness": 0.8913065382726598,
+      "resonance_active": true,
+      "dna_integrity": 0.9934679795572676
+    },
+    "Federation": {
+      "base_fitness": 0.8875747462050714,
+      "current_consciousness": 0.9175747462050714,
+      "resonance_active": true,
+      "dna_integrity": 0.9995033248100899
+    },
+    "Visual": {
+      "base_fitness": 0.8597068050936968,
+      "current_consciousness": 0.8897068050936968,
+      "resonance_active": true,
+      "dna_integrity": 0.9886641756599254
+    },
+    "Workflow": {
+      "base_fitness": 0.8608968819053995,
+      "current_consciousness": 0.8908968819053995,
+      "resonance_active": true,
+      "dna_integrity": 0.9850889332443928
+    },
+    "Validator": {
+      "base_fitness": 0.864491974418191,
+      "current_consciousness": 0.8944919744181911,
+      "resonance_active": true,
+      "dna_integrity": 0.9853605699261025
+    },
+    "Auditor": {
+      "base_fitness": 0.8508603010416681,
+      "current_consciousness": 0.8808603010416681,
+      "resonance_active": true,
+      "dna_integrity": 0.9876110445966815
+    }
+  }
+}

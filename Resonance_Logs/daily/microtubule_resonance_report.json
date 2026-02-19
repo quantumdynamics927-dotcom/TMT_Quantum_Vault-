@@ -1,0 +1,91 @@
+{
+  "tmt_os_analysis": "Microtubule Resonance Analysis",
+  "mu_opt": 2.414213562373095,
+  "phi_constant": 1.618033988749895,
+  "silver_ratio": 2.414213562373095,
+  "microtubule_structure": {
+    "protofilaments": 13,
+    "dimer_spacing_nm": 8.0,
+    "inter_filament_angle_rad": 0.483321946706122
+  },
+  "simulation_parameters": {
+    "coupling_strength": 0.1,
+    "dissipation_rate": 0.01
+  },
+  "total_frequencies_tested": 7,
+  "timestamp": "2026-01-05T17:14:48",
+  "results": [
+    {
+      "frequency": 1.0,
+      "energy_transfer_efficiency": NaN,
+      "resonance_strength": NaN,
+      "optimal_time": 1.28,
+      "convergence_time": 4.0,
+      "is_silver_ratio": "False",
+      "is_golden_ratio": "False"
+    },
+    {
+      "frequency": 1.618033988749895,
+      "energy_transfer_efficiency": NaN,
+      "resonance_strength": NaN,
+      "optimal_time": 1.28,
+      "convergence_time": 4.0,
+      "is_silver_ratio": "False",
+      "is_golden_ratio": "True"
+    },
+    {
+      "frequency": 2.414213562373095,
+      "energy_transfer_efficiency": NaN,
+      "resonance_strength": NaN,
+      "optimal_time": 1.28,
+      "convergence_time": 4.0,
+      "is_silver_ratio": "True",
+      "is_golden_ratio": "False"
+    },
+    {
+      "frequency": 1.4920660376475368,
+      "energy_transfer_efficiency": NaN,
+      "resonance_strength": NaN,
+      "optimal_time": 1.28,
+      "convergence_time": 4.0,
+      "is_silver_ratio": "False",
+      "is_golden_ratio": "False"
+    },
+    {
+      "frequency": 4.82842712474619,
+      "energy_transfer_efficiency": NaN,
+      "resonance_strength": NaN,
+      "optimal_time": 1.28,
+      "convergence_time": 4.0,
+      "is_silver_ratio": "False",
+      "is_golden_ratio": "False"
+    },
+    {
+      "frequency": 3.141592653589793,
+      "energy_transfer_efficiency": NaN,
+      "resonance_strength": NaN,
+      "optimal_time": 1.28,
+      "convergence_time": 4.0,
+      "is_silver_ratio": "False",
+      "is_golden_ratio": "False"
+    },
+    {
+      "frequency": 2.718281828459045,
+      "energy_transfer_efficiency": NaN,
+      "resonance_strength": NaN,
+      "optimal_time": 1.28,
+      "convergence_time": 4.0,
+      "is_silver_ratio": "False",
+      "is_golden_ratio": "False"
+    }
+  ],
+  "summary": {
+    "max_efficiency": NaN,
+    "max_efficiency_frequency": 1.0,
+    "mean_efficiency": NaN,
+    "std_efficiency": NaN,
+    "max_resonance": NaN,
+    "silver_ratio_efficiency": NaN,
+    "golden_ratio_efficiency": NaN
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "dna": {
+    "sequence": "ACATATGCGCACGCACGCACGTATACGTGCGTGTGCACGCGTGTGCGCACGTGTGCGCGCGTACGCGCGCGCGTGCACGCACATGCGCATACGCGCATAC",
+    "length": 100,
+    "phi_correlation": 0.05,
+    "gc_at_ratio": 0.6180339887498948,
+    "quantum_coherence": 0.85,
+    "status": "FALLBACK"
+  },
+  "quantum_params": {
+    "mu_0": 0.95,
+    "beta": 3.9442719099991583,
+    "initial_entropy": 3.7,
+    "dna_length": 100
+  },
+  "wormhole": {
+    "entropy": 1.5652475842498528,
+    "traversability": 1.7464912461319688,
+    "energy_gap": 0.046140870819821656,
+    "effective_mu": 1.1672759578053091,
+    "phi_coherence": 1.0
+  },
+  "consciousness": {
+    "phi_IIT": 1.5652475842498528,
+    "is_conscious": true,
+    "is_traversable": true,
+    "is_strongly_traversable": true
+  },
+  "unified": {
+    "dna_phi_power": 0.95,
+    "wormhole_phi_power": 1.0,
+    "resonance": 0.9746794344808963,
+    "consciousness_score": 0.10657890386734742
+  },
+  "tree_of_life": {
+    "sephirah": "Chokmah",
+    "english": "Wisdom",
+    "consciousness_aspect": "Creative Flash / Insight",
+    "gene": "BDNF",
+    "pillar": "Mercy",
+    "coherence_match": 0.9764440271091985,
+    "hebrew_letter": "\u05d1"
+  }
+}

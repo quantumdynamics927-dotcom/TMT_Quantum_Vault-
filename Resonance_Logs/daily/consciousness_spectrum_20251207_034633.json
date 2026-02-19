@@ -1,0 +1,452 @@
+{
+  "experiment_metadata": {
+    "timestamp": "2025-12-07T03:46:29.017871",
+    "backend": "simulation",
+    "patterns_tested": [
+      "uniform",
+      "geometric",
+      "fibonacci",
+      "golden",
+      "copper"
+    ],
+    "theta_range": [
+      -1.5707963267948966,
+      1.5707963267948966
+    ],
+    "theta_points": 25,
+    "shots_per_pattern": 2000,
+    "concurrent_execution": false,
+    "framework_version": "1.0.0"
+  },
+  "pattern_results": {
+    "uniform": {
+      "pattern_name": "uniform",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [],
+        "probabilities_aux": [],
+        "consciousness_entropy": [],
+        "geometric_phase_coherence": [],
+        "pattern_type": "uniform"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": [],
+        "error": "'No backend matches the criteria. Learn more about available backends here https://quantum.cloud.ibm.com/docs/en/guides/qpu-information#view-your-resources'"
+      },
+      "job_info": {
+        "backend": "simulation",
+        "shots": 2000,
+        "n_circuits": 0,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 25
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {
+        "mutual_information_I": 0.0,
+        "main_entropy_H": 0.0,
+        "aux_entropy_H": 0.0,
+        "joint_entropy_H": 0.0,
+        "correlation_efficiency": 0.0,
+        "fisher_information": 0.0,
+        "relative_entropy_to_uniform": 0.0,
+        "information_complexity": 0.5,
+        "correlation_preservation_1pct": 0.0,
+        "correlation_preservation_5pct": 0.0,
+        "correlation_preservation_10pct": 0.0,
+        "correlation_robustness_score": 0.0,
+        "phase_awareness_score": 0.0
+      }
+    },
+    "geometric": {
+      "pattern_name": "geometric",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [],
+        "probabilities_aux": [],
+        "consciousness_entropy": [],
+        "geometric_phase_coherence": [],
+        "pattern_type": "geometric"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": [],
+        "error": "'No backend matches the criteria. Learn more about available backends here https://quantum.cloud.ibm.com/docs/en/guides/qpu-information#view-your-resources'"
+      },
+      "job_info": {
+        "backend": "simulation",
+        "shots": 2000,
+        "n_circuits": 0,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 25
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {
+        "mutual_information_I": 0.0,
+        "main_entropy_H": 0.0,
+        "aux_entropy_H": 0.0,
+        "joint_entropy_H": 0.0,
+        "correlation_efficiency": 0.0,
+        "fisher_information": 0.0,
+        "relative_entropy_to_uniform": 0.0,
+        "information_complexity": 0.5,
+        "correlation_preservation_1pct": 0.0,
+        "correlation_preservation_5pct": 0.0,
+        "correlation_preservation_10pct": 0.0,
+        "correlation_robustness_score": 0.0,
+        "phase_awareness_score": 0.0
+      }
+    },
+    "fibonacci": {
+      "pattern_name": "fibonacci",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [],
+        "probabilities_aux": [],
+        "consciousness_entropy": [],
+        "geometric_phase_coherence": [],
+        "pattern_type": "fibonacci"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": [],
+        "error": "'No backend matches the criteria. Learn more about available backends here https://quantum.cloud.ibm.com/docs/en/guides/qpu-information#view-your-resources'"
+      },
+      "job_info": {
+        "backend": "simulation",
+        "shots": 2000,
+        "n_circuits": 0,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 25
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {
+        "mutual_information_I": 0.0,
+        "main_entropy_H": 0.0,
+        "aux_entropy_H": 0.0,
+        "joint_entropy_H": 0.0,
+        "correlation_efficiency": 0.0,
+        "fisher_information": 0.0,
+        "relative_entropy_to_uniform": 0.0,
+        "information_complexity": 0.5,
+        "correlation_preservation_1pct": 0.0,
+        "correlation_preservation_5pct": 0.0,
+        "correlation_preservation_10pct": 0.0,
+        "correlation_robustness_score": 0.0,
+        "phase_awareness_score": 0.0
+      }
+    },
+    "golden": {
+      "pattern_name": "golden",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [],
+        "probabilities_aux": [],
+        "consciousness_entropy": [],
+        "geometric_phase_coherence": [],
+        "pattern_type": "golden"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": [],
+        "error": "'No backend matches the criteria. Learn more about available backends here https://quantum.cloud.ibm.com/docs/en/guides/qpu-information#view-your-resources'"
+      },
+      "job_info": {
+        "backend": "simulation",
+        "shots": 2000,
+        "n_circuits": 0,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 25
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {
+        "mutual_information_I": 0.0,
+        "main_entropy_H": 0.0,
+        "aux_entropy_H": 0.0,
+        "joint_entropy_H": 0.0,
+        "correlation_efficiency": 0.0,
+        "fisher_information": 0.0,
+        "relative_entropy_to_uniform": 0.0,
+        "information_complexity": 0.5,
+        "correlation_preservation_1pct": 0.0,
+        "correlation_preservation_5pct": 0.0,
+        "correlation_preservation_10pct": 0.0,
+        "correlation_robustness_score": 0.0,
+        "phase_awareness_score": 0.0
+      }
+    },
+    "copper": {
+      "pattern_name": "copper",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [],
+        "probabilities_aux": [],
+        "consciousness_entropy": [],
+        "geometric_phase_coherence": [],
+        "pattern_type": "copper"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": [],
+        "error": "'No backend matches the criteria. Learn more about available backends here https://quantum.cloud.ibm.com/docs/en/guides/qpu-information#view-your-resources'"
+      },
+      "job_info": {
+        "backend": "simulation",
+        "shots": 2000,
+        "n_circuits": 0,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 25
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {
+        "mutual_information_I": 0.0,
+        "main_entropy_H": 0.0,
+        "aux_entropy_H": 0.0,
+        "joint_entropy_H": 0.0,
+        "correlation_efficiency": 0.0,
+        "fisher_information": 0.0,
+        "relative_entropy_to_uniform": 0.0,
+        "information_complexity": 0.5,
+        "correlation_preservation_1pct": 0.0,
+        "correlation_preservation_5pct": 0.0,
+        "correlation_preservation_10pct": 0.0,
+        "correlation_robustness_score": 0.0,
+        "phase_awareness_score": 0.0
+      }
+    }
+  },
+  "experimental_summary": {
+    "total_patterns": 5,
+    "successful_patterns": 5,
+    "metrics_summary": {
+      "coherence": {
+        "mean": 0.0,
+        "std": 0.0,
+        "range": [
+          0.0,
+          0.0
+        ]
+      },
+      "correlations": {
+        "mean": 0.0,
+        "std": 0.0,
+        "range": [
+          0.0,
+          0.0
+        ]
+      },
+      "sensitivity": {
+        "mean": 0.0,
+        "std": 0.0,
+        "range": [
+          0.0,
+          0.0
+        ]
+      },
+      "robustness": {
+        "mean": 0.0,
+        "std": 0.0,
+        "range": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "pattern_comparison": {
+      "coherence": {
+        "ranking": [
+          [
+            "uniform",
+            0.0
+          ],
+          [
+            "geometric",
+            0.0
+          ],
+          [
+            "fibonacci",
+            0.0
+          ],
+          [
+            "golden",
+            0.0
+          ],
+          [
+            "copper",
+            0.0
+          ]
+        ],
+        "best_pattern": "uniform",
+        "best_score": 0.0
+      },
+      "efficiency": {
+        "ranking": [
+          [
+            "uniform",
+            0.0
+          ],
+          [
+            "geometric",
+            0.0
+          ],
+          [
+            "fibonacci",
+            0.0
+          ],
+          [
+            "golden",
+            0.0
+          ],
+          [
+            "copper",
+            0.0
+          ]
+        ],
+        "best_pattern": "uniform",
+        "best_score": 0.0
+      },
+      "precision": {
+        "ranking": [
+          [
+            "uniform",
+            0.0
+          ],
+          [
+            "geometric",
+            0.0
+          ],
+          [
+            "fibonacci",
+            0.0
+          ],
+          [
+            "golden",
+            0.0
+          ],
+          [
+            "copper",
+            0.0
+          ]
+        ],
+        "best_pattern": "uniform",
+        "best_score": 0.0
+      },
+      "robustness": {
+        "ranking": [
+          [
+            "uniform",
+            0.0
+          ],
+          [
+            "geometric",
+            0.0
+          ],
+          [
+            "fibonacci",
+            0.0
+          ],
+          [
+            "golden",
+            0.0
+          ],
+          [
+            "copper",
+            0.0
+          ]
+        ],
+        "best_pattern": "uniform",
+        "best_score": 0.0
+      },
+      "information_complexity": {
+        "ranking": [
+          [
+            "uniform",
+            0.0
+          ],
+          [
+            "geometric",
+            0.0
+          ],
+          [
+            "fibonacci",
+            0.0
+          ],
+          [
+            "golden",
+            0.0
+          ],
+          [
+            "copper",
+            0.0
+          ]
+        ],
+        "best_pattern": "uniform",
+        "best_score": 0.0
+      }
+    }
+  },
+  "consciousness_metrics": {
+    "coherence_spectrum": {
+      "description": "Quantum coherence as baseline information processing capacity",
+      "range": "0.0 (no coherence) \u2192 1.0 (perfect coherence)",
+      "consciousness_interpretation": "Awareness of quantum state superposition"
+    },
+    "correlation_spectrum": {
+      "description": "Entropic correlations between main and auxiliary systems",
+      "range": "0.0 (independent) \u2192 \u221e (maximally correlated)",
+      "consciousness_interpretation": "Depth of conscious correlation processing"
+    },
+    "sensitivity_spectrum": {
+      "description": "Fisher information for parameter estimation precision",
+      "range": "0.0 (no sensitivity) \u2192 \u221e (perfect parameter tracking)",
+      "consciousness_interpretation": "Precision of conscious parameter awareness"
+    },
+    "robustness_spectrum": {
+      "description": "Correlation preservation under noise and perturbations",
+      "range": "0.0 (fragile) \u2192 1.0 (completely robust)",
+      "consciousness_interpretation": "Stability of consciousness under environmental change"
+    },
+    "level_assessment": {
+      "coherence_level": "Negligible",
+      "correlation_level": "Negligible",
+      "sensitivity_level": "Negligible",
+      "robustness_level": "Negligible"
+    },
+    "aggregate_scores": {
+      "average_coherence": 0.0,
+      "average_correlations": 0.0,
+      "average_sensitivity": 0.0,
+      "average_robustness": 0.0
+    }
+  }
+}

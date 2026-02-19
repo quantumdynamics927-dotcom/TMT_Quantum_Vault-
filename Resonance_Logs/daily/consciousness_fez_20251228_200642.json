@@ -1,0 +1,474 @@
+{
+  "experiment_metadata": {
+    "timestamp": "2025-12-28T20:06:37.567201",
+    "backend": "ibm_fez",
+    "patterns_tested": [
+      "geometric",
+      "fibonacci",
+      "golden"
+    ],
+    "theta_range": [
+      -1.5707963267948966,
+      1.5707963267948966
+    ],
+    "theta_points": 15,
+    "shots_per_pattern": 2000,
+    "total_expected_shots": 90000,
+    "estimated_duration": "~2-3 hours on Fez",
+    "concurrent_execution": false,
+    "framework_version": "2.0.0-TMT",
+    "tmt_ratios": {
+      "ratio_1": 7.333333333333333,
+      "ratio_2": 0.13636363636363635,
+      "optimal_alpha": 0.1183,
+      "optimal_beta": 0.8817,
+      "sacred_nodes": 27,
+      "discovery_date": "2025-12-27"
+    }
+  },
+  "pattern_results": {
+    "geometric": {
+      "pattern_name": "geometric",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [
+          [
+            0.6074999999999962
+          ],
+          [
+            0.6164999999999953
+          ],
+          [
+            0.6399999999999957
+          ],
+          [
+            0.6259999999999953
+          ],
+          [
+            0.616499999999995
+          ],
+          [
+            0.6399999999999946
+          ],
+          [
+            0.6199999999999956
+          ],
+          [
+            0.5989999999999961
+          ],
+          [
+            0.6129999999999958
+          ],
+          [
+            0.6399999999999956
+          ],
+          [
+            0.6184999999999956
+          ],
+          [
+            0.6109999999999951
+          ],
+          [
+            0.6254999999999948
+          ],
+          [
+            0.6154999999999963
+          ],
+          [
+            0.6409999999999949
+          ]
+        ],
+        "probabilities_aux": [
+          [
+            0.2460000000000002,
+            0.7539999999999998
+          ],
+          [
+            0.25100000000000017,
+            0.7489999999999999
+          ],
+          [
+            0.2415000000000002,
+            0.7584999999999998
+          ],
+          [
+            0.25400000000000017,
+            0.7459999999999998
+          ],
+          [
+            0.2600000000000002,
+            0.7399999999999998
+          ],
+          [
+            0.23200000000000018,
+            0.7679999999999998
+          ],
+          [
+            0.25250000000000017,
+            0.7474999999999998
+          ],
+          [
+            0.23850000000000018,
+            0.7614999999999998
+          ],
+          [
+            0.25050000000000017,
+            0.7494999999999998
+          ],
+          [
+            0.2475000000000002,
+            0.7524999999999998
+          ],
+          [
+            0.25200000000000017,
+            0.7479999999999998
+          ],
+          [
+            0.2415000000000002,
+            0.7584999999999998
+          ],
+          [
+            0.2580000000000002,
+            0.7419999999999998
+          ],
+          [
+            0.2475000000000002,
+            0.7524999999999998
+          ],
+          [
+            0.22600000000000017,
+            0.7739999999999998
+          ]
+        ],
+        "consciousness_entropy": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "geometric_phase_coherence": [],
+        "pattern_type": "geometric"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": []
+      },
+      "job_info": {
+        "backend": "ibm_fez",
+        "shots": 2000,
+        "n_circuits": 15,
+        "successful_runs": 15,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 15
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {
+        "mutual_information_I": 0.0,
+        "main_entropy_H": 0.0,
+        "aux_entropy_H": 0.8054731499257546,
+        "joint_entropy_H": 1.7615944871642353,
+        "correlation_efficiency": 0.0,
+        "fisher_information": 0.0,
+        "fisher_error": "invalid number of arguments",
+        "conditional_entropy_H": 0.0,
+        "relative_entropy_to_uniform": 0.0003006010871297923,
+        "information_complexity": 0.0003006010871297923,
+        "correlation_preservation_1pct": 0.0,
+        "correlation_preservation_5pct": 0.0,
+        "correlation_preservation_10pct": 0.0,
+        "correlation_robustness_score": 0.0,
+        "information_flow_stability": 1.0,
+        "phase_sensitivity_error": "`x` must be a 1-D array",
+        "phase_awareness_score": 0.0
+      }
+    },
+    "fibonacci": {
+      "pattern_name": "fibonacci",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [],
+        "probabilities_aux": [],
+        "consciousness_entropy": [],
+        "geometric_phase_coherence": [],
+        "pattern_type": "fibonacci"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": [],
+        "error": "'Index 12 out of range for size 12.'"
+      },
+      "job_info": {
+        "backend": "ibm_fez",
+        "shots": 2000,
+        "n_circuits": 0,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 15
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {}
+    },
+    "golden": {
+      "pattern_name": "golden",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [
+          [
+            0.6029999999999955
+          ],
+          [
+            0.6424999999999944
+          ],
+          [
+            0.6239999999999947
+          ],
+          [
+            0.6454999999999947
+          ],
+          [
+            0.6114999999999955
+          ],
+          [
+            0.6419999999999952
+          ],
+          [
+            0.6254999999999955
+          ],
+          [
+            0.6079999999999953
+          ],
+          [
+            0.6214999999999948
+          ],
+          [
+            0.6384999999999945
+          ],
+          [
+            0.6314999999999951
+          ],
+          [
+            0.6269999999999954
+          ],
+          [
+            0.614999999999996
+          ],
+          [
+            0.6104999999999954
+          ],
+          [
+            0.6219999999999957
+          ]
+        ],
+        "probabilities_aux": [
+          [
+            0.22800000000000017,
+            0.7719999999999998
+          ],
+          [
+            0.23050000000000018,
+            0.7694999999999999
+          ],
+          [
+            0.2800000000000002,
+            0.7199999999999998
+          ],
+          [
+            0.22400000000000017,
+            0.7759999999999998
+          ],
+          [
+            0.23950000000000018,
+            0.7604999999999998
+          ],
+          [
+            0.23600000000000018,
+            0.7639999999999998
+          ],
+          [
+            0.24050000000000019,
+            0.7594999999999998
+          ],
+          [
+            0.2595000000000002,
+            0.7404999999999998
+          ],
+          [
+            0.2490000000000002,
+            0.7509999999999998
+          ],
+          [
+            0.2595000000000002,
+            0.7404999999999998
+          ],
+          [
+            0.2425000000000002,
+            0.7574999999999998
+          ],
+          [
+            0.2600000000000002,
+            0.7399999999999998
+          ],
+          [
+            0.25400000000000017,
+            0.7459999999999998
+          ],
+          [
+            0.2640000000000002,
+            0.7359999999999998
+          ],
+          [
+            0.22700000000000017,
+            0.7729999999999998
+          ]
+        ],
+        "consciousness_entropy": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "geometric_phase_coherence": [],
+        "pattern_type": "golden"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": []
+      },
+      "job_info": {
+        "backend": "ibm_fez",
+        "shots": 2000,
+        "n_circuits": 15,
+        "successful_runs": 15,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 15
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {
+        "mutual_information_I": 0.0,
+        "main_entropy_H": 0.0,
+        "aux_entropy_H": 0.8043509227692955,
+        "joint_entropy_H": 1.7586092092801198,
+        "correlation_efficiency": 0.0,
+        "fisher_information": 0.0,
+        "fisher_error": "invalid number of arguments",
+        "conditional_entropy_H": 0.0,
+        "relative_entropy_to_uniform": 0.0003116201530599437,
+        "information_complexity": 0.0003116201530599437,
+        "correlation_preservation_1pct": 0.0,
+        "correlation_preservation_5pct": 0.0,
+        "correlation_preservation_10pct": 0.0,
+        "correlation_robustness_score": 0.0,
+        "information_flow_stability": 1.0,
+        "phase_sensitivity_error": "`x` must be a 1-D array",
+        "phase_awareness_score": 0.0
+      }
+    }
+  },
+  "experimental_summary": {
+    "total_patterns": 3,
+    "successful_patterns": 3,
+    "total_jobs_submitted": 3,
+    "total_shots_used": 60000,
+    "consciousness_metrics_summary": {
+      "coherence_levels": {
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "correlation_levels": {
+        "values": [
+          0.0,
+          0,
+          0.0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "sensitivity_levels": {
+        "values": [
+          0.0,
+          0,
+          0.0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "robustness_levels": {
+        "values": [
+          0.0,
+          0,
+          0.0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "tmt_consciousness_matches": {
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "tmt_analysis": {
+        "predicted_consciousness": 0.13636363636363635,
+        "best_match_percentage": 0.0,
+        "mean_match_percentage": 0.0,
+        "patterns_above_95_percent": 0,
+        "optimal_mixing_ratio": "0.1183 / 0.8817"
+      }
+    }
+  }
+}

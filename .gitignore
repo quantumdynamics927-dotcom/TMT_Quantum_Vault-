@@ -1,0 +1,6 @@
+Models/llama-3-8b.gguf
+Models/.cache/
+Node_13_Core/.resonance
+*.log
+.DS_Store
+Thumbs.db

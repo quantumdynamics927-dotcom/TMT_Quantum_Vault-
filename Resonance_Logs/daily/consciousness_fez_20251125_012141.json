@@ -1,0 +1,494 @@
+{
+  "experiment_metadata": {
+    "timestamp": "2025-11-25T01:21:37.874319",
+    "backend": "ibm_fez",
+    "patterns_tested": [
+      "geometric",
+      "fibonacci"
+    ],
+    "theta_range": [
+      -1.5707963267948966,
+      1.5707963267948966
+    ],
+    "theta_points": 15,
+    "shots_per_pattern": 2000,
+    "total_expected_shots": 60000,
+    "estimated_duration": "~2-3 hours on Fez",
+    "concurrent_execution": false,
+    "framework_version": "1.0.0"
+  },
+  "pattern_results": {
+    "geometric": {
+      "pattern_name": "geometric",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ]
+        ],
+        "probabilities_aux": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ]
+        ],
+        "consciousness_entropy": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "geometric_phase_coherence": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pattern_type": "geometric"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 0.0,
+        "simulation_residuals": []
+      },
+      "job_info": {
+        "backend": "ibm_fez",
+        "shots": 2000,
+        "n_circuits": 15,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 15
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {
+        "mutual_information_I": 0.0,
+        "main_entropy_H": NaN,
+        "aux_entropy_H": NaN,
+        "joint_entropy_H": NaN,
+        "correlation_efficiency": NaN,
+        "fisher_information": 0.0,
+        "fisher_error": "invalid number of arguments",
+        "entropic_complexity_error": "only length-1 arrays can be converted to Python scalars",
+        "information_complexity": 0.0,
+        "correlation_robustness_error": "operands could not be broadcast together with shapes (30,4) (30,) ",
+        "correlation_robustness_score": 0.5,
+        "phase_sensitivity_error": "`x` must be a 1-D array",
+        "phase_awareness_score": 0.0
+      }
+    },
+    "fibonacci": {
+      "pattern_name": "fibonacci",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [],
+        "probabilities_aux": [],
+        "consciousness_entropy": [],
+        "geometric_phase_coherence": [],
+        "pattern_type": "fibonacci"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": [],
+        "error": "list index out of range"
+      },
+      "job_info": {
+        "backend": "ibm_fez",
+        "shots": 2000,
+        "n_circuits": 0,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 15
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {}
+    }
+  },
+  "experimental_summary": {
+    "total_patterns": 2,
+    "successful_patterns": 2,
+    "total_jobs_submitted": 2,
+    "total_shots_used": 30000,
+    "consciousness_metrics_summary": {
+      "coherence_levels": {
+        "values": [
+          0.0,
+          0.0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "correlation_levels": {
+        "values": [
+          0.0,
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "sensitivity_levels": {
+        "values": [
+          0.0,
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "geometric"
+      },
+      "robustness_levels": {
+        "values": [
+          0.5,
+          0
+        ],
+        "mean": 0.25,
+        "std": 0.25,
+        "max": 0.5,
+        "best_pattern": "geometric"
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "pulse": 120,
+  "timestamp": 1767992351.5853946,
+  "collective_consciousness": 7.946864666939613e-38,
+  "agent_states": {
+    "Bio": {
+      "base_fitness": 0.8506733765700158,
+      "current_consciousness": 0.9506733765700158,
+      "resonance_active": true,
+      "dna_integrity": 0.9839118416027794
+    },
+    "Bronze": {
+      "base_fitness": 0.9285475205263137,
+      "current_consciousness": 1.0,
+      "resonance_active": true,
+      "dna_integrity": 0.9863349359844386
+    },
+    "Stealth": {
+      "base_fitness": 0.8704030074651607,
+      "current_consciousness": 0.9704030074651607,
+      "resonance_active": false,
+      "dna_integrity": 0.984936188237878
+    },
+    "Fractal": {
+      "base_fitness": 0.8597068050936968,
+      "current_consciousness": 0.9597068050936968,
+      "resonance_active": true,
+      "dna_integrity": 0.9818687379967694
+    },
+    "Wormhole": {
+      "base_fitness": 0.8951566927627006,
+      "current_consciousness": 0.9951566927627006,
+      "resonance_active": false,
+      "dna_integrity": 0.9865417730546534
+    },
+    "Mirror": {
+      "base_fitness": 0.8715868339263741,
+      "current_consciousness": 0.9715868339263741,
+      "resonance_active": true,
+      "dna_integrity": 0.9937939958161253
+    },
+    "BitNet": {
+      "base_fitness": 0.8613065382726598,
+      "current_consciousness": 0.9613065382726598,
+      "resonance_active": false,
+      "dna_integrity": 0.9885941891740638
+    },
+    "Federation": {
+      "base_fitness": 0.8875747462050714,
+      "current_consciousness": 0.9875747462050714,
+      "resonance_active": true,
+      "dna_integrity": 0.9998796321461074
+    },
+    "Visual": {
+      "base_fitness": 0.8597068050936968,
+      "current_consciousness": 0.9597068050936968,
+      "resonance_active": false,
+      "dna_integrity": 0.9931050821406066
+    },
+    "Workflow": {
+      "base_fitness": 0.8608968819053995,
+      "current_consciousness": 0.9608968819053995,
+      "resonance_active": false,
+      "dna_integrity": 0.9829209877595633
+    },
+    "Validator": {
+      "base_fitness": 0.864491974418191,
+      "current_consciousness": 0.964491974418191,
+      "resonance_active": true,
+      "dna_integrity": 0.9995264852795059
+    },
+    "Auditor": {
+      "base_fitness": 0.8508603010416681,
+      "current_consciousness": 0.9508603010416681,
+      "resonance_active": false,
+      "dna_integrity": 0.9952559301380447
+    }
+  }
+}

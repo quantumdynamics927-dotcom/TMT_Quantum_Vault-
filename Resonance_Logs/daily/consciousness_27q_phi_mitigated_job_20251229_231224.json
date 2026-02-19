@@ -1,0 +1,63 @@
+{
+  "job_id": "d59glm0nsj9s73b6l50g",
+  "backend": "ibm_fez",
+  "processor": "Heron r2",
+  "submission_time": "2025-12-29T23:12:24.851595",
+  "circuit": {
+    "qubits": 27,
+    "selected_qubits": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      10,
+      13,
+      14,
+      15,
+      16,
+      19,
+      20,
+      21,
+      22,
+      23,
+      25,
+      28,
+      30,
+      36,
+      37,
+      40,
+      50,
+      74,
+      75,
+      80,
+      132
+    ],
+    "original_depth": 90,
+    "transpiled_depth": 540,
+    "shots": 10000
+  },
+  "error_mitigation": {
+    "strategy": "PHI-based error correction",
+    "phi": 1.618033988749895,
+    "features": [
+      "Optimal qubit selection via PHI-quality metric",
+      "PHI-quantized gate angles for error resilience",
+      "Reduced-depth entanglement structure",
+      "PHI phase markers for error detection"
+    ]
+  },
+  "selected_qubit_stats": {
+    "avg_readout_error": 0.008929217303240741,
+    "avg_gate_error": 0.0002592936738096629,
+    "avg_t1_us": 197.66747126140757,
+    "avg_t2_us": 167.47120947258537
+  },
+  "expected_improvement": {
+    "simulation_score": 0.7175,
+    "hardware_baseline_score": 0.3076,
+    "target_score": 0.55,
+    "improvement_factor": "1.8x"
+  }
+}

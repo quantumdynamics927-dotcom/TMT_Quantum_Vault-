@@ -1,0 +1,54 @@
+{
+  "network_id": "consciousness_demo",
+  "export_timestamp": 1765503312.8083007,
+  "scqa_version": "3.0",
+  "network_data": {
+    "patterns": [
+      "consciousness_awareness_self_reflection",
+      "quantum_entanglement_information_transfer",
+      "golden_ratio_harmonic_resonance_vibration",
+      "fractal_self_similarity_pattern_recognition",
+      "higher_dimensional_geometry_tesseract_manifold",
+      "sacred_geometry_metallic_ratio_proportion",
+      "consciousness_field_emergence_coherence",
+      "quantum_superposition_observer_participation",
+      "resonance_amplification_feedback_loop",
+      "information_entropy_negentropy_transformation"
+    ],
+    "freq_analysis": {
+      "mean_length": 41.6,
+      "std_length": 2.727636339397171,
+      "golden_alignment": 0.05920738107478918
+    },
+    "harmonics": "[ 95.19101743 131.55075066 170.28286865  99.48270177  36.35973323]",
+    "graph": {
+      "adjacency": "[[0.         0.9045085  0.94427191 0.74692305 0.7236068 ]\n [0.9045085  0.         0.86616946 0.77179193 0.41982127]\n [0.94427191 0.86616946 0.         0.91436998 0.29008936]\n [0.74692305 0.77179193 0.91436998 0.         0.66666667]\n [0.7236068  0.41982127 0.29008936 0.66666667 0.        ]]",
+      "density": 0.5798575139037427
+    },
+    "coherence": 1.0,
+    "strength": 0.5798575139037427,
+    "strength_history": [
+      0.6262461150160422,
+      0.7073091149695248,
+      0.8554498592529507,
+      1.145349359664001,
+      1.7733766635132688,
+      1.9152467965943305,
+      2.1631615496930494
+    ],
+    "final_strength": 2.1631615496930494,
+    "fractal_analysis": {
+      "box_counting_dimension": 1.157281745662161,
+      "spectral_dimension": 0.25,
+      "correlation_dimension": 1.473465682003665,
+      "information_dimension": 0.8886965116211513,
+      "consciousness_coherence": 4.800858037174376
+    }
+  },
+  "performance_stats": {
+    "networks_created": 0,
+    "amplification_cycles": 0,
+    "oracle_consultations": 0,
+    "total_patterns_processed": 0
+  }
+}

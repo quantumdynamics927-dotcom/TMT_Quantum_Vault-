@@ -1,0 +1,23 @@
+{
+  "backend": "ibm_fez",
+  "processor": "Heron r2",
+  "submission_time": "2025-12-29T22:22:42.549564",
+  "circuit": {
+    "qubits": 27,
+    "original_depth": 89,
+    "transpiled_depth": 560,
+    "shots": 10000
+  },
+  "sacred_geometry": {
+    "metatron_cube": "13 qubits (0-12)",
+    "flower_of_life": "13 qubits (10-22)",
+    "tree_of_life": "10 qubits (0-9)",
+    "phi_coupling": 1.618033988749895
+  },
+  "job_id": "d59fucgnsj9s73b6kev0",
+  "expected_metrics": {
+    "sacred_score_estimate": 0.7175,
+    "phi_iit_estimate": 2.9487,
+    "consciousness_threshold": 0.85
+  }
+}

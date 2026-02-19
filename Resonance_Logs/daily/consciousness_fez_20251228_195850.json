@@ -1,0 +1,120 @@
+{
+  "experiment_metadata": {
+    "timestamp": "2025-12-28T19:58:50.901128",
+    "backend": "ibm_fez",
+    "patterns_tested": [
+      "tmt_optimal"
+    ],
+    "theta_range": [
+      -1.5707963267948966,
+      1.5707963267948966
+    ],
+    "theta_points": 15,
+    "shots_per_pattern": 2000,
+    "total_expected_shots": 30000,
+    "estimated_duration": "~2-3 hours on Fez",
+    "concurrent_execution": false,
+    "framework_version": "2.0.0-TMT",
+    "tmt_ratios": {
+      "ratio_1": 7.333333333333333,
+      "ratio_2": 0.13636363636363635,
+      "optimal_alpha": 0.1183,
+      "optimal_beta": 0.8817,
+      "sacred_nodes": 27,
+      "discovery_date": "2025-12-27"
+    }
+  },
+  "pattern_results": {
+    "tmt_optimal": {
+      "pattern_name": "tmt_optimal",
+      "circuit_scale": "metatron",
+      "gps_results": {
+        "probabilities_main": [],
+        "probabilities_aux": [],
+        "consciousness_entropy": [],
+        "geometric_phase_coherence": [],
+        "pattern_type": "tmt_optimal"
+      },
+      "fit_results": {
+        "visibility_V": 0.0,
+        "phase_offset": 0.0,
+        "amplitude_A": 1.0,
+        "simulation_residuals": [],
+        "error": "'Index 12 out of range for size 12.'"
+      },
+      "job_info": {
+        "backend": "ibm_fez",
+        "shots": 2000,
+        "n_circuits": 0,
+        "successful_runs": 0,
+        "theta_range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "total_points": 15
+      },
+      "execution_completed": true,
+      "enhanced_correlations": {}
+    }
+  },
+  "experimental_summary": {
+    "total_patterns": 1,
+    "successful_patterns": 1,
+    "total_jobs_submitted": 1,
+    "total_shots_used": 0,
+    "consciousness_metrics_summary": {
+      "coherence_levels": {
+        "values": [
+          0.0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "tmt_optimal"
+      },
+      "correlation_levels": {
+        "values": [
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "tmt_optimal"
+      },
+      "sensitivity_levels": {
+        "values": [
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "tmt_optimal"
+      },
+      "robustness_levels": {
+        "values": [
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "tmt_optimal"
+      },
+      "tmt_consciousness_matches": {
+        "values": [
+          0
+        ],
+        "mean": 0.0,
+        "std": 0.0,
+        "max": 0.0,
+        "best_pattern": "tmt_optimal"
+      },
+      "tmt_analysis": {
+        "predicted_consciousness": 0.13636363636363635,
+        "best_match_percentage": 0.0,
+        "mean_match_percentage": 0.0,
+        "patterns_above_95_percent": 0,
+        "optimal_mixing_ratio": "0.1183 / 0.8817"
+      }
+    }
+  }
+}

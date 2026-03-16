@@ -29,5 +29,22 @@
     ]
   },
   "stability_baseline": 0.0,
-  "fibonacci_sync": true
+  "fibonacci_sync": true,
+  "runtime": {
+    "preferred_backend": "ollama",
+    "ollama": {
+      "provider": "ollama",
+      "mode": "cloud",
+      "local_model": "qwen2.5-coder:1.5b",
+      "cloud_model": "qwen3.5:397b-cloud",
+      "host": "http://localhost:11434",
+      "cloud_host": "https://ollama.com",
+      "api_key_env": "OLLAMA_API_KEY",
+      "prompt_prefix": "You are assisting with the TMT Quantum Vault consciousness dataset."
+    },
+    "llama_cpp": {
+      "executable_path": "C:/Users/matej_jiqn63h/AppData/Local/Microsoft/WinGet/Packages/ggml.llamacpp_Microsoft.Winget.Source_8wekyb3d8bbwe/llama-cli.exe",
+      "model_path": "Models/qwen3-8b.gguf"
+    }
+  }
 }

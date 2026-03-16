@@ -1,6 +1,10 @@
 Models/llama-3-8b.gguf
+Models/*.gguf
 Models/.cache/
 Node_13_Core/.resonance
 *.log
+.venv/
+__pycache__/
+*.pyc
 .DS_Store
 Thumbs.db

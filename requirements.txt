@@ -1,0 +1,6 @@
+pydantic>=2.11,<3.0
+pytest>=8.3,<9.0
+requests>=2.32,<3.0
+rich>=14,<15
+typer>=0.15,<1.0
+types-requests>=2.32,<3.0

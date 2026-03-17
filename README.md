@@ -97,14 +97,15 @@ TMT_Quantum_Vault/
    python -m tmt_quantum_vault validate
    python -m tmt_quantum_vault doctor
    python -m tmt_quantum_vault runtime
-    python -m tmt_quantum_vault run "Summarize the vault state"
-   python -m tmt_quantum_vault run "Reply with exactly: TMT cloud test" --raw-final-only
-   python -m tmt_quantum_vault run "Reply with exactly: TMT json test" --json --raw-final-only
-   python -m tmt_quantum_vault smoke-local --raw-final-only
-   python -m tmt_quantum_vault smoke-local --force-ollama --raw-final-only
+   python -m tmt_quantum_vault run "Summarize the vault state" --mode cloud
+   python -m tmt_quantum_vault run "Reply with exactly: TMT cloud test" --mode cloud --raw-final-only
+   python -m tmt_quantum_vault run "Reply with exactly: TMT json test" --mode cloud --json --raw-final-only
+   python -m tmt_quantum_vault agent-task "Produce a short JSON object with keys workflow, validator, and visual, each containing a one-line status." --mode cloud --json --raw-final-only
    ```
 
 5. Adjust the runtime settings in `vault_config.json` if you want to switch between Ollama local and cloud models:
+
+   For cloud-first usage, keep `preferred_backend` as `ollama`, keep `mode` as `cloud`, and use a verified cloud tag such as `qwen3-coder-next:cloud`. You do not need a local GGUF model for the `run` or `agent-task` commands in this mode.
 
     ```json
     {
@@ -113,7 +114,7 @@ TMT_Quantum_Vault/
           "ollama": {
              "mode": "cloud",
              "local_model": "qwen2.5-coder:1.5b",
-             "cloud_model": "qwen3.5:397b-cloud"
+             "cloud_model": "qwen3-coder-next:cloud"
           },
           "llama_cpp": {
              "executable_path": null,
@@ -131,6 +132,8 @@ TMT_Quantum_Vault/
 
 7. Run your preferred LLM inference framework (llama.cpp, Ollama, etc.)
 
+   If you are using cloud-only Ollama models, step 6 is optional and `smoke-local` is not required.
+
 ## Python CLI
 
 The repository now includes a small Python entrypoint for validating and summarizing the JSON-based vault state.
@@ -140,8 +143,10 @@ The repository now includes a small Python entrypoint for validating and summari
 - `python -m tmt_quantum_vault doctor` checks for common setup issues such as missing model files or configured directories.
 - `python -m tmt_quantum_vault runtime` detects Ollama and llama.cpp executables and reports whether local model assets are available.
 - `python -m tmt_quantum_vault run "..."` sends a prompt to the configured Ollama model, using local or cloud mode from `vault_config.json` unless overridden.
+- `python -m tmt_quantum_vault run "..." --mode cloud` forces cloud-only Ollama routing and requires a cloud model tag such as `qwen3-coder-next:cloud`.
 - `python -m tmt_quantum_vault run "..." --raw-final-only` strips model thinking blocks from displayed stdout.
 - `python -m tmt_quantum_vault run "..." --json` emits structured JSON for automation pipelines.
+- `python -m tmt_quantum_vault agent-task "..." --mode cloud --json` runs the Workflow -> Validator -> Visual chain against a cloud model with stage-specific JSON contracts.
 - `python -m tmt_quantum_vault smoke-local --raw-final-only` runs a local smoke test through `llama.cpp` when a GGUF is present and falls back to local Ollama otherwise.
 - `python -m tmt_quantum_vault smoke-local --force-ollama --raw-final-only` bypasses `llama.cpp` and uses local Ollama directly.
 - `python -m tmt_quantum_vault smoke-local --json` emits structured JSON for automation-friendly local health checks.

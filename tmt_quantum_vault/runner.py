@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, cast
@@ -63,15 +64,38 @@ class RuntimeRunner:
     ) -> RunResult:
         selected_mode = self._resolve_mode(mode)
         selected_model = model or self._default_ollama_model(selected_mode)
+        merged_system = (
+            system or self.runtime_config.ollama.prompt_prefix or ""
+        )
+
+        if selected_mode == "cloud":
+            if not self._is_cloud_model(selected_model):
+                return RunResult(
+                    backend="ollama",
+                    mode=selected_mode,
+                    model=selected_model,
+                    command="ollama run",
+                    returncode=1,
+                    stdout="",
+                    stderr=(
+                        "Cloud mode requires an explicit cloud model tag. "
+                        "Use a tag such as qwen3.5:397b-cloud or "
+                        "qwen3-coder-next:cloud."
+                    ),
+                    duration_ms=0,
+                )
+            return self._run_ollama_cloud(
+                model=selected_model,
+                prompt=prompt,
+                system=merged_system,
+                timeout=timeout,
+            )
+
         try:
             response = ollama_run(
                 model=selected_model,
                 prompt=prompt,
-                system=(
-                    system
-                    or self.runtime_config.ollama.prompt_prefix
-                    or ""
-                ),
+                system=merged_system,
                 timeout=timeout,
                 temperature=0.0,
             )
@@ -97,6 +121,62 @@ class RuntimeRunner:
                 duration_ms=0,
             )
 
+    def _run_ollama_cloud(
+        self,
+        *,
+        model: str,
+        prompt: str,
+        system: str,
+        timeout: int,
+    ) -> RunResult:
+        full_prompt = self._merge_prompt(system=system, prompt=prompt)
+        command = ["ollama", "run", model, full_prompt]
+        try:
+            completed = subprocess.run(
+                command,
+                check=False,
+                capture_output=True,
+                stdin=subprocess.DEVNULL,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                cwd=self.root,
+                timeout=timeout,
+            )
+        except subprocess.TimeoutExpired:
+            return RunResult(
+                backend="ollama",
+                mode="cloud",
+                model=model,
+                command=command,
+                returncode=1,
+                stdout="",
+                stderr="Cloud model invocation timed out.",
+                duration_ms=0,
+            )
+        except OSError as exc:
+            return RunResult(
+                backend="ollama",
+                mode="cloud",
+                model=model,
+                command=command,
+                returncode=1,
+                stdout="",
+                stderr=self._clean_output(str(exc)),
+                duration_ms=0,
+            )
+
+        return RunResult(
+            backend="ollama",
+            mode="cloud",
+            model=model,
+            command=command,
+            returncode=completed.returncode,
+            stdout=self._clean_output(completed.stdout),
+            stderr=self._clean_output(completed.stderr),
+            duration_ms=0,
+        )
+
     def _resolve_backend(
         self,
         backend: str | None,
@@ -120,6 +200,15 @@ class RuntimeRunner:
         if mode == "cloud":
             return self.runtime_config.ollama.cloud_model
         return self.runtime_config.ollama.local_model
+
+    def _is_cloud_model(self, model: str) -> bool:
+        lowered = model.casefold()
+        return lowered.endswith(":cloud") or lowered.endswith("-cloud")
+
+    def _merge_prompt(self, *, system: str, prompt: str) -> str:
+        if not system:
+            return prompt
+        return f"System instructions:\n{system}\n\nUser task:\n{prompt}"
 
     def _clean_output(self, value: str | None) -> str:
         if value is None:

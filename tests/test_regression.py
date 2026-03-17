@@ -6,14 +6,16 @@ import json
 import re
 import subprocess
 import sys
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
 
 from tmt_quantum_vault.cli import app, strip_thinking
+from tmt_quantum_vault.models import RuntimeConfig
 from tmt_quantum_vault.ollama_api import is_available, run as ollama_run
-from tmt_quantum_vault.runner import RunResult
+from tmt_quantum_vault.runner import RunResult, RuntimeRunner
 
 BRAILLE_SPINNERS = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 ANSI_RE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
@@ -73,8 +75,6 @@ def test_ollama_api_local_smoke() -> None:
 
 @pytest.mark.skipif(not is_available(), reason="Ollama not running")
 def test_json_output_mode() -> None:
-    import json
-
     process = subprocess.run(
         [
             sys.executable,
@@ -170,3 +170,58 @@ def test_agent_task_json_output() -> None:
         "Validator",
         "Visual",
     ]
+
+    call_args = mock_runner.return_value.run.call_args_list
+    workflow_prompt = call_args[0].kwargs["prompt"]
+    validator_prompt = call_args[1].kwargs["prompt"]
+    visual_prompt = call_args[2].kwargs["prompt"]
+
+    assert (
+        "Return exactly one JSON object and nothing else."
+        in workflow_prompt
+    )
+    assert '"stage": "Workflow"' in workflow_prompt
+    assert '"required_keys"' in workflow_prompt
+
+    assert "Previous stages as JSON:" in validator_prompt
+    assert '"agent": "Workflow"' in validator_prompt
+    assert '"stage": "Validator"' in validator_prompt
+    assert '"assessment"' in validator_prompt
+
+    assert '"stage": "Visual"' in visual_prompt
+    assert '"input_stage": "Validator"' in visual_prompt
+    assert '"visual"' in visual_prompt
+
+
+def test_cloud_mode_rejects_non_cloud_tag() -> None:
+    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+    result = runner.run(
+        prompt="Reply with exactly: test",
+        mode="cloud",
+        model="nemotron-3-super:120b",
+    )
+    assert result.returncode == 1
+    assert "explicit cloud model tag" in result.stderr
+
+
+def test_cloud_mode_uses_ollama_cli() -> None:
+    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+    completed = subprocess.CompletedProcess(
+        args=["ollama"],
+        returncode=0,
+        stdout='{"stage":"Workflow"}',
+        stderr="",
+    )
+    with patch("tmt_quantum_vault.runner.subprocess.run") as mock_subprocess:
+        mock_subprocess.return_value = completed
+        result = runner.run(
+            prompt="Reply with exactly: test",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            system="Return JSON only.",
+        )
+
+    assert result.returncode == 0
+    assert result.mode == "cloud"
+    assert result.command[:3] == ["ollama", "run", "qwen3-coder-next:cloud"]
+    assert "System instructions:" in result.command[3]

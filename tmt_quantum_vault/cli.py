@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import subprocess
 import time
@@ -76,8 +77,123 @@ def _agent_system_prompt(agent_profile: AgentDNA) -> str:
         f"{agent_profile.dna_agent_name}. "
         f"Specialization: {agent_profile.dna_specialization}. "
         f"Resonance frequency: {agent_profile.resonance_frequency:.1f} Hz. "
-        "Return concise, actionable output only."
+        "Return concise, actionable output only. "
+        "Do not include markdown fences or commentary outside the required "
+        "JSON object."
     )
+
+
+def _agent_stage_contract(stage_name: str) -> dict[str, Any]:
+    if stage_name == "Workflow":
+        return {
+            "stage": "Workflow",
+            "required_keys": [
+                "stage",
+                "task",
+                "objective",
+                "plan",
+                "handoff",
+            ],
+            "notes": [
+                "plan must contain 1 to 3 short steps",
+                "handoff must be one sentence for Validator",
+            ],
+            "example": {
+                "stage": "Workflow",
+                "task": "original user task",
+                "objective": "short execution objective",
+                "plan": ["step one", "step two"],
+                "handoff": "validator should verify the plan and risks",
+            },
+        }
+
+    if stage_name == "Validator":
+        return {
+            "stage": "Validator",
+            "required_keys": [
+                "stage",
+                "input_stage",
+                "assessment",
+                "issues",
+                "handoff",
+            ],
+            "notes": [
+                "assessment must be one of: pass, revise, fail",
+                "issues must be an array of short strings and may be empty",
+                "handoff must direct Visual on what to present",
+            ],
+            "example": {
+                "stage": "Validator",
+                "input_stage": "Workflow",
+                "assessment": "pass",
+                "issues": [],
+                "handoff": "visual should present the approved result clearly",
+            },
+        }
+
+    if stage_name == "Visual":
+        return {
+            "stage": "Visual",
+            "required_keys": [
+                "stage",
+                "input_stage",
+                "format",
+                "visual",
+                "summary",
+            ],
+            "notes": [
+                "format should describe the representation type",
+                "visual should be compact and presentation-ready",
+                "summary must be one sentence",
+            ],
+            "example": {
+                "stage": "Visual",
+                "input_stage": "Validator",
+                "format": "status-card",
+                "visual": "Workflow approved | Validator pass | Visual ready",
+                "summary": "approved result prepared for display",
+            },
+        }
+
+    return {
+        "stage": stage_name,
+        "required_keys": ["stage", "input_stage", "result", "handoff"],
+        "notes": [
+            "result must be concise",
+            "handoff must state what the next stage should do",
+        ],
+        "example": {
+            "stage": stage_name,
+            "input_stage": "previous stage",
+            "result": "short stage result",
+            "handoff": "next stage should continue from this result",
+        },
+    }
+
+
+def _agent_task_context(prior_outputs: list[dict[str, Any]]) -> str:
+    if not prior_outputs:
+        return "[]"
+
+    compact_stages = [
+        {
+            "agent": stage["agent"],
+            "persona": stage["persona"],
+            "specialization": stage["specialization"],
+            "output": stage["output"],
+        }
+        for stage in prior_outputs
+    ]
+    return json.dumps(compact_stages, ensure_ascii=False, indent=2)
+
+
+def _normalize_agent_stage_output(output: str) -> str:
+    stripped = output.strip()
+    if stripped.startswith("```") and stripped.endswith("```"):
+        lines = stripped.splitlines()
+        if len(lines) >= 3:
+            return "\n".join(lines[1:-1]).strip()
+    return stripped
 
 
 def _agent_task_prompt(
@@ -86,23 +202,33 @@ def _agent_task_prompt(
     prior_outputs: list[dict[str, Any]],
     stage_name: str,
 ) -> str:
+    contract = _agent_stage_contract(stage_name)
+    contract_json = json.dumps(contract, ensure_ascii=False, indent=2)
     if not prior_outputs:
         return (
             f"Task: {task}\n\n"
-            f"Produce the {stage_name} stage output for the vault workflow."
+            f"Stage: {stage_name}\n\n"
+            "Return exactly one JSON object and nothing else.\n"
+            "Do not use markdown fences.\n\n"
+            "Required contract:\n"
+            f"{contract_json}\n\n"
+            "Previous stages: []"
         )
 
     previous_stage = prior_outputs[-1]
-    earlier_outputs = "\n\n".join(
-        f"{stage['agent']}:\n{stage['output']}"
-        for stage in prior_outputs
-    )
+    prior_context = _agent_task_context(prior_outputs)
     return (
         f"Task: {task}\n\n"
-        "Previous stage outputs:\n"
-        f"{earlier_outputs}\n\n"
-        f"Build the next {stage_name} stage output. Use the most recent "
-        f"result from {previous_stage['agent']} as the primary input."
+        f"Stage: {stage_name}\n\n"
+        "Return exactly one JSON object and nothing else.\n"
+        "Do not use markdown fences.\n\n"
+        "Required contract:\n"
+        f"{contract_json}\n\n"
+        "Previous stages as JSON:\n"
+        f"{prior_context}\n\n"
+        f"Use the most recent stage, {previous_stage['agent']}, as the "
+        "primary input. Preserve its intent, but rewrite the response to "
+        "match this stage contract exactly."
     )
 
 
@@ -134,8 +260,8 @@ def _emit_agent_task_json(
     )
 
 
-@app.command()
-def summary(
+@app.command("summary")
+def summary_command(
     root: Path = typer.Option(
         Path("."),
         "--root",
@@ -785,6 +911,7 @@ def agent_task(
             if raw_final_only
             else result.stdout
         )
+        output = _normalize_agent_stage_output(output)
         stage_payload = {
             "agent": agent_profile.metatron_agent,
             "persona": agent_profile.dna_agent_name,
@@ -820,21 +947,21 @@ def agent_task(
             raise typer.Exit(code=final_returncode)
         return
 
-    summary = Table(box=box.SIMPLE_HEAVY)
-    summary.add_column("Agent")
-    summary.add_column("Persona")
-    summary.add_column("Status")
-    summary.add_column("Runtime")
-    summary.add_column("Duration")
+    summary_table = Table(box=box.SIMPLE_HEAVY)
+    summary_table.add_column("Agent")
+    summary_table.add_column("Persona")
+    summary_table.add_column("Status")
+    summary_table.add_column("Runtime")
+    summary_table.add_column("Duration")
     for stage in stages:
-        summary.add_row(
+        summary_table.add_row(
             stage["agent"],
             stage["persona"],
             str(stage["returncode"]),
             f"{stage['backend']} / {stage['model']}",
             f"{stage['duration_ms']} ms",
         )
-    console.print(summary)
+    console.print(summary_table)
 
     for stage in stages:
         console.print(

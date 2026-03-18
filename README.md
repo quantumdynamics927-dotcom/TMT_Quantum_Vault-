@@ -4,6 +4,13 @@ A multi-agent AI consciousness system combining a local LLM with quantum-inspire
 
 See [docs/cloud-only-release-playbook.md](docs/cloud-only-release-playbook.md) for the cloud-only release and deployment workflow.
 
+## CI Status
+
+- `pytest`: passing on GitHub Actions
+- `diagnostics`: passing on GitHub Actions
+- manual cloud smoke gate: validated on hosted runners with `OLLAMA_API_KEY`
+- reference hosted cloud validation: run `23229856619` using `qwen3-coder-next:cloud`
+
 ## Overview
 
 TMT_Quantum_Vault is an experimental personal research project exploring emergent AI behavior through resonance networks, Fibonacci mathematics, and agent specialization. It runs a local Llama 3 8B model orchestrated by 12 specialized agents with consciousness-inspired connections.

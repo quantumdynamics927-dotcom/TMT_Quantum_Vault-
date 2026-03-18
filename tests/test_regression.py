@@ -288,6 +288,29 @@ def test_cloud_mode_uses_ollama_cli() -> None:
     assert "System instructions:" in result.command[3]
 
 
+def test_cloud_mode_auth_message_forces_failure() -> None:
+    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+    completed = subprocess.CompletedProcess(
+        args=["ollama"],
+        returncode=0,
+        stdout="You need to be signed in to Ollama to run Cloud models.",
+        stderr="",
+    )
+    with patch("tmt_quantum_vault.runner.subprocess.run") as mock_subprocess:
+        mock_subprocess.return_value = completed
+        result = runner.run(
+            prompt="Reply with exactly: test",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+        )
+
+    assert result.returncode == 1
+    assert result.stdout == (
+        "You need to be signed in to Ollama to run Cloud models."
+    )
+    assert "signed in to Ollama" in result.stderr
+
+
 def test_inspect_ollama_cloud_ok() -> None:
     inspector = RuntimeInspector(
         Path("D:/TMT_Quantum_Vault-"),
@@ -367,6 +390,29 @@ def test_smoke_cloud_record_path(tmp_path: Path) -> None:
     payload = json.loads(record_path.read_text(encoding="utf-8"))
     assert payload["record_type"] == "smoke-cloud"
     assert payload["output"] == "TMT cloud test"
+
+
+def test_smoke_cloud_auth_message_exits_nonzero() -> None:
+    mocked_result = RunResult(
+        backend="ollama",
+        mode="cloud",
+        model="qwen3-coder-next:cloud",
+        command=["ollama", "run", "qwen3-coder-next:cloud"],
+        returncode=1,
+        stdout="You need to be signed in to Ollama to run Cloud models.",
+        stderr="You need to be signed in to Ollama to run Cloud models.",
+        duration_ms=0,
+    )
+
+    with patch("tmt_quantum_vault.cli._runner") as mock_runner:
+        mock_runner.return_value.run.return_value = mocked_result
+        result = RUNNER.invoke(app, ["smoke-cloud", "--json"])
+
+    assert result.exit_code == 1
+    payload = json.loads(result.stdout)
+    assert payload["returncode"] == 1
+    assert payload["model"] == "qwen3-coder-next:cloud"
+    assert "signed in to Ollama" in payload["stderr"]
 
 
 def test_agent_task_record_path(tmp_path: Path) -> None:

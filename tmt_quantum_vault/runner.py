@@ -27,6 +27,14 @@ class RunResult:
 
 
 class RuntimeRunner:
+    _OLLAMA_CLOUD_FAILURE_MARKERS = (
+        "you need to be signed in to ollama to run cloud models",
+        "please sign in to ollama to run cloud models",
+        "ollama cloud requires a pro subscription",
+        "cloud models require a pro subscription",
+        "upgrade to ollama pro",
+    )
+
     def __init__(self, root: Path, runtime_config: RuntimeConfig) -> None:
         self.root = root.resolve()
         self.runtime_config = runtime_config
@@ -166,14 +174,21 @@ class RuntimeRunner:
                 duration_ms=0,
             )
 
+        stdout = self._clean_output(completed.stdout)
+        stderr = self._clean_output(completed.stderr)
+        auth_failure = self._detect_ollama_cloud_failure(
+            stdout=stdout,
+            stderr=stderr,
+        )
+
         return RunResult(
             backend="ollama",
             mode="cloud",
             model=model,
             command=command,
-            returncode=completed.returncode,
-            stdout=self._clean_output(completed.stdout),
-            stderr=self._clean_output(completed.stderr),
+            returncode=1 if auth_failure else completed.returncode,
+            stdout=stdout,
+            stderr=auth_failure or stderr,
             duration_ms=0,
         )
 
@@ -209,6 +224,19 @@ class RuntimeRunner:
         if not system:
             return prompt
         return f"System instructions:\n{system}\n\nUser task:\n{prompt}"
+
+    def _detect_ollama_cloud_failure(
+        self,
+        *,
+        stdout: str,
+        stderr: str,
+    ) -> str | None:
+        combined = "\n".join(part for part in (stdout, stderr) if part)
+        lowered = combined.casefold()
+        for marker in self._OLLAMA_CLOUD_FAILURE_MARKERS:
+            if marker in lowered:
+                return combined or marker
+        return None
 
     def _clean_output(self, value: str | None) -> str:
         if value is None:

@@ -26,19 +26,21 @@ This playbook covers release and deployment steps for running TMT Quantum Vault 
 5. Run `python -m tmt_quantum_vault runtime --json --record-path Resonance_Logs/daily/runtime-check.json`.
 6. Run `python -m tmt_quantum_vault smoke-cloud --json --raw-final-only --record-path Resonance_Logs/daily/smoke-cloud.json`.
 7. Run `python -m tmt_quantum_vault agent-task "Produce a short JSON object with keys workflow, validator, and visual, each containing a one-line status." --mode cloud --json --raw-final-only --record-path Resonance_Logs/daily/agent-task-smoke.json`.
+8. Optionally run `python -m tmt_quantum_vault release-evidence --json` to bundle the release records into one timestamped directory.
 
 ## Release Procedure
 
 1. Confirm the working tree is clean.
 2. Push the current branch.
 3. Ensure the `pytest` and `diagnostics` GitHub Actions jobs pass.
-4. If cloud smoke is needed in CI, run the manual `CI` workflow with `run_smoke=true` on a runner that has cloud-ready Ollama access.
+4. If cloud smoke is needed in CI, run the manual `CI` workflow with `run_smoke=true` and set `cloud_model` to the tag you want to validate on a runner that has cloud-ready Ollama access.
 
 ## Operational Diagnostics
 
 - `runtime --json` reports local runtime inventory plus a dedicated `Ollama Cloud` status.
 - `doctor --json` combines repository health with runtime statuses.
 - `smoke-cloud` is the authoritative end-to-end connectivity check for cloud inference.
+- `release-evidence` collects the main diagnostic and runtime records into a single timestamped artifact bundle.
 
 ## Exportable Records
 
@@ -50,6 +52,8 @@ The following commands support `--record-path` for structured JSON records:
 - `agent-task`
 
 Use these records for change reviews, incident notes, or release evidence.
+
+The `agent-task` export includes per-stage prompts, system prompts, raw outputs, normalized outputs, stderr, and the invoked command for deeper troubleshooting.
 
 ## Rollback
 

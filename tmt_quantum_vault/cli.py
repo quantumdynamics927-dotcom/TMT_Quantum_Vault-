@@ -151,6 +151,11 @@ def _run_result_payload(
     return payload
 
 
+def _default_release_evidence_dir(root: Path) -> Path:
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    return root / "Resonance_Logs" / "daily" / f"release-evidence-{timestamp}"
+
+
 def _resolve_agent_profile(
     repo: VaultRepository,
     name: str,
@@ -348,6 +353,110 @@ def _emit_agent_task_json(
             ),
         }
     )
+
+
+def _execute_smoke_cloud(
+    *,
+    root: Path,
+    model: str | None,
+    timeout: int,
+    raw_final_only: bool,
+) -> tuple[dict[str, Any], int]:
+    runtime_runner = _runner(root)
+    result = runtime_runner.run(
+        prompt="Reply with exactly: TMT cloud test",
+        backend="ollama",
+        mode="cloud",
+        model=model,
+        timeout=timeout,
+    )
+    output = strip_thinking(result.stdout) if raw_final_only else result.stdout
+    output = _normalize_agent_stage_output(output)
+    payload = _run_result_payload(
+        backend=result.backend,
+        mode=result.mode,
+        model=result.model,
+        returncode=result.returncode,
+        output=output,
+        duration_ms=result.duration_ms,
+        stderr=result.stderr,
+        command=result.command,
+    )
+    return payload, result.returncode
+
+
+def _execute_agent_task(
+    *,
+    root: Path,
+    task: str,
+    agent_name: str,
+    chain: str,
+    backend: str | None,
+    mode: str | None,
+    model: str | None,
+    raw_final_only: bool,
+    timeout: int,
+) -> tuple[dict[str, Any], int]:
+    repo = _repo(root)
+    runtime_runner = _runner(root)
+    stage_names = [agent_name] + [
+        item.strip() for item in chain.split(",") if item.strip()
+    ]
+
+    stages: list[dict[str, Any]] = []
+    for current_stage_name in stage_names:
+        _, agent_profile = _resolve_agent_profile(repo, current_stage_name)
+        system_prompt = _agent_system_prompt(agent_profile)
+        stage_prompt = _agent_task_prompt(
+            task=task,
+            prior_outputs=stages,
+            stage_name=agent_profile.metatron_agent,
+        )
+        result = runtime_runner.run(
+            prompt=stage_prompt,
+            backend=backend,
+            mode=mode,
+            model=model,
+            system=system_prompt,
+            timeout=timeout,
+        )
+        raw_output = result.stdout
+        output = strip_thinking(raw_output) if raw_final_only else raw_output
+        output = _normalize_agent_stage_output(output)
+        stage_payload = {
+            "agent": agent_profile.metatron_agent,
+            "persona": agent_profile.dna_agent_name,
+            "specialization": agent_profile.dna_specialization,
+            "backend": result.backend,
+            "mode": result.mode,
+            "model": result.model,
+            "returncode": result.returncode,
+            "duration_ms": result.duration_ms,
+            "command": result.command,
+            "system_prompt": system_prompt,
+            "prompt": stage_prompt,
+            "raw_output": raw_output,
+            "output": output,
+            "stderr": result.stderr,
+        }
+        stages.append(stage_payload)
+        if result.returncode != 0:
+            break
+
+    final_returncode = next(
+        (stage["returncode"] for stage in stages if stage["returncode"] != 0),
+        0,
+    )
+    payload = json.loads(
+        _emit_agent_task_json(
+            task=task,
+            backend=backend,
+            mode=mode,
+            model=model,
+            stages=stages,
+        )
+    )
+    return payload, final_returncode
 
 
 @app.command("summary")
@@ -921,25 +1030,11 @@ def smoke_cloud(
         help="Write a structured JSON record to the specified path.",
     ),
 ) -> None:
-    runtime_runner = _runner(root)
-    result = runtime_runner.run(
-        prompt="Reply with exactly: TMT cloud test",
-        backend="ollama",
-        mode="cloud",
+    smoke_payload, return_code = _execute_smoke_cloud(
+        root=root,
         model=model,
         timeout=timeout,
-    )
-    output = strip_thinking(result.stdout) if raw_final_only else result.stdout
-    output = _normalize_agent_stage_output(output)
-    smoke_payload = _run_result_payload(
-        backend=result.backend,
-        mode=result.mode,
-        model=result.model,
-        returncode=result.returncode,
-        output=output,
-        duration_ms=result.duration_ms,
-        stderr=result.stderr,
-        command=result.command,
+        raw_final_only=raw_final_only,
     )
 
     _write_record(
@@ -951,23 +1046,26 @@ def smoke_cloud(
 
     if json_out:
         typer.echo(emit_json_document(smoke_payload))
-        if result.returncode != 0:
-            raise typer.Exit(code=result.returncode)
+        if return_code != 0:
+            raise typer.Exit(code=return_code)
         return
 
     render_run_result(
         console,
-        backend=result.backend,
-        mode=result.mode,
-        model=result.model,
-        command=result.command,
-        returncode=result.returncode,
-        output=output,
-        stderr=result.stderr,
+        backend=cast(str, smoke_payload["backend"]),
+        mode=cast(str, smoke_payload["mode"]),
+        model=cast(str, smoke_payload["model"]),
+        command=cast(
+            list[str] | str,
+            smoke_payload.get("command", "ollama run"),
+        ),
+        returncode=cast(int, smoke_payload["returncode"]),
+        output=cast(str, smoke_payload["output"]),
+        stderr=cast(str, smoke_payload.get("stderr", "")),
     )
 
-    if result.returncode != 0:
-        raise typer.Exit(code=result.returncode)
+    if return_code != 0:
+        raise typer.Exit(code=return_code)
 
 
 @app.command()
@@ -1054,62 +1152,18 @@ def agent_task(
         help="Maximum runtime in seconds for each stage invocation.",
     ),
 ) -> None:
-    repo = _repo(root)
-    runtime_runner = _runner(root)
-    stage_names = [agent_name] + [
-        item.strip() for item in chain.split(",") if item.strip()
-    ]
-
-    stages: list[dict[str, Any]] = []
-    for stage_name in stage_names:
-        _, agent_profile = _resolve_agent_profile(repo, stage_name)
-        result = runtime_runner.run(
-            prompt=_agent_task_prompt(
-                task=task,
-                prior_outputs=stages,
-                stage_name=agent_profile.metatron_agent,
-            ),
-            backend=backend,
-            mode=mode,
-            model=model,
-            system=_agent_system_prompt(agent_profile),
-            timeout=timeout,
-        )
-        output = (
-            strip_thinking(result.stdout)
-            if raw_final_only
-            else result.stdout
-        )
-        output = _normalize_agent_stage_output(output)
-        stage_payload = {
-            "agent": agent_profile.metatron_agent,
-            "persona": agent_profile.dna_agent_name,
-            "specialization": agent_profile.dna_specialization,
-            "backend": result.backend,
-            "mode": result.mode,
-            "model": result.model,
-            "returncode": result.returncode,
-            "duration_ms": result.duration_ms,
-            "output": output,
-            "stderr": result.stderr,
-        }
-        stages.append(stage_payload)
-        if result.returncode != 0:
-            break
-
-    final_returncode = next(
-        (stage["returncode"] for stage in stages if stage["returncode"] != 0),
-        0,
+    agent_task_payload, final_returncode = _execute_agent_task(
+        root=root,
+        task=task,
+        agent_name=agent_name,
+        chain=chain,
+        backend=backend,
+        mode=mode,
+        model=model,
+        raw_final_only=raw_final_only,
+        timeout=timeout,
     )
-    agent_task_payload = json.loads(
-        _emit_agent_task_json(
-            task=task,
-            backend=backend,
-            mode=mode,
-            model=model,
-            stages=stages,
-        )
-    )
+    stages = cast(list[dict[str, Any]], agent_task_payload["stages"])
 
     _write_record(
         root=root,
@@ -1154,3 +1208,154 @@ def agent_task(
 
     if final_returncode != 0:
         raise typer.Exit(code=final_returncode)
+
+
+@app.command("release-evidence")
+def release_evidence(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    output_dir: Path | None = typer.Option(
+        None,
+        "--output-dir",
+        help="Write the evidence bundle into the specified directory.",
+    ),
+    task: str = typer.Option(
+        (
+            "Produce a short JSON object with keys workflow, validator, "
+            "and visual, each containing a one-line status."
+        ),
+        "--task",
+        help="Task to use for the bundled agent-task record.",
+    ),
+    agent_name: str = typer.Option(
+        "Workflow",
+        "--agent",
+        help="Entry agent for the bundled agent-task chain.",
+    ),
+    chain: str = typer.Option(
+        "Validator,Visual",
+        "--chain",
+        help="Comma-separated downstream agents for the bundled chain.",
+    ),
+    model: str | None = typer.Option(
+        None,
+        "--model",
+        help=(
+            "Override the configured cloud model name for smoke and chain "
+            "runs."
+        ),
+    ),
+    raw_final_only: bool = typer.Option(
+        True,
+        "--raw-final-only/--include-raw-thinking",
+        help=(
+            "Strip model thinking blocks in bundled smoke and agent-task "
+            "outputs."
+        ),
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit the evidence manifest as JSON instead of Rich output.",
+    ),
+    timeout: int = typer.Option(
+        120,
+        "--timeout",
+        help=(
+            "Maximum runtime in seconds for bundled smoke and agent-task "
+            "runs."
+        ),
+    ),
+) -> None:
+    repo = _repo(root)
+    runtime_inspector = _runtime(root)
+    bundle_dir = _resolved_record_path(
+        root,
+        output_dir or _default_release_evidence_dir(root.resolve()),
+    )
+    bundle_dir.mkdir(parents=True, exist_ok=True)
+
+    checks = repo.repository_checks()
+    runtime_checks = runtime_inspector.inspect_all()
+    doctor_payload = _doctor_payload(checks, runtime_checks)
+    runtime_payload = _runtime_payload(runtime_checks)
+    smoke_payload, smoke_returncode = _execute_smoke_cloud(
+        root=root,
+        model=model,
+        timeout=timeout,
+        raw_final_only=raw_final_only,
+    )
+    agent_task_payload, agent_task_returncode = _execute_agent_task(
+        root=root,
+        task=task,
+        agent_name=agent_name,
+        chain=chain,
+        backend="ollama",
+        mode="cloud",
+        model=model,
+        raw_final_only=raw_final_only,
+        timeout=timeout,
+    )
+
+    write_json_record(
+        bundle_dir / "doctor.json",
+        {
+            "record_type": "doctor",
+            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            **doctor_payload,
+        },
+    )
+    write_json_record(
+        bundle_dir / "runtime.json",
+        {
+            "record_type": "runtime",
+            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            **runtime_payload,
+        },
+    )
+    write_json_record(
+        bundle_dir / "smoke-cloud.json",
+        {
+            "record_type": "smoke-cloud",
+            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            **smoke_payload,
+        },
+    )
+    write_json_record(
+        bundle_dir / "agent-task.json",
+        {
+            "record_type": "agent-task",
+            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            **agent_task_payload,
+        },
+    )
+
+    manifest = {
+        "bundle_dir": str(bundle_dir),
+        "task": task,
+        "files": {
+            "doctor": str(bundle_dir / "doctor.json"),
+            "runtime": str(bundle_dir / "runtime.json"),
+            "smoke_cloud": str(bundle_dir / "smoke-cloud.json"),
+            "agent_task": str(bundle_dir / "agent-task.json"),
+        },
+        "returncode": max(smoke_returncode, agent_task_returncode),
+    }
+    write_json_record(bundle_dir / "manifest.json", manifest)
+
+    if json_out:
+        typer.echo(emit_json_document(manifest))
+    else:
+        summary_table = Table(box=box.SIMPLE_HEAVY)
+        summary_table.add_column("Artifact")
+        summary_table.add_column("Path")
+        for key, value in cast(dict[str, str], manifest["files"]).items():
+            summary_table.add_row(key, value)
+        console.print(Panel.fit(str(bundle_dir), title="Release Evidence"))
+        console.print(summary_table)
+
+    if cast(int, manifest["returncode"]) != 0:
+        raise typer.Exit(code=cast(int, manifest["returncode"]))

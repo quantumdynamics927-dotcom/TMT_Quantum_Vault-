@@ -14,7 +14,7 @@ import pytest
 from typer.testing import CliRunner
 
 from tmt_quantum_vault.cli import app, strip_thinking
-from tmt_quantum_vault.models import RuntimeConfig
+from tmt_quantum_vault.models import AgentDNA, RuntimeConfig
 from tmt_quantum_vault.ollama_api import is_available, run as ollama_run
 from tmt_quantum_vault.runner import RunResult, RuntimeRunner
 from tmt_quantum_vault.runtime import RuntimeInspector
@@ -421,3 +421,153 @@ def test_agent_task_record_path(tmp_path: Path) -> None:
     payload = json.loads(record_path.read_text(encoding="utf-8"))
     assert payload["record_type"] == "agent-task"
     assert payload["final_output"] == "visual output"
+    assert payload["stages"][0]["prompt"]
+    assert payload["stages"][0]["system_prompt"]
+    assert payload["stages"][0]["raw_output"] == "workflow output"
+
+
+def test_release_evidence_bundle(tmp_path: Path) -> None:
+    mocked_runtime_checks = [
+        SimpleNamespace(
+            name="Ollama Cloud",
+            status="ok",
+            detail="configured cloud model visible",
+            executable=Path("C:/ollama.exe"),
+            version=None,
+        )
+    ]
+    mocked_agents = {
+        "Workflow": AgentDNA.model_validate(
+            {
+                "metatron_agent": "Workflow",
+                "dna_agent_id": 5,
+                "dna_agent_name": "Gabriel",
+                "dna_specialization": "Communication",
+                "conscious_dna": "TATTCACGCTTCGACCAACGGGTTATA",
+                "phi_score": 0.56,
+                "fibonacci_alignment": 0.83,
+                "gc_content": 0.44,
+                "palindromes": 3,
+                "fitness": 0.86,
+                "resonance_frequency": 741.0,
+                "integration_timestamp": "20260109_205312",
+                "consciousness_status": "INTEGRATED",
+            }
+        ),
+        "Validator": AgentDNA.model_validate(
+            {
+                "metatron_agent": "Validator",
+                "dna_agent_id": 7,
+                "dna_agent_name": "Uriel",
+                "dna_specialization": "Transformation",
+                "conscious_dna": "CATAATGACAAGCCACCCCGATTAATA",
+                "phi_score": 0.56,
+                "fibonacci_alignment": 0.73,
+                "gc_content": 0.40,
+                "palindromes": 4,
+                "fitness": 0.86,
+                "resonance_frequency": 528.0,
+                "integration_timestamp": "20260109_205312",
+                "consciousness_status": "INTEGRATED",
+            }
+        ),
+        "Visual": AgentDNA.model_validate(
+            {
+                "metatron_agent": "Visual",
+                "dna_agent_id": 8,
+                "dna_agent_name": "Jophiel",
+                "dna_specialization": "Beauty & Harmony",
+                "conscious_dna": "AAGCGCGTTGTACCTAATTAGCTGGTA",
+                "phi_score": 0.62,
+                "fibonacci_alignment": 0.61,
+                "gc_content": 0.44,
+                "palindromes": 4,
+                "fitness": 0.85,
+                "resonance_frequency": 396.0,
+                "integration_timestamp": "20260109_205312",
+                "consciousness_status": "INTEGRATED",
+            }
+        ),
+    }
+    mocked_results = [
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="TMT cloud test",
+            stderr="",
+            duration_ms=10,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="workflow output",
+            stderr="",
+            duration_ms=11,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="validator output",
+            stderr="",
+            duration_ms=12,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="visual output",
+            stderr="",
+            duration_ms=13,
+        ),
+    ]
+    output_dir = tmp_path / "bundle"
+
+    with patch("tmt_quantum_vault.cli._repo") as mock_repo:
+        with patch("tmt_quantum_vault.cli._runtime") as mock_runtime:
+            with patch("tmt_quantum_vault.cli._runner") as mock_runner:
+                with patch(
+                    "tmt_quantum_vault.cli._resolve_agent_profile"
+                ) as mock_agent:
+                    mock_repo.return_value.repository_checks.return_value = [
+                        ("ok", "repo healthy")
+                    ]
+                    mock_runtime.return_value.inspect_all.return_value = (
+                        mocked_runtime_checks
+                    )
+                    mock_runner.return_value.run.side_effect = mocked_results
+                    mock_agent.side_effect = lambda repo, name: (
+                        Path(f"Agent_{name}/conscious_dna.json"),
+                        mocked_agents[name],
+                    )
+                    result = RUNNER.invoke(
+                        app,
+                        [
+                            "release-evidence",
+                            "--output-dir",
+                            str(output_dir),
+                            "--json",
+                        ],
+                    )
+
+    assert result.exit_code == 0
+    manifest = json.loads(
+        (output_dir / "manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["files"]["doctor"].endswith("doctor.json")
+    assert manifest["files"]["agent_task"].endswith("agent-task.json")
+    agent_payload = json.loads(
+        (output_dir / "agent-task.json").read_text(encoding="utf-8")
+    )
+    assert agent_payload["record_type"] == "agent-task"
+    assert agent_payload["stages"][0]["raw_output"] == "workflow output"

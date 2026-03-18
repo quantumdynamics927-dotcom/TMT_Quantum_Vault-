@@ -12,6 +12,11 @@ on:
         required: false
         default: false
         type: boolean
+      cloud_model:
+        description: Cloud model tag to use for the smoke matrix
+        required: false
+        default: qwen3-coder-next:cloud
+        type: string
 
 jobs:
   pytest:
@@ -61,17 +66,21 @@ jobs:
   smoke-matrix:
     if: github.event_name == 'workflow_dispatch' && inputs.run_smoke
     runs-on: ubuntu-latest
+    env:
+      CLOUD_MODEL: ${{ inputs.cloud_model }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: smoke-cloud
-            command: python -m tmt_quantum_vault smoke-cloud --json --raw-final-only
+            command: >-
+              python -m tmt_quantum_vault smoke-cloud
+              --model "${CLOUD_MODEL}" --json --raw-final-only
           - name: agent-task-cloud
             command: >-
               python -m tmt_quantum_vault agent-task
               "Produce a short JSON object with keys workflow, validator, and visual, each containing a one-line status."
-              --mode cloud --json --raw-final-only
+              --mode cloud --model "${CLOUD_MODEL}" --json --raw-final-only
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

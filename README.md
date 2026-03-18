@@ -152,6 +152,7 @@ The repository now includes a small Python entrypoint for validating and summari
 - `python -m tmt_quantum_vault run "..." --json` emits structured JSON for automation pipelines.
 - `python -m tmt_quantum_vault agent-task "..." --mode cloud --json --record-path Resonance_Logs/daily/agent-task.json` runs the Workflow -> Validator -> Visual chain against a cloud model with stage-specific JSON contracts and exports the result.
 - `python -m tmt_quantum_vault smoke-cloud --json --raw-final-only --record-path Resonance_Logs/daily/smoke-cloud.json` runs a real cloud-only health check against the configured cloud model and exports the result.
+- `python -m tmt_quantum_vault release-evidence --json` creates a timestamped artifact directory containing `doctor`, `runtime`, `smoke-cloud`, and `agent-task` records.
 - `python -m tmt_quantum_vault smoke-local --raw-final-only` runs a local smoke test through `llama.cpp` when a GGUF is present and falls back to local Ollama otherwise.
 - `python -m tmt_quantum_vault smoke-local --force-ollama --raw-final-only` bypasses `llama.cpp` and uses local Ollama directly.
 - `python -m tmt_quantum_vault smoke-local --json` emits structured JSON for automation-friendly local health checks.
@@ -164,6 +165,8 @@ Use `python -m tmt_quantum_vault runtime --json` or `python -m tmt_quantum_vault
 - `Ollama Cloud` reports whether the configured cloud model tag is visible in `ollama list`.
 - `smoke-cloud` performs a real end-to-end cloud invocation and is the fastest way to confirm that cloud execution is working for the current model.
 - `--record-path` on `runtime`, `doctor`, `smoke-cloud`, and `agent-task` writes structured JSON records for release evidence or incident review.
+- `release-evidence` bundles those records into one timestamped directory and writes a `manifest.json` file for release reviews.
+- `agent-task` exported records now include per-stage prompts, system prompts, raw outputs, normalized outputs, invoked commands, and stderr for deeper troubleshooting.
 
 ## CI
 
@@ -172,6 +175,7 @@ GitHub Actions now runs:
 - `pytest` on every push and pull request
 - a diagnostics job that compiles the Python sources, validates the JSON dataset, and renders a repository summary
 - a manual smoke command matrix, guarded behind `workflow_dispatch`, for cloud-only verification on runners that already have Ollama cloud access configured
+- the manual smoke matrix accepts a `cloud_model` input so you can validate a specific cloud tag without editing the workflow
 
 ## Local Tool Artifacts
 

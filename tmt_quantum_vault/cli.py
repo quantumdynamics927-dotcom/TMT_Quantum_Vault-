@@ -806,6 +806,75 @@ def smoke_local(
         raise typer.Exit(code=completed.returncode)
 
 
+@app.command("smoke-cloud")
+def smoke_cloud(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    model: str | None = typer.Option(
+        None,
+        "--model",
+        help="Override the configured cloud model name.",
+    ),
+    timeout: int = typer.Option(
+        120,
+        "--timeout",
+        help="Maximum runtime in seconds for the cloud smoke test.",
+    ),
+    raw_final_only: bool = typer.Option(
+        False,
+        "--raw-final-only",
+        help="Strip model thinking blocks from displayed stdout.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    runtime_runner = _runner(root)
+    result = runtime_runner.run(
+        prompt="Reply with exactly: TMT cloud test",
+        backend="ollama",
+        mode="cloud",
+        model=model,
+        timeout=timeout,
+    )
+    output = strip_thinking(result.stdout) if raw_final_only else result.stdout
+    output = _normalize_agent_stage_output(output)
+
+    if json_out:
+        typer.echo(
+            emit_json_result(
+                backend=result.backend,
+                mode=result.mode,
+                model=result.model,
+                returncode=result.returncode,
+                output=output,
+                duration_ms=result.duration_ms,
+            )
+        )
+        if result.returncode != 0:
+            raise typer.Exit(code=result.returncode)
+        return
+
+    render_run_result(
+        console,
+        backend=result.backend,
+        mode=result.mode,
+        model=result.model,
+        command=result.command,
+        returncode=result.returncode,
+        output=output,
+        stderr=result.stderr,
+    )
+
+    if result.returncode != 0:
+        raise typer.Exit(code=result.returncode)
+
+
 @app.command()
 def agent(
     name: str = typer.Argument(

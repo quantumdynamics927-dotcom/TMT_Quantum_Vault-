@@ -16,6 +16,7 @@ from tmt_quantum_vault.cli import app, strip_thinking
 from tmt_quantum_vault.models import RuntimeConfig
 from tmt_quantum_vault.ollama_api import is_available, run as ollama_run
 from tmt_quantum_vault.runner import RunResult, RuntimeRunner
+from tmt_quantum_vault.runtime import RuntimeInspector
 
 BRAILLE_SPINNERS = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 ANSI_RE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
@@ -225,3 +226,58 @@ def test_cloud_mode_uses_ollama_cli() -> None:
     assert result.mode == "cloud"
     assert result.command[:3] == ["ollama", "run", "qwen3-coder-next:cloud"]
     assert "System instructions:" in result.command[3]
+
+
+def test_inspect_ollama_cloud_ok() -> None:
+    inspector = RuntimeInspector(
+        Path("D:/TMT_Quantum_Vault-"),
+        type(
+            "ConfigWrapper",
+            (),
+            {
+                "runtime": RuntimeConfig.model_validate(
+                    {
+                        "ollama": {
+                            "cloud_model": "qwen3-coder-next:cloud"
+                        }
+                    }
+                )
+            },
+        )(),
+    )
+    with patch.object(inspector, "_which", return_value=Path("C:/ollama.exe")):
+        with patch.object(
+            inspector,
+            "_command_output",
+            return_value=(
+                "NAME ID SIZE MODIFIED\n"
+                "qwen3-coder-next:cloud aa626c11ae8d - 3 weeks ago"
+            ),
+        ):
+            status = inspector.inspect_ollama_cloud()
+
+    assert status.status == "ok"
+    assert "qwen3-coder-next:cloud" in status.detail
+
+
+def test_smoke_cloud_json_output() -> None:
+    mocked_result = RunResult(
+        backend="ollama",
+        mode="cloud",
+        model="qwen3-coder-next:cloud",
+        command=["ollama", "run", "qwen3-coder-next:cloud"],
+        returncode=0,
+        stdout="TMT cloud test",
+        stderr="",
+        duration_ms=42,
+    )
+
+    with patch("tmt_quantum_vault.cli._runner") as mock_runner:
+        mock_runner.return_value.run.return_value = mocked_result
+        result = RUNNER.invoke(app, ["smoke-cloud", "--json"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["mode"] == "cloud"
+    assert payload["model"] == "qwen3-coder-next:cloud"
+    assert payload["output"] == "TMT cloud test"

@@ -147,9 +147,18 @@ The repository now includes a small Python entrypoint for validating and summari
 - `python -m tmt_quantum_vault run "..." --raw-final-only` strips model thinking blocks from displayed stdout.
 - `python -m tmt_quantum_vault run "..." --json` emits structured JSON for automation pipelines.
 - `python -m tmt_quantum_vault agent-task "..." --mode cloud --json` runs the Workflow -> Validator -> Visual chain against a cloud model with stage-specific JSON contracts.
+- `python -m tmt_quantum_vault smoke-cloud --json --raw-final-only` runs a real cloud-only health check against the configured cloud model.
 - `python -m tmt_quantum_vault smoke-local --raw-final-only` runs a local smoke test through `llama.cpp` when a GGUF is present and falls back to local Ollama otherwise.
 - `python -m tmt_quantum_vault smoke-local --force-ollama --raw-final-only` bypasses `llama.cpp` and uses local Ollama directly.
 - `python -m tmt_quantum_vault smoke-local --json` emits structured JSON for automation-friendly local health checks.
+
+## Cloud Diagnostics
+
+Use `python -m tmt_quantum_vault runtime --json` or `python -m tmt_quantum_vault doctor --json` to inspect runtime health.
+
+- `Ollama` reports the local CLI and local inventory status.
+- `Ollama Cloud` reports whether the configured cloud model tag is visible in `ollama list`.
+- `smoke-cloud` performs a real end-to-end cloud invocation and is the fastest way to confirm that cloud execution is working for the current model.
 
 ## Mathematical Constants
 

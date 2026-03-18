@@ -24,7 +24,11 @@ class RuntimeInspector:
         self.config = config
 
     def inspect_all(self) -> list[RuntimeStatus]:
-        return [self.inspect_ollama(), self.inspect_llama_cpp()]
+        return [
+            self.inspect_ollama(),
+            self.inspect_ollama_cloud(),
+            self.inspect_llama_cpp(),
+        ]
 
     def inspect_ollama(self) -> RuntimeStatus:
         executable = self._which("ollama")
@@ -102,6 +106,80 @@ class RuntimeInspector:
             detail=detail,
             executable=executable,
             version=self._summarize_version("llama.cpp", version),
+        )
+
+    def inspect_ollama_cloud(self) -> RuntimeStatus:
+        executable = self._which("ollama")
+        if executable is None:
+            return RuntimeStatus(
+                name="Ollama Cloud",
+                status="warning",
+                detail="Ollama executable not found on PATH.",
+            )
+
+        if self.config is None:
+            return RuntimeStatus(
+                name="Ollama Cloud",
+                status="warning",
+                detail="Vault runtime configuration is not available.",
+                executable=executable,
+            )
+
+        cloud_model = self.config.runtime.ollama.cloud_model
+        if not self._is_cloud_model_tag(cloud_model):
+            return RuntimeStatus(
+                name="Ollama Cloud",
+                status="warning",
+                detail=(
+                    "Configured cloud model does not use a cloud tag: "
+                    f"{cloud_model}"
+                ),
+                executable=executable,
+            )
+
+        model_list = self._command_output([str(executable), "list"])
+        if model_list is None:
+            return RuntimeStatus(
+                name="Ollama Cloud",
+                status="warning",
+                detail="Could not read Ollama model inventory.",
+                executable=executable,
+            )
+
+        visible_models = self._parse_ollama_models(model_list)
+        visible_cloud_models = [
+            model
+            for model in visible_models
+            if self._is_cloud_model_tag(model)
+        ]
+        if cloud_model in visible_cloud_models:
+            return RuntimeStatus(
+                name="Ollama Cloud",
+                status="ok",
+                detail=(
+                    "Configured cloud model is visible in Ollama inventory: "
+                    f"{cloud_model}"
+                ),
+                executable=executable,
+            )
+
+        if visible_cloud_models:
+            return RuntimeStatus(
+                name="Ollama Cloud",
+                status="warning",
+                detail=(
+                    "Configured cloud model is not visible in Ollama "
+                    "inventory. Visible cloud model(s): "
+                    + ", ".join(visible_cloud_models)
+                ),
+                executable=executable,
+            )
+
+        return RuntimeStatus(
+            name="Ollama Cloud",
+            status="warning",
+            detail="No cloud-tagged models are visible in Ollama inventory.",
+            executable=executable,
         )
 
     def _find_llama_cpp_executable(self) -> Path | None:
@@ -201,6 +279,21 @@ class RuntimeInspector:
         if lines[0].casefold().startswith("name"):
             return max(len(lines) - 1, 0)
         return len(lines)
+
+    def _parse_ollama_models(self, model_list: str) -> list[str]:
+        lines = [line for line in model_list.splitlines() if line.strip()]
+        if not lines:
+            return []
+        if lines[0].casefold().startswith("name"):
+            lines = lines[1:]
+        models: list[str] = []
+        for line in lines:
+            models.append(line.split()[0])
+        return models
+
+    def _is_cloud_model_tag(self, model: str) -> bool:
+        lowered = model.casefold()
+        return lowered.endswith(":cloud") or lowered.endswith("-cloud")
 
     def _summarize_version(
         self,

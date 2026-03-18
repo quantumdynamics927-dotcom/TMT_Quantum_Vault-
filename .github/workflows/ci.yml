@@ -143,6 +143,7 @@ jobs:
           python -m tmt_quantum_vault release-evidence \
             --output-dir Resonance_Logs/daily/release-evidence-ci-baseline \
             --model "${CLOUD_MODEL}" \
+              --raw-final-only \
             --json
 
       - name: Generate candidate evidence bundle with comparison
@@ -153,6 +154,7 @@ jobs:
             --output-dir Resonance_Logs/daily/release-evidence-ci-candidate \
             --compare-to Resonance_Logs/daily/release-evidence-ci-baseline \
             --model "${CLOUD_MODEL}" \
+              --raw-final-only \
             --json
 
       - name: Enforce release gate

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import subprocess
@@ -22,6 +23,7 @@ from .output import (
     emit_json_result,
     render_run_result,
     strip_thinking,
+    write_json_record,
 )
 from .repository import VaultRepository
 from .runner import RuntimeRunner
@@ -59,6 +61,94 @@ def _json_runtime_check(runtime_check: Any) -> dict[str, Any]:
         ),
         "version": runtime_check.version,
     }
+
+
+def _resolved_record_path(root: Path, record_path: Path) -> Path:
+    if record_path.is_absolute():
+        return record_path
+    return (root.resolve() / record_path).resolve()
+
+
+def _write_record(
+    *,
+    root: Path,
+    record_path: Path | None,
+    record_type: str,
+    payload: dict[str, Any],
+) -> None:
+    if record_path is None:
+        return
+    resolved_path = _resolved_record_path(root, record_path)
+    write_json_record(
+        resolved_path,
+        {
+            "record_type": record_type,
+            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            **payload,
+        },
+    )
+
+
+def _doctor_payload(
+    checks: list[tuple[str, str]],
+    runtime_checks: list[Any],
+) -> dict[str, Any]:
+    has_repository_warnings = any(status == "warning" for status, _ in checks)
+    has_runtime_warnings = any(
+        runtime_check.status == "warning"
+        for runtime_check in runtime_checks
+    )
+    return {
+        "repository": [
+            {"status": status, "detail": detail}
+            for status, detail in checks
+        ],
+        "runtime": [
+            _json_runtime_check(runtime_check)
+            for runtime_check in runtime_checks
+        ],
+        "has_warnings": has_repository_warnings or has_runtime_warnings,
+    }
+
+
+def _runtime_payload(runtime_checks: list[Any]) -> dict[str, Any]:
+    all_warnings = all(
+        runtime_check.status == "warning"
+        for runtime_check in runtime_checks
+    )
+    return {
+        "runtime": [
+            _json_runtime_check(runtime_check)
+            for runtime_check in runtime_checks
+        ],
+        "all_warnings": all_warnings,
+    }
+
+
+def _run_result_payload(
+    *,
+    backend: str,
+    mode: str,
+    model: str,
+    returncode: int,
+    output: str,
+    duration_ms: int,
+    stderr: str = "",
+    command: list[str] | str | None = None,
+) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "backend": backend,
+        "mode": mode,
+        "model": model,
+        "returncode": returncode,
+        "output": output,
+        "duration_ms": duration_ms,
+    }
+    if stderr:
+        payload["stderr"] = stderr
+    if command is not None:
+        payload["command"] = command
+    return payload
 
 
 def _resolve_agent_profile(
@@ -374,37 +464,30 @@ def doctor(
         "--json",
         help="Emit structured JSON instead of Rich output.",
     ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
 ) -> None:
     repo = _repo(root)
     runtime_inspector = _runtime(root)
     checks = repo.repository_checks()
     runtime_checks = runtime_inspector.inspect_all()
 
-    has_repository_warnings = any(status == "warning" for status, _ in checks)
-    has_runtime_warnings = any(
-        runtime_check.status == "warning"
-        for runtime_check in runtime_checks
+    doctor_payload = _doctor_payload(checks, runtime_checks)
+    has_warnings = bool(doctor_payload["has_warnings"])
+
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="doctor",
+        payload=doctor_payload,
     )
 
     if json_out:
-        typer.echo(
-            emit_json_document(
-                {
-                    "repository": [
-                        {"status": status, "detail": detail}
-                        for status, detail in checks
-                    ],
-                    "runtime": [
-                        _json_runtime_check(runtime_check)
-                        for runtime_check in runtime_checks
-                    ],
-                    "has_warnings": (
-                        has_repository_warnings or has_runtime_warnings
-                    ),
-                }
-            )
-        )
-        if has_repository_warnings or has_runtime_warnings:
+        typer.echo(emit_json_document(doctor_payload))
+        if has_warnings:
             raise typer.Exit(code=1)
         return
 
@@ -423,7 +506,7 @@ def doctor(
         table.add_row(runtime_check.status, runtime_check.name, runtime_detail)
     console.print(table)
 
-    if has_repository_warnings or has_runtime_warnings:
+    if has_warnings:
         raise typer.Exit(code=1)
 
 
@@ -439,27 +522,26 @@ def runtime(
         "--json",
         help="Emit structured JSON instead of Rich output.",
     ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
 ) -> None:
     runtime_inspector = _runtime(root)
     runtime_checks = runtime_inspector.inspect_all()
+    runtime_payload = _runtime_payload(runtime_checks)
+    all_warnings = bool(runtime_payload["all_warnings"])
 
-    all_warnings = all(
-        runtime_check.status == "warning"
-        for runtime_check in runtime_checks
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="runtime",
+        payload=runtime_payload,
     )
 
     if json_out:
-        typer.echo(
-            emit_json_document(
-                {
-                    "runtime": [
-                        _json_runtime_check(runtime_check)
-                        for runtime_check in runtime_checks
-                    ],
-                    "all_warnings": all_warnings,
-                }
-            )
-        )
+        typer.echo(emit_json_document(runtime_payload))
         if all_warnings:
             raise typer.Exit(code=1)
         return
@@ -833,6 +915,11 @@ def smoke_cloud(
         "--json",
         help="Emit structured JSON instead of Rich output.",
     ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
 ) -> None:
     runtime_runner = _runner(root)
     result = runtime_runner.run(
@@ -844,18 +931,26 @@ def smoke_cloud(
     )
     output = strip_thinking(result.stdout) if raw_final_only else result.stdout
     output = _normalize_agent_stage_output(output)
+    smoke_payload = _run_result_payload(
+        backend=result.backend,
+        mode=result.mode,
+        model=result.model,
+        returncode=result.returncode,
+        output=output,
+        duration_ms=result.duration_ms,
+        stderr=result.stderr,
+        command=result.command,
+    )
+
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="smoke-cloud",
+        payload=smoke_payload,
+    )
 
     if json_out:
-        typer.echo(
-            emit_json_result(
-                backend=result.backend,
-                mode=result.mode,
-                model=result.model,
-                returncode=result.returncode,
-                output=output,
-                duration_ms=result.duration_ms,
-            )
-        )
+        typer.echo(emit_json_document(smoke_payload))
         if result.returncode != 0:
             raise typer.Exit(code=result.returncode)
         return
@@ -948,6 +1043,11 @@ def agent_task(
         "--json",
         help="Emit structured JSON instead of Rich output.",
     ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
     timeout: int = typer.Option(
         120,
         "--timeout",
@@ -1001,17 +1101,25 @@ def agent_task(
         (stage["returncode"] for stage in stages if stage["returncode"] != 0),
         0,
     )
+    agent_task_payload = json.loads(
+        _emit_agent_task_json(
+            task=task,
+            backend=backend,
+            mode=mode,
+            model=model,
+            stages=stages,
+        )
+    )
+
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="agent-task",
+        payload=agent_task_payload,
+    )
 
     if json_out:
-        typer.echo(
-            _emit_agent_task_json(
-                task=task,
-                backend=backend,
-                mode=mode,
-                model=model,
-                stages=stages,
-            )
-        )
+        typer.echo(emit_json_document(agent_task_payload))
         if final_returncode != 0:
             raise typer.Exit(code=final_returncode)
         return

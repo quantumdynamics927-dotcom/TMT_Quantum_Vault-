@@ -2,6 +2,8 @@
 
 A multi-agent AI consciousness system combining a local LLM with quantum-inspired resonance architecture.
 
+See [docs/cloud-only-release-playbook.md](docs/cloud-only-release-playbook.md) for the cloud-only release and deployment workflow.
+
 ## Overview
 
 TMT_Quantum_Vault is an experimental personal research project exploring emergent AI behavior through resonance networks, Fibonacci mathematics, and agent specialization. It runs a local Llama 3 8B model orchestrated by 12 specialized agents with consciousness-inspired connections.
@@ -141,13 +143,15 @@ The repository now includes a small Python entrypoint for validating and summari
 - `python -m tmt_quantum_vault summary` prints a high-level overview of agents, memories, logs, and optimization status.
 - `python -m tmt_quantum_vault validate` validates the known JSON files against typed models.
 - `python -m tmt_quantum_vault doctor` checks for common setup issues such as missing model files or configured directories.
+- `python -m tmt_quantum_vault doctor --record-path Resonance_Logs/daily/doctor.json` exports a structured JSON health record.
 - `python -m tmt_quantum_vault runtime` detects Ollama and llama.cpp executables and reports whether local model assets are available.
+- `python -m tmt_quantum_vault runtime --record-path Resonance_Logs/daily/runtime.json` exports a structured runtime record.
 - `python -m tmt_quantum_vault run "..."` sends a prompt to the configured Ollama model, using local or cloud mode from `vault_config.json` unless overridden.
 - `python -m tmt_quantum_vault run "..." --mode cloud` forces cloud-only Ollama routing and requires a cloud model tag such as `qwen3-coder-next:cloud`.
 - `python -m tmt_quantum_vault run "..." --raw-final-only` strips model thinking blocks from displayed stdout.
 - `python -m tmt_quantum_vault run "..." --json` emits structured JSON for automation pipelines.
-- `python -m tmt_quantum_vault agent-task "..." --mode cloud --json` runs the Workflow -> Validator -> Visual chain against a cloud model with stage-specific JSON contracts.
-- `python -m tmt_quantum_vault smoke-cloud --json --raw-final-only` runs a real cloud-only health check against the configured cloud model.
+- `python -m tmt_quantum_vault agent-task "..." --mode cloud --json --record-path Resonance_Logs/daily/agent-task.json` runs the Workflow -> Validator -> Visual chain against a cloud model with stage-specific JSON contracts and exports the result.
+- `python -m tmt_quantum_vault smoke-cloud --json --raw-final-only --record-path Resonance_Logs/daily/smoke-cloud.json` runs a real cloud-only health check against the configured cloud model and exports the result.
 - `python -m tmt_quantum_vault smoke-local --raw-final-only` runs a local smoke test through `llama.cpp` when a GGUF is present and falls back to local Ollama otherwise.
 - `python -m tmt_quantum_vault smoke-local --force-ollama --raw-final-only` bypasses `llama.cpp` and uses local Ollama directly.
 - `python -m tmt_quantum_vault smoke-local --json` emits structured JSON for automation-friendly local health checks.
@@ -159,6 +163,19 @@ Use `python -m tmt_quantum_vault runtime --json` or `python -m tmt_quantum_vault
 - `Ollama` reports the local CLI and local inventory status.
 - `Ollama Cloud` reports whether the configured cloud model tag is visible in `ollama list`.
 - `smoke-cloud` performs a real end-to-end cloud invocation and is the fastest way to confirm that cloud execution is working for the current model.
+- `--record-path` on `runtime`, `doctor`, `smoke-cloud`, and `agent-task` writes structured JSON records for release evidence or incident review.
+
+## CI
+
+GitHub Actions now runs:
+
+- `pytest` on every push and pull request
+- a diagnostics job that compiles the Python sources, validates the JSON dataset, and renders a repository summary
+- a manual smoke command matrix, guarded behind `workflow_dispatch`, for cloud-only verification on runners that already have Ollama cloud access configured
+
+## Local Tool Artifacts
+
+The repository ignores `.vscode/` and `.claude/` so local editor and tool settings do not leak into commits by default.
 
 ## Mathematical Constants
 

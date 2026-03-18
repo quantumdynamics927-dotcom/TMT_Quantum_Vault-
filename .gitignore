@@ -6,6 +6,7 @@ Node_13_Core/.resonance
 .venv/
 __pycache__/
 *.pyc
+.claude/
 .vscode/
 .DS_Store
 Thumbs.db

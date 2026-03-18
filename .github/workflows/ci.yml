@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_smoke:
+        description: Run the cloud smoke command matrix on a preconfigured runner
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run regression suite
+        run: python -m pytest tests/test_regression.py -q
+
+  diagnostics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Compile project sources
+        run: python -m compileall tmt_quantum_vault tests
+
+      - name: Validate repository data
+        run: python -m tmt_quantum_vault validate
+
+      - name: Generate repository summary
+        run: python -m tmt_quantum_vault summary
+
+  smoke-matrix:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_smoke
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: smoke-cloud
+            command: python -m tmt_quantum_vault smoke-cloud --json --raw-final-only
+          - name: agent-task-cloud
+            command: >-
+              python -m tmt_quantum_vault agent-task
+              "Produce a short JSON object with keys workflow, validator, and visual, each containing a one-line status."
+              --mode cloud --json --raw-final-only
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Install Ollama CLI
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Run ${{ matrix.name }}
+        shell: bash
+        run: |
+          if ! ollama list >/dev/null 2>&1; then
+            echo "Skipping ${{ matrix.name }} because Ollama is not configured on this runner."
+            exit 0
+          fi
+          ${{ matrix.command }}

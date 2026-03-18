@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -102,7 +103,21 @@ def test_json_output_mode() -> None:
 
 
 def test_runtime_json_output() -> None:
-    result = RUNNER.invoke(app, ["runtime", "--json"])
+    mocked_runtime_checks = [
+        SimpleNamespace(
+            name="Ollama",
+            status="ok",
+            detail="available",
+            executable=Path("C:/ollama.exe"),
+            version="0.18.0",
+        )
+    ]
+    with patch("tmt_quantum_vault.cli._runtime") as mock_runtime:
+        mock_runtime.return_value.inspect_all.return_value = (
+            mocked_runtime_checks
+        )
+        result = RUNNER.invoke(app, ["runtime", "--json"])
+
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
     assert "runtime" in payload
@@ -110,11 +125,56 @@ def test_runtime_json_output() -> None:
 
 
 def test_doctor_json_output() -> None:
-    result = RUNNER.invoke(app, ["doctor", "--json"])
+    mocked_runtime_checks = [
+        SimpleNamespace(
+            name="Ollama",
+            status="ok",
+            detail="available",
+            executable=Path("C:/ollama.exe"),
+            version="0.18.0",
+        )
+    ]
+    with patch("tmt_quantum_vault.cli._repo") as mock_repo:
+        with patch("tmt_quantum_vault.cli._runtime") as mock_runtime:
+            mock_repo.return_value.repository_checks.return_value = [
+                ("ok", "repo healthy")
+            ]
+            mock_runtime.return_value.inspect_all.return_value = (
+                mocked_runtime_checks
+            )
+            result = RUNNER.invoke(app, ["doctor", "--json"])
+
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
     assert "repository" in payload
     assert "runtime" in payload
+
+
+def test_runtime_record_path(tmp_path: Path) -> None:
+    mocked_runtime_checks = [
+        SimpleNamespace(
+            name="Ollama Cloud",
+            status="ok",
+            detail="configured cloud model visible",
+            executable=Path("C:/ollama.exe"),
+            version=None,
+        )
+    ]
+    record_path = tmp_path / "runtime-record.json"
+
+    with patch("tmt_quantum_vault.cli._runtime") as mock_runtime:
+        mock_runtime.return_value.inspect_all.return_value = (
+            mocked_runtime_checks
+        )
+        result = RUNNER.invoke(
+            app,
+            ["runtime", "--json", "--record-path", str(record_path)],
+        )
+
+    assert result.exit_code == 0
+    payload = json.loads(record_path.read_text(encoding="utf-8"))
+    assert payload["record_type"] == "runtime"
+    assert payload["runtime"][0]["name"] == "Ollama Cloud"
 
 
 def test_agent_task_json_output() -> None:
@@ -281,3 +341,83 @@ def test_smoke_cloud_json_output() -> None:
     assert payload["mode"] == "cloud"
     assert payload["model"] == "qwen3-coder-next:cloud"
     assert payload["output"] == "TMT cloud test"
+
+
+def test_smoke_cloud_record_path(tmp_path: Path) -> None:
+    mocked_result = RunResult(
+        backend="ollama",
+        mode="cloud",
+        model="qwen3-coder-next:cloud",
+        command=["ollama", "run", "qwen3-coder-next:cloud"],
+        returncode=0,
+        stdout="TMT cloud test",
+        stderr="",
+        duration_ms=42,
+    )
+    record_path = tmp_path / "smoke-cloud.json"
+
+    with patch("tmt_quantum_vault.cli._runner") as mock_runner:
+        mock_runner.return_value.run.return_value = mocked_result
+        result = RUNNER.invoke(
+            app,
+            ["smoke-cloud", "--record-path", str(record_path), "--json"],
+        )
+
+    assert result.exit_code == 0
+    payload = json.loads(record_path.read_text(encoding="utf-8"))
+    assert payload["record_type"] == "smoke-cloud"
+    assert payload["output"] == "TMT cloud test"
+
+
+def test_agent_task_record_path(tmp_path: Path) -> None:
+    mocked_results = [
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="test-model",
+            command="ollama run",
+            returncode=0,
+            stdout="workflow output",
+            stderr="",
+            duration_ms=10,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="test-model",
+            command="ollama run",
+            returncode=0,
+            stdout="validator output",
+            stderr="",
+            duration_ms=20,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="test-model",
+            command="ollama run",
+            returncode=0,
+            stdout="visual output",
+            stderr="",
+            duration_ms=30,
+        ),
+    ]
+    record_path = tmp_path / "agent-task.json"
+
+    with patch("tmt_quantum_vault.cli._runner") as mock_runner:
+        mock_runner.return_value.run.side_effect = mocked_results
+        result = RUNNER.invoke(
+            app,
+            [
+                "agent-task",
+                "Summarize the vault state",
+                "--record-path",
+                str(record_path),
+                "--json",
+            ],
+        )
+
+    assert result.exit_code == 0
+    payload = json.loads(record_path.read_text(encoding="utf-8"))
+    assert payload["record_type"] == "agent-task"
+    assert payload["final_output"] == "visual output"

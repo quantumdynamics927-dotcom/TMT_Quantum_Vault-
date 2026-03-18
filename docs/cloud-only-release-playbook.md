@@ -8,7 +8,7 @@ This playbook covers release and deployment steps for running TMT Quantum Vault 
 
 - Python 3.13+
 - A populated `.venv` or equivalent Python environment
-- Ollama CLI installed and authenticated for cloud usage
+- Either `ollama signin` completed locally or `OLLAMA_API_KEY` exported for direct ollama.com API access
 - `vault_config.json` configured with `preferred_backend: "ollama"` and `mode: "cloud"`
 - A verified cloud tag such as `qwen3-coder-next:cloud`
 
@@ -33,7 +33,7 @@ This playbook covers release and deployment steps for running TMT Quantum Vault 
 1. Confirm the working tree is clean.
 2. Push the current branch.
 3. Ensure the `pytest` and `diagnostics` GitHub Actions jobs pass.
-4. If cloud smoke is needed in CI, run the manual `CI` workflow with `run_smoke=true` and set `cloud_model` to the tag you want to validate on a runner that has cloud-ready Ollama access.
+4. If cloud smoke is needed in CI, set the `OLLAMA_API_KEY` repository secret, then run the manual `CI` workflow with `run_smoke=true` and set `cloud_model` to the tag you want to validate.
 
 ## Operational Diagnostics
 
@@ -41,6 +41,7 @@ This playbook covers release and deployment steps for running TMT Quantum Vault 
 - `doctor --json` combines repository health with runtime statuses.
 - `smoke-cloud` is the authoritative end-to-end connectivity check for cloud inference.
 - `release-evidence` collects the main diagnostic and runtime records into a single timestamped artifact bundle.
+- `smoke-cloud` and `agent-task --mode cloud` use `OLLAMA_API_KEY` for direct ollama.com API access when the variable is present.
 
 ## Exportable Records
 

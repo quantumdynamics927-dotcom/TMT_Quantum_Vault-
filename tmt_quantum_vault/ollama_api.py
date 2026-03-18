@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import requests
 
@@ -25,6 +26,8 @@ def run(
     timeout: int = 120,
     num_predict: int = 512,
     temperature: float = 0.7,
+    base_url: str = OLLAMA_BASE,
+    headers: dict[str, str] | None = None,
 ) -> OllamaResponse:
     payload = {
         "model": model,
@@ -39,8 +42,9 @@ def run(
         payload["system"] = system
 
     response = requests.post(
-        f"{OLLAMA_BASE}/api/generate",
+        f"{base_url.rstrip('/')}/api/generate",
         json=payload,
+        headers=headers,
         timeout=timeout,
     )
     response.raise_for_status()
@@ -58,6 +62,19 @@ def list_models() -> list[str]:
     response.raise_for_status()
     payload = response.json()
     return [model["name"] for model in payload.get("models", [])]
+
+
+def extract_error_message(response: requests.Response) -> str:
+    try:
+        payload: Any = response.json()
+    except ValueError:
+        return response.text.strip() or f"HTTP {response.status_code}"
+
+    if isinstance(payload, dict):
+        error = payload.get("error")
+        if isinstance(error, str) and error.strip():
+            return error.strip()
+    return response.text.strip() or f"HTTP {response.status_code}"
 
 
 def is_available() -> bool:

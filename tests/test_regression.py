@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import requests
 import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from typer.testing import CliRunner
@@ -286,6 +288,62 @@ def test_cloud_mode_uses_ollama_cli() -> None:
     assert result.mode == "cloud"
     assert result.command[:3] == ["ollama", "run", "qwen3-coder-next:cloud"]
     assert "System instructions:" in result.command[3]
+
+
+def test_cloud_mode_uses_api_key_direct_api() -> None:
+    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+
+    with patch.dict(os.environ, {"OLLAMA_API_KEY": "test-key"}, clear=False):
+        with patch("tmt_quantum_vault.runner.ollama_run") as mock_ollama_run:
+            mock_ollama_run.return_value = SimpleNamespace(
+                returncode=0,
+                response="TMT cloud test",
+                total_duration_ns=123_000_000,
+            )
+            result = runner.run(
+                prompt="Reply with exactly: test",
+                mode="cloud",
+                model="qwen3-coder-next:cloud",
+                system="Return JSON only.",
+            )
+
+    assert result.returncode == 0
+    assert result.command == "https://ollama.com/api/generate"
+    assert result.stdout == "TMT cloud test"
+    mock_ollama_run.assert_called_once_with(
+        model="qwen3-coder-next:cloud",
+        prompt="Reply with exactly: test",
+        system="Return JSON only.",
+        timeout=120,
+        temperature=0.0,
+        base_url="https://ollama.com",
+        headers={"Authorization": "Bearer test-key"},
+    )
+
+
+def test_cloud_mode_api_key_unauthorized_forces_failure() -> None:
+    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+    response = Mock(spec=requests.Response)
+    response.status_code = 401
+    response.json.return_value = {"error": "unauthorized"}
+    response.text = '{"error":"unauthorized"}'
+    response.url = "https://ollama.com/api/generate"
+
+    with patch.dict(os.environ, {"OLLAMA_API_KEY": "test-key"}, clear=False):
+        with patch("tmt_quantum_vault.runner.ollama_run") as mock_ollama_run:
+            mock_ollama_run.side_effect = requests.HTTPError(
+                "401 Client Error: Unauthorized",
+                response=response,
+            )
+            result = runner.run(
+                prompt="Reply with exactly: test",
+                mode="cloud",
+                model="qwen3-coder-next:cloud",
+            )
+
+    assert result.returncode == 1
+    assert result.command == "https://ollama.com/api/generate"
+    assert result.stderr == "unauthorized"
 
 
 def test_cloud_mode_auth_message_forces_failure() -> None:

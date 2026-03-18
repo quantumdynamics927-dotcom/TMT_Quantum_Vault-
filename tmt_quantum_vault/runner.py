@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,7 +11,7 @@ from typing import Literal, cast
 
 import requests
 
-from .ollama_api import run as ollama_run
+from .ollama_api import extract_error_message, run as ollama_run
 from .models import RuntimeConfig
 
 
@@ -137,6 +138,16 @@ class RuntimeRunner:
         system: str,
         timeout: int,
     ) -> RunResult:
+        api_key = os.getenv(self.runtime_config.ollama.api_key_env, "").strip()
+        if api_key:
+            return self._run_ollama_cloud_api(
+                model=model,
+                prompt=prompt,
+                system=system,
+                timeout=timeout,
+                api_key=api_key,
+            )
+
         full_prompt = self._merge_prompt(system=system, prompt=prompt)
         command = ["ollama", "run", model, full_prompt]
         try:
@@ -190,6 +201,77 @@ class RuntimeRunner:
             stdout=stdout,
             stderr=auth_failure or stderr,
             duration_ms=0,
+        )
+
+    def _run_ollama_cloud_api(
+        self,
+        *,
+        model: str,
+        prompt: str,
+        system: str,
+        timeout: int,
+        api_key: str,
+    ) -> RunResult:
+        command = (
+            f"{self.runtime_config.ollama.cloud_host.rstrip('/')}/api/"
+            "generate"
+        )
+        try:
+            response = ollama_run(
+                model=model,
+                prompt=prompt,
+                system=system,
+                timeout=timeout,
+                temperature=0.0,
+                base_url=self.runtime_config.ollama.cloud_host,
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+        except requests.HTTPError as exc:
+            message = "Cloud API request failed."
+            if exc.response is not None:
+                message = extract_error_message(exc.response)
+            message = self._clean_output(message)
+            auth_failure = self._detect_ollama_cloud_failure(
+                stdout=message,
+                stderr=message,
+            )
+            return RunResult(
+                backend="ollama",
+                mode="cloud",
+                model=model,
+                command=command,
+                returncode=1,
+                stdout="",
+                stderr=auth_failure or message,
+                duration_ms=0,
+            )
+        except requests.RequestException as exc:
+            message = self._clean_output(str(exc))
+            return RunResult(
+                backend="ollama",
+                mode="cloud",
+                model=model,
+                command=command,
+                returncode=1,
+                stdout="",
+                stderr=message,
+                duration_ms=0,
+            )
+
+        stdout = self._clean_output(response.response)
+        auth_failure = self._detect_ollama_cloud_failure(
+            stdout=stdout,
+            stderr="",
+        )
+        return RunResult(
+            backend="ollama",
+            mode="cloud",
+            model=model,
+            command=command,
+            returncode=1 if auth_failure else response.returncode,
+            stdout=stdout,
+            stderr=auth_failure or "",
+            duration_ms=response.total_duration_ns // 1_000_000,
         )
 
     def _resolve_backend(

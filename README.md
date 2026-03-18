@@ -167,6 +167,7 @@ Use `python -m tmt_quantum_vault runtime --json` or `python -m tmt_quantum_vault
 - `--record-path` on `runtime`, `doctor`, `smoke-cloud`, and `agent-task` writes structured JSON records for release evidence or incident review.
 - `release-evidence` bundles those records into one timestamped directory and writes a `manifest.json` file for release reviews.
 - `agent-task` exported records now include per-stage prompts, system prompts, raw outputs, normalized outputs, invoked commands, and stderr for deeper troubleshooting.
+- When `OLLAMA_API_KEY` is set, cloud runs use `https://ollama.com/api` directly instead of requiring `ollama signin`.
 
 ## CI
 
@@ -174,8 +175,10 @@ GitHub Actions now runs:
 
 - `pytest` on every push and pull request
 - a diagnostics job that compiles the Python sources, validates the JSON dataset, and renders a repository summary
-- a manual smoke command matrix, guarded behind `workflow_dispatch`, for cloud-only verification on runners that already have Ollama cloud access configured
+- a manual smoke command matrix, guarded behind `workflow_dispatch`, for cloud-only verification using the `OLLAMA_API_KEY` repository secret
 - the manual smoke matrix accepts a `cloud_model` input so you can validate a specific cloud tag without editing the workflow
+
+Set `OLLAMA_API_KEY` in GitHub repository Actions secrets before running the manual smoke matrix.
 
 ## Local Tool Artifacts
 

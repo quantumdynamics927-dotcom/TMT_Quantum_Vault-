@@ -1,0 +1,35 @@
+{
+  "name": "baseline",
+  "description": "Small starter evaluation set for cloud-only regression checks.",
+  "backend": "ollama",
+  "mode": "cloud",
+  "model": "qwen3-coder-next:cloud",
+  "cases": [
+    {
+      "id": "exact-smoke",
+      "prompt": "Reply with exactly: TMT cloud test",
+      "expectation": {
+        "contains_all": [
+          "TMT cloud test"
+        ]
+      }
+    },
+    {
+      "id": "json-status-shape",
+      "prompt": "Return exactly one JSON object with keys status, target, and mode using values ok, vault, and cloud.",
+      "expectation": {
+        "contains_all": [
+          "\"status\"",
+          "\"ok\"",
+          "\"target\"",
+          "\"vault\"",
+          "\"mode\"",
+          "\"cloud\""
+        ],
+        "excludes": [
+          "```"
+        ]
+      }
+    }
+  ]
+}

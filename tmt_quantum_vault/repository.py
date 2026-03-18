@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from .models import (
     AgentDNA,
     AgentMemory,
+    EvalDataset,
     GeometryConfig,
     OptimizationEntry,
     SummarySnapshot,
@@ -35,6 +36,10 @@ class VaultRepository:
 
     def load_json_document(self, path: Path) -> Any:
         return self._load_json(path)
+
+    def load_eval_dataset(self, path: Path) -> EvalDataset:
+        payload = self._load_json(path)
+        return EvalDataset.model_validate(payload)
 
     def load_vault_config(self) -> VaultConfig:
         payload = self._load_json(self.root / "vault_config.json")

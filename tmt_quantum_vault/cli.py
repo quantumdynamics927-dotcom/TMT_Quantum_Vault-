@@ -17,7 +17,11 @@ from rich.panel import Panel
 from rich.table import Table
 
 from .ollama_api import run as ollama_run
-from .models import AgentDNA, OptimizationEntry, SummarySnapshot
+from .models import (
+    AgentDNA,
+    OptimizationEntry,
+    SummarySnapshot,
+)
 from .output import (
     emit_json_document,
     emit_json_result,
@@ -151,9 +155,537 @@ def _run_result_payload(
     return payload
 
 
+def _resolve_eval_dataset_path(root: Path, dataset_path: Path) -> Path:
+    if dataset_path.is_absolute():
+        return dataset_path
+    return (root.resolve() / dataset_path).resolve()
+
+
+def _eval_case_payload(
+    *,
+    case_id: str,
+    prompt: str,
+    output: str,
+    backend: str,
+    mode: str,
+    model: str,
+    returncode: int,
+    duration_ms: int,
+    stderr: str,
+    command: list[str] | str,
+    passed: bool,
+    failures: list[str],
+) -> dict[str, Any]:
+    payload = {
+        "id": case_id,
+        "prompt": prompt,
+        "backend": backend,
+        "mode": mode,
+        "model": model,
+        "returncode": returncode,
+        "duration_ms": duration_ms,
+        "output": output,
+        "passed": passed,
+        "failures": failures,
+        "command": command,
+    }
+    if stderr:
+        payload["stderr"] = stderr
+    return payload
+
+
+def _evaluate_case_output(
+    output: str,
+    case: Any,
+) -> list[str]:
+    failures: list[str] = []
+    lowered_output = output.casefold()
+
+    missing_required = [
+        token
+        for token in case.expectation.contains_all
+        if token.casefold() not in lowered_output
+    ]
+    if missing_required:
+        failures.append(
+            "missing required tokens: " + ", ".join(missing_required)
+        )
+
+    if case.expectation.contains_any and not any(
+        token.casefold() in lowered_output
+        for token in case.expectation.contains_any
+    ):
+        failures.append(
+            "missing any-of tokens: "
+            + ", ".join(case.expectation.contains_any)
+        )
+
+    present_excluded = [
+        token
+        for token in case.expectation.excludes
+        if token.casefold() in lowered_output
+    ]
+    if present_excluded:
+        failures.append(
+            "found excluded tokens: " + ", ".join(present_excluded)
+        )
+
+    return failures
+
+
+def _execute_eval(
+    *,
+    root: Path,
+    dataset_path: Path,
+    backend: str | None,
+    mode: str | None,
+    model: str | None,
+    raw_final_only: bool,
+    timeout: int,
+) -> tuple[dict[str, Any], int]:
+    repo = _repo(root)
+    resolved_dataset_path = _resolve_eval_dataset_path(root, dataset_path)
+    dataset = repo.load_eval_dataset(resolved_dataset_path)
+    runtime_runner = _runner(root)
+
+    selected_backend = backend or dataset.backend
+    selected_mode = mode or dataset.mode
+    selected_model = model or dataset.model
+
+    case_payloads: list[dict[str, Any]] = []
+    for case in dataset.cases:
+        result = runtime_runner.run(
+            prompt=case.prompt,
+            backend=selected_backend,
+            mode=selected_mode,
+            model=selected_model,
+            system=case.system,
+            timeout=timeout,
+        )
+        raw_output = result.stdout
+        output = strip_thinking(raw_output) if raw_final_only else raw_output
+        failures = []
+        if result.returncode != 0:
+            failures.append("runtime invocation failed")
+        failures.extend(_evaluate_case_output(output, case))
+        case_payloads.append(
+            _eval_case_payload(
+                case_id=case.id,
+                prompt=case.prompt,
+                output=output,
+                backend=result.backend,
+                mode=result.mode,
+                model=result.model,
+                returncode=result.returncode,
+                duration_ms=result.duration_ms,
+                stderr=result.stderr,
+                command=result.command,
+                passed=not failures,
+                failures=failures,
+            )
+        )
+
+    passed_cases = sum(case["passed"] for case in case_payloads)
+    failed_cases = len(case_payloads) - passed_cases
+    total_duration_ms = sum(case["duration_ms"] for case in case_payloads)
+    payload = {
+        "dataset": {
+            "name": dataset.name,
+            "path": str(resolved_dataset_path),
+            "description": dataset.description,
+        },
+        "backend": selected_backend,
+        "mode": selected_mode,
+        "model": selected_model,
+        "summary": {
+            "total_cases": len(case_payloads),
+            "passed_cases": passed_cases,
+            "failed_cases": failed_cases,
+            "success_rate": round(
+                (passed_cases / len(case_payloads)) * 100,
+                2,
+            ),
+            "total_duration_ms": total_duration_ms,
+        },
+        "cases": case_payloads,
+        "returncode": 0 if failed_cases == 0 else 1,
+    }
+    return payload, cast(int, payload["returncode"])
+
+
+def _resolve_evidence_manifest_path(bundle_path: Path) -> Path:
+    if bundle_path.is_dir():
+        return bundle_path / "manifest.json"
+    return bundle_path
+
+
+def _load_json_path(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _load_evidence_artifact(path: str | None) -> dict[str, Any] | None:
+    if not path:
+        return None
+    artifact_path = Path(path)
+    if not artifact_path.exists():
+        return None
+    return _load_json_path(artifact_path)
+
+
+def _compare_smoke_payloads(
+    previous_payload: dict[str, Any] | None,
+    current_payload: dict[str, Any] | None,
+) -> tuple[dict[str, Any], list[str]]:
+    failures: list[str] = []
+    previous_returncode = (
+        cast(int, previous_payload.get("returncode", 1))
+        if previous_payload is not None
+        else None
+    )
+    current_returncode = (
+        cast(int, current_payload.get("returncode", 1))
+        if current_payload is not None
+        else None
+    )
+    if current_payload is None:
+        failures.append("current smoke-cloud artifact missing")
+    elif previous_payload is None:
+        failures.append("previous smoke-cloud artifact missing")
+    elif previous_returncode == 0 and current_returncode != 0:
+        failures.append("smoke-cloud regressed from pass to fail")
+
+    return (
+        {
+            "previous_returncode": previous_returncode,
+            "current_returncode": current_returncode,
+            "previous_model": (
+                previous_payload.get("model") if previous_payload else None
+            ),
+            "current_model": (
+                current_payload.get("model") if current_payload else None
+            ),
+        },
+        failures,
+    )
+
+
+def _compare_eval_payloads(
+    previous_payload: dict[str, Any] | None,
+    current_payload: dict[str, Any] | None,
+) -> tuple[dict[str, Any], list[str]]:
+    failures: list[str] = []
+    previous_summary = (
+        cast(dict[str, Any], previous_payload.get("summary", {}))
+        if previous_payload is not None
+        else {}
+    )
+    current_summary = (
+        cast(dict[str, Any], current_payload.get("summary", {}))
+        if current_payload is not None
+        else {}
+    )
+    if current_payload is None:
+        failures.append("current eval artifact missing")
+    elif previous_payload is None:
+        failures.append("previous eval artifact missing")
+    else:
+        previous_failed = cast(int, previous_summary.get("failed_cases", 0))
+        current_failed = cast(int, current_summary.get("failed_cases", 0))
+        previous_success = cast(
+            float,
+            previous_summary.get("success_rate", 0.0),
+        )
+        current_success = cast(
+            float,
+            current_summary.get("success_rate", 0.0),
+        )
+        if current_failed > previous_failed:
+            failures.append("eval failed case count increased")
+        if current_success < previous_success:
+            failures.append("eval success rate decreased")
+
+    return (
+        {
+            "previous_dataset": (
+                cast(dict[str, Any], previous_payload.get("dataset", {})).get(
+                    "name"
+                )
+                if previous_payload is not None
+                else None
+            ),
+            "current_dataset": (
+                cast(dict[str, Any], current_payload.get("dataset", {})).get(
+                    "name"
+                )
+                if current_payload is not None
+                else None
+            ),
+            "previous_summary": previous_summary,
+            "current_summary": current_summary,
+        },
+        failures,
+    )
+
+
+def _compare_agent_task_payloads(
+    previous_payload: dict[str, Any] | None,
+    current_payload: dict[str, Any] | None,
+) -> tuple[dict[str, Any], list[str]]:
+    failures: list[str] = []
+    previous_returncode = (
+        cast(int, previous_payload.get("returncode", 1))
+        if previous_payload is not None
+        else None
+    )
+    current_returncode = (
+        cast(int, current_payload.get("returncode", 1))
+        if current_payload is not None
+        else None
+    )
+    previous_stages = (
+        cast(list[dict[str, Any]], previous_payload.get("stages", []))
+        if previous_payload is not None
+        else []
+    )
+    current_stages = (
+        cast(list[dict[str, Any]], current_payload.get("stages", []))
+        if current_payload is not None
+        else []
+    )
+    if current_payload is None:
+        failures.append("current agent-task artifact missing")
+    elif previous_payload is None:
+        failures.append("previous agent-task artifact missing")
+    elif previous_returncode == 0 and current_returncode != 0:
+        failures.append("agent-task regressed from pass to fail")
+
+    return (
+        {
+            "previous_returncode": previous_returncode,
+            "current_returncode": current_returncode,
+            "previous_stage_count": len(previous_stages),
+            "current_stage_count": len(current_stages),
+        },
+        failures,
+    )
+
+
+def _execute_compare_evidence(
+    *,
+    previous_bundle: Path,
+    current_bundle: Path,
+) -> tuple[dict[str, Any], int]:
+    previous_manifest_path = _resolve_evidence_manifest_path(previous_bundle)
+    current_manifest_path = _resolve_evidence_manifest_path(current_bundle)
+    previous_manifest = _load_json_path(previous_manifest_path)
+    current_manifest = _load_json_path(current_manifest_path)
+
+    previous_files = cast(dict[str, str], previous_manifest.get("files", {}))
+    current_files = cast(dict[str, str], current_manifest.get("files", {}))
+
+    smoke_summary, smoke_failures = _compare_smoke_payloads(
+        _load_evidence_artifact(previous_files.get("smoke_cloud")),
+        _load_evidence_artifact(current_files.get("smoke_cloud")),
+    )
+    eval_summary, eval_failures = _compare_eval_payloads(
+        _load_evidence_artifact(previous_files.get("eval")),
+        _load_evidence_artifact(current_files.get("eval")),
+    )
+    agent_task_summary, agent_task_failures = _compare_agent_task_payloads(
+        _load_evidence_artifact(previous_files.get("agent_task")),
+        _load_evidence_artifact(current_files.get("agent_task")),
+    )
+
+    regressions = [
+        *smoke_failures,
+        *eval_failures,
+        *agent_task_failures,
+    ]
+    previous_returncode = cast(int, previous_manifest.get("returncode", 1))
+    current_returncode = cast(int, current_manifest.get("returncode", 1))
+    if previous_returncode == 0 and current_returncode != 0:
+        regressions.append(
+            "overall bundle returncode regressed from pass to fail"
+        )
+
+    payload = {
+        "previous_bundle": str(previous_manifest_path.parent),
+        "current_bundle": str(current_manifest_path.parent),
+        "summary": {
+            "previous_returncode": previous_returncode,
+            "current_returncode": current_returncode,
+            "regression_count": len(regressions),
+            "has_regressions": bool(regressions),
+        },
+        "components": {
+            "smoke_cloud": smoke_summary,
+            "eval": eval_summary,
+            "agent_task": agent_task_summary,
+        },
+        "regressions": regressions,
+        "returncode": 1 if regressions else 0,
+    }
+    return payload, cast(int, payload["returncode"])
+
+
 def _default_release_evidence_dir(root: Path) -> Path:
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     return root / "Resonance_Logs" / "daily" / f"release-evidence-{timestamp}"
+
+
+def _find_latest_release_evidence_bundle(
+    root: Path,
+    current_bundle: Path | None = None,
+) -> Path | None:
+    daily_dir = root.resolve() / "Resonance_Logs" / "daily"
+    if not daily_dir.exists():
+        return None
+
+    candidates: list[Path] = []
+    resolved_current = current_bundle.resolve() if current_bundle else None
+    for candidate in daily_dir.glob("release-evidence*"):
+        if not candidate.is_dir():
+            continue
+        if (
+            resolved_current is not None
+            and candidate.resolve() == resolved_current
+        ):
+            continue
+        manifest_path = candidate / "manifest.json"
+        if manifest_path.exists():
+            candidates.append(candidate)
+
+    if not candidates:
+        return None
+
+    return max(
+        candidates,
+        key=lambda candidate: (candidate / "manifest.json").stat().st_mtime_ns,
+    )
+
+
+def _execute_release_summary(
+    *,
+    root: Path,
+    bundle: Path | None,
+) -> tuple[dict[str, Any], int]:
+    selected_bundle = bundle
+    if selected_bundle is None:
+        selected_bundle = _find_latest_release_evidence_bundle(root)
+        if selected_bundle is None:
+            raise typer.BadParameter(
+                "No release-evidence bundle with a manifest was found in "
+                "Resonance_Logs/daily."
+            )
+
+    manifest_path = _resolve_evidence_manifest_path(selected_bundle)
+    manifest = _load_json_path(manifest_path)
+    files = cast(dict[str, str], manifest.get("files", {}))
+
+    smoke_payload = _load_evidence_artifact(files.get("smoke_cloud")) or {}
+    eval_payload = _load_evidence_artifact(files.get("eval")) or {}
+    agent_task_payload = _load_evidence_artifact(files.get("agent_task")) or {}
+    compare_payload = _load_evidence_artifact(files.get("compare_evidence"))
+
+    eval_summary = cast(dict[str, Any], eval_payload.get("summary", {}))
+    compare_summary = (
+        cast(dict[str, Any], compare_payload.get("summary", {}))
+        if compare_payload is not None
+        else None
+    )
+    stages = cast(list[dict[str, Any]], agent_task_payload.get("stages", []))
+
+    payload = {
+        "bundle_dir": str(manifest_path.parent),
+        "compared_to": manifest.get("compared_to"),
+        "overall": {
+            "returncode": cast(int, manifest.get("returncode", 1)),
+            "has_comparison": compare_payload is not None,
+        },
+        "smoke_cloud": {
+            "returncode": smoke_payload.get("returncode"),
+            "model": smoke_payload.get("model"),
+        },
+        "eval": {
+            "dataset": cast(
+                dict[str, Any],
+                eval_payload.get("dataset", {}),
+            ).get("name"),
+            "passed_cases": eval_summary.get("passed_cases"),
+            "total_cases": eval_summary.get("total_cases"),
+            "failed_cases": eval_summary.get("failed_cases"),
+            "success_rate": eval_summary.get("success_rate"),
+        },
+        "agent_task": {
+            "returncode": agent_task_payload.get("returncode"),
+            "stage_count": len(stages),
+            "final_output": agent_task_payload.get("final_output"),
+        },
+        "comparison": {
+            "has_regressions": (
+                compare_summary.get("has_regressions")
+                if compare_summary is not None
+                else None
+            ),
+            "regression_count": (
+                compare_summary.get("regression_count")
+                if compare_summary is not None
+                else None
+            ),
+        },
+        "returncode": cast(int, manifest.get("returncode", 1)),
+    }
+    return payload, cast(int, payload["returncode"])
+
+
+def _execute_release_gate(
+    *,
+    root: Path,
+    bundle: Path | None,
+    require_comparison: bool,
+) -> tuple[dict[str, Any], int]:
+    summary_payload, _ = _execute_release_summary(root=root, bundle=bundle)
+
+    overall = cast(dict[str, Any], summary_payload["overall"])
+    smoke_summary = cast(dict[str, Any], summary_payload["smoke_cloud"])
+    eval_summary = cast(dict[str, Any], summary_payload["eval"])
+    agent_task_summary = cast(dict[str, Any], summary_payload["agent_task"])
+    comparison_summary = cast(dict[str, Any], summary_payload["comparison"])
+
+    failures: list[str] = []
+    if overall["returncode"] != 0:
+        failures.append("bundle manifest returncode is non-zero")
+    if smoke_summary["returncode"] != 0:
+        failures.append("smoke-cloud check failed")
+    if eval_summary["failed_cases"] not in {0, None}:
+        failures.append("eval contains failed cases")
+    if agent_task_summary["returncode"] != 0:
+        failures.append("agent-task check failed")
+
+    has_comparison = bool(overall["has_comparison"])
+    if require_comparison and not has_comparison:
+        failures.append("comparison artifact is required but missing")
+    if comparison_summary["has_regressions"] is True:
+        failures.append("comparison detected regressions")
+
+    payload = {
+        "bundle_dir": summary_payload["bundle_dir"],
+        "compared_to": summary_payload["compared_to"],
+        "policy": {
+            "require_comparison": require_comparison,
+        },
+        "checks": {
+            "overall": overall,
+            "smoke_cloud": smoke_summary,
+            "eval": eval_summary,
+            "agent_task": agent_task_summary,
+            "comparison": comparison_summary,
+        },
+        "decision": "pass" if not failures else "fail",
+        "failures": failures,
+        "returncode": 0 if not failures else 1,
+    }
+    return payload, cast(int, payload["returncode"])
 
 
 def _resolve_agent_profile(
@@ -661,7 +1193,6 @@ def runtime(
     table.add_column("Executable")
     table.add_column("Version")
     table.add_column("Detail")
-
     for runtime_check in runtime_checks:
         executable = (
             str(runtime_check.executable)
@@ -1068,6 +1599,390 @@ def smoke_cloud(
         raise typer.Exit(code=return_code)
 
 
+@app.command("eval")
+def eval_command(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    dataset: Path = typer.Option(
+        Path("evals/baseline.json"),
+        "--dataset",
+        help="Path to the evaluation dataset JSON file.",
+    ),
+    backend: str | None = typer.Option(
+        None,
+        "--backend",
+        help="Override the configured backend: ollama or llama.cpp.",
+    ),
+    mode: str | None = typer.Option(
+        None,
+        "--mode",
+        help="Override the configured Ollama mode: local or cloud.",
+    ),
+    model: str | None = typer.Option(
+        None,
+        "--model",
+        help="Override the configured model name.",
+    ),
+    raw_final_only: bool = typer.Option(
+        False,
+        "--raw-final-only",
+        help="Strip model thinking blocks from evaluated outputs.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
+    timeout: int = typer.Option(
+        120,
+        "--timeout",
+        help="Maximum runtime in seconds for each evaluation case.",
+    ),
+) -> None:
+    eval_payload, return_code = _execute_eval(
+        root=root,
+        dataset_path=dataset,
+        backend=backend,
+        mode=mode,
+        model=model,
+        raw_final_only=raw_final_only,
+        timeout=timeout,
+    )
+
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="eval",
+        payload=eval_payload,
+    )
+
+    if json_out:
+        typer.echo(emit_json_document(eval_payload))
+        if return_code != 0:
+            raise typer.Exit(code=return_code)
+        return
+
+    summary = cast(dict[str, Any], eval_payload["summary"])
+    console.print(
+        Panel.fit(
+            (
+                f"{cast(dict[str, Any], eval_payload['dataset'])['name']}\n"
+                f"Pass: {summary['passed_cases']} / {summary['total_cases']}\n"
+                f"Success rate: {summary['success_rate']}%"
+            ),
+            title="Evaluation Summary",
+        )
+    )
+
+    table = Table(box=box.SIMPLE_HEAVY)
+    table.add_column("Case")
+    table.add_column("Status")
+    table.add_column("Runtime")
+    table.add_column("Duration")
+    table.add_column("Failures")
+    for case in cast(list[dict[str, Any]], eval_payload["cases"]):
+        table.add_row(
+            cast(str, case["id"]),
+            "pass" if cast(bool, case["passed"]) else "fail",
+            f"{case['backend']} / {case['model']}",
+            f"{case['duration_ms']} ms",
+            "; ".join(cast(list[str], case["failures"])) or "-",
+        )
+    console.print(table)
+
+    if return_code != 0:
+        raise typer.Exit(code=return_code)
+
+
+@app.command("compare-evidence")
+def compare_evidence(
+    previous_bundle: Path = typer.Argument(
+        ...,
+        help="Previous release-evidence bundle directory or manifest path.",
+    ),
+    current_bundle: Path = typer.Argument(
+        ...,
+        help="Current release-evidence bundle directory or manifest path.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
+) -> None:
+    compare_payload, return_code = _execute_compare_evidence(
+        previous_bundle=previous_bundle,
+        current_bundle=current_bundle,
+    )
+
+    _write_record(
+        root=Path("."),
+        record_path=record_path,
+        record_type="compare-evidence",
+        payload=compare_payload,
+    )
+
+    if json_out:
+        typer.echo(emit_json_document(compare_payload))
+        if return_code != 0:
+            raise typer.Exit(code=return_code)
+        return
+
+    summary = cast(dict[str, Any], compare_payload["summary"])
+    console.print(
+        Panel.fit(
+            (
+                f"Previous: {compare_payload['previous_bundle']}\n"
+                f"Current: {compare_payload['current_bundle']}\n"
+                f"Regressions: {summary['regression_count']}"
+            ),
+            title="Evidence Comparison",
+        )
+    )
+
+    component_table = Table(box=box.SIMPLE_HEAVY)
+    component_table.add_column("Component")
+    component_table.add_column("Previous")
+    component_table.add_column("Current")
+    component_table.add_row(
+        "smoke-cloud",
+        str(
+            cast(dict[str, Any], compare_payload["components"])[
+                "smoke_cloud"
+            ]["previous_returncode"]
+        ),
+        str(
+            cast(dict[str, Any], compare_payload["components"])[
+                "smoke_cloud"
+            ]["current_returncode"]
+        ),
+    )
+    component_table.add_row(
+        "eval failed cases",
+        str(
+            cast(dict[str, Any], compare_payload["components"])["eval"][
+                "previous_summary"
+            ].get("failed_cases")
+        ),
+        str(
+            cast(dict[str, Any], compare_payload["components"])["eval"][
+                "current_summary"
+            ].get("failed_cases")
+        ),
+    )
+    component_table.add_row(
+        "agent-task",
+        str(
+            cast(dict[str, Any], compare_payload["components"])[
+                "agent_task"
+            ]["previous_returncode"]
+        ),
+        str(
+            cast(dict[str, Any], compare_payload["components"])[
+                "agent_task"
+            ]["current_returncode"]
+        ),
+    )
+    console.print(component_table)
+
+    regressions = cast(list[str], compare_payload["regressions"])
+    if regressions:
+        console.print(Panel("\n".join(regressions), title="Regressions"))
+
+    if return_code != 0:
+        raise typer.Exit(code=return_code)
+
+
+@app.command("release-summary")
+def release_summary(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    bundle: Path | None = typer.Option(
+        None,
+        "--bundle",
+        help=(
+            "Release-evidence bundle directory or manifest path. When "
+            "omitted, the newest bundle in Resonance_Logs/daily is used."
+        ),
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
+) -> None:
+    summary_payload, return_code = _execute_release_summary(
+        root=root,
+        bundle=bundle,
+    )
+
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="release-summary",
+        payload=summary_payload,
+    )
+
+    if json_out:
+        typer.echo(emit_json_document(summary_payload))
+        if return_code != 0:
+            raise typer.Exit(code=return_code)
+        return
+
+    overall = cast(dict[str, Any], summary_payload["overall"])
+    console.print(
+        Panel.fit(
+            (
+                f"Bundle: {summary_payload['bundle_dir']}\n"
+                f"Return code: {overall['returncode']}\n"
+                f"Compared: {summary_payload['compared_to'] or 'none'}"
+            ),
+            title="Release Summary",
+        )
+    )
+
+    table = Table(box=box.SIMPLE_HEAVY)
+    table.add_column("Check")
+    table.add_column("Status")
+    table.add_column("Detail")
+    smoke_summary = cast(dict[str, Any], summary_payload["smoke_cloud"])
+    eval_component = cast(dict[str, Any], summary_payload["eval"])
+    agent_task_component = cast(
+        dict[str, Any],
+        summary_payload["agent_task"],
+    )
+    comparison_component = cast(
+        dict[str, Any],
+        summary_payload["comparison"],
+    )
+    table.add_row(
+        "smoke-cloud",
+        str(smoke_summary["returncode"]),
+        str(smoke_summary["model"]),
+    )
+    table.add_row(
+        "eval",
+        str(eval_component["failed_cases"]),
+        (
+            f"{eval_component['passed_cases']} / "
+            f"{eval_component['total_cases']} "
+            f"passed"
+        ),
+    )
+    table.add_row(
+        "agent-task",
+        str(agent_task_component["returncode"]),
+        (
+            f"{agent_task_component['stage_count']} "
+            "stages"
+        ),
+    )
+    table.add_row(
+        "comparison",
+        str(comparison_component["has_regressions"]),
+        (
+            f"{comparison_component['regression_count']} "
+            "regressions"
+            if comparison_component["regression_count"] is not None
+            else "no comparison artifact"
+        ),
+    )
+    console.print(table)
+
+    if return_code != 0:
+        raise typer.Exit(code=return_code)
+
+
+@app.command("release-gate")
+def release_gate(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    bundle: Path | None = typer.Option(
+        None,
+        "--bundle",
+        help=(
+            "Release-evidence bundle directory or manifest path. When "
+            "omitted, the newest bundle in Resonance_Logs/daily is used."
+        ),
+    ),
+    require_comparison: bool = typer.Option(
+        False,
+        "--require-comparison",
+        help="Fail the gate when no comparison artifact is present.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
+) -> None:
+    gate_payload, return_code = _execute_release_gate(
+        root=root,
+        bundle=bundle,
+        require_comparison=require_comparison,
+    )
+
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="release-gate",
+        payload=gate_payload,
+    )
+
+    if json_out:
+        typer.echo(emit_json_document(gate_payload))
+        if return_code != 0:
+            raise typer.Exit(code=return_code)
+        return
+
+    console.print(
+        Panel.fit(
+            (
+                f"Decision: {gate_payload['decision']}\n"
+                f"Bundle: {gate_payload['bundle_dir']}\n"
+                f"Compared: {gate_payload['compared_to'] or 'none'}"
+            ),
+            title="Release Gate",
+        )
+    )
+
+    failures = cast(list[str], gate_payload["failures"])
+    if failures:
+        console.print(Panel("\n".join(failures), title="Gate Failures"))
+
+    if return_code != 0:
+        raise typer.Exit(code=return_code)
+
+
 @app.command()
 def agent(
     name: str = typer.Argument(
@@ -1222,6 +2137,27 @@ def release_evidence(
         "--output-dir",
         help="Write the evidence bundle into the specified directory.",
     ),
+    compare_to: Path | None = typer.Option(
+        None,
+        "--compare-to",
+        help=(
+            "Previous release-evidence bundle directory or manifest path "
+            "to compare against after writing the new bundle."
+        ),
+    ),
+    compare_to_latest: bool = typer.Option(
+        False,
+        "--compare-to-latest",
+        help=(
+            "Automatically compare against the most recent previous "
+            "release-evidence bundle in Resonance_Logs/daily."
+        ),
+    ),
+    eval_dataset: Path = typer.Option(
+        Path("evals/baseline.json"),
+        "--eval-dataset",
+        help="Path to the evaluation dataset bundled into the evidence.",
+    ),
     task: str = typer.Option(
         (
             "Produce a short JSON object with keys workflow, validator, "
@@ -1270,6 +2206,11 @@ def release_evidence(
         ),
     ),
 ) -> None:
+    if compare_to is not None and compare_to_latest:
+        raise typer.BadParameter(
+            "Use either --compare-to or --compare-to-latest, not both."
+        )
+
     repo = _repo(root)
     runtime_inspector = _runtime(root)
     bundle_dir = _resolved_record_path(
@@ -1277,6 +2218,16 @@ def release_evidence(
         output_dir or _default_release_evidence_dir(root.resolve()),
     )
     bundle_dir.mkdir(parents=True, exist_ok=True)
+
+    resolved_compare_to = compare_to
+    if compare_to_latest:
+        latest_bundle = _find_latest_release_evidence_bundle(root, bundle_dir)
+        if latest_bundle is None:
+            raise typer.BadParameter(
+                "No previous release-evidence bundle with a manifest was "
+                "found in Resonance_Logs/daily."
+            )
+        resolved_compare_to = latest_bundle
 
     checks = repo.repository_checks()
     runtime_checks = runtime_inspector.inspect_all()
@@ -1287,6 +2238,15 @@ def release_evidence(
         model=model,
         timeout=timeout,
         raw_final_only=raw_final_only,
+    )
+    eval_payload, eval_returncode = _execute_eval(
+        root=root,
+        dataset_path=eval_dataset,
+        backend="ollama",
+        mode="cloud",
+        model=model,
+        raw_final_only=raw_final_only,
+        timeout=timeout,
     )
     agent_task_payload, agent_task_returncode = _execute_agent_task(
         root=root,
@@ -1325,6 +2285,14 @@ def release_evidence(
         },
     )
     write_json_record(
+        bundle_dir / "eval.json",
+        {
+            "record_type": "eval",
+            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            **eval_payload,
+        },
+    )
+    write_json_record(
         bundle_dir / "agent-task.json",
         {
             "record_type": "agent-task",
@@ -1333,17 +2301,49 @@ def release_evidence(
         },
     )
 
-    manifest = {
+    manifest: dict[str, Any] = {
         "bundle_dir": str(bundle_dir),
         "task": task,
+        "eval_dataset": str(_resolve_eval_dataset_path(root, eval_dataset)),
         "files": {
             "doctor": str(bundle_dir / "doctor.json"),
             "runtime": str(bundle_dir / "runtime.json"),
             "smoke_cloud": str(bundle_dir / "smoke-cloud.json"),
+            "eval": str(bundle_dir / "eval.json"),
             "agent_task": str(bundle_dir / "agent-task.json"),
         },
-        "returncode": max(smoke_returncode, agent_task_returncode),
+        "returncode": max(
+            smoke_returncode,
+            eval_returncode,
+            agent_task_returncode,
+        ),
     }
+
+    if resolved_compare_to is not None:
+        write_json_record(bundle_dir / "manifest.json", manifest)
+        compare_payload, compare_returncode = _execute_compare_evidence(
+            previous_bundle=resolved_compare_to,
+            current_bundle=bundle_dir,
+        )
+        write_json_record(
+            bundle_dir / "compare-evidence.json",
+            {
+                "record_type": "compare-evidence",
+                "recorded_at": datetime.now(timezone.utc).isoformat(),
+                **compare_payload,
+            },
+        )
+        cast(dict[str, str], manifest["files"])["compare_evidence"] = str(
+            bundle_dir / "compare-evidence.json"
+        )
+        manifest["compared_to"] = str(
+            _resolve_evidence_manifest_path(resolved_compare_to).parent
+        )
+        manifest["returncode"] = max(
+            cast(int, manifest["returncode"]),
+            compare_returncode,
+        )
+
     write_json_record(bundle_dir / "manifest.json", manifest)
 
     if json_out:

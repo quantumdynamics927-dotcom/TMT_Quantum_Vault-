@@ -15,8 +15,12 @@ from unittest.mock import Mock, patch
 import pytest
 from typer.testing import CliRunner
 
-from tmt_quantum_vault.cli import app, strip_thinking
-from tmt_quantum_vault.models import AgentDNA, RuntimeConfig
+from tmt_quantum_vault.cli import (
+    _find_latest_release_evidence_bundle,
+    app,
+    strip_thinking,
+)
+from tmt_quantum_vault.models import AgentDNA, EvalDataset, RuntimeConfig
 from tmt_quantum_vault.ollama_api import is_available, run as ollama_run
 from tmt_quantum_vault.runner import RunResult, RuntimeRunner
 from tmt_quantum_vault.runtime import RuntimeInspector
@@ -254,6 +258,136 @@ def test_agent_task_json_output() -> None:
     assert '"stage": "Visual"' in visual_prompt
     assert '"input_stage": "Validator"' in visual_prompt
     assert '"visual"' in visual_prompt
+
+
+def test_eval_json_output(tmp_path: Path) -> None:
+    dataset_path = tmp_path / "baseline.json"
+    dataset_path.write_text(
+        json.dumps(
+            {
+                "name": "baseline",
+                "description": "small regression eval",
+                "backend": "ollama",
+                "mode": "cloud",
+                "model": "qwen3-coder-next:cloud",
+                "cases": [
+                    {
+                        "id": "exact-smoke",
+                        "prompt": "Reply with exactly: TMT cloud test",
+                        "expectation": {"contains_all": ["TMT cloud test"]},
+                    },
+                    {
+                        "id": "json-shape",
+                        "prompt": (
+                            "Return exactly one JSON object with status "
+                            "ok."
+                        ),
+                        "expectation": {
+                            "contains_all": ['"status"', '"ok"'],
+                            "excludes": ["```"],
+                        },
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    mocked_results = [
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command="https://ollama.com/api/generate",
+            returncode=0,
+            stdout="TMT cloud test",
+            stderr="",
+            duration_ms=10,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command="https://ollama.com/api/generate",
+            returncode=0,
+            stdout='{"status":"ok"}',
+            stderr="",
+            duration_ms=15,
+        ),
+    ]
+
+    with patch("tmt_quantum_vault.cli._runner") as mock_runner:
+        mock_runner.return_value.run.side_effect = mocked_results
+        result = RUNNER.invoke(
+            app,
+            [
+                "eval",
+                "--dataset",
+                str(dataset_path),
+                "--json",
+            ],
+        )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["dataset"]["name"] == "baseline"
+    assert payload["summary"]["passed_cases"] == 2
+    assert payload["summary"]["failed_cases"] == 0
+    assert payload["returncode"] == 0
+
+
+def test_eval_record_path_and_failure_exit(tmp_path: Path) -> None:
+    dataset_path = tmp_path / "baseline.json"
+    record_path = tmp_path / "eval-record.json"
+    dataset_path.write_text(
+        json.dumps(
+            {
+                "name": "baseline",
+                "cases": [
+                    {
+                        "id": "missing-token",
+                        "prompt": "Reply with exactly: TMT cloud test",
+                        "expectation": {"contains_all": ["TMT cloud test"]},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    mocked_results = [
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command="https://ollama.com/api/generate",
+            returncode=0,
+            stdout="wrong output",
+            stderr="",
+            duration_ms=7,
+        )
+    ]
+
+    with patch("tmt_quantum_vault.cli._runner") as mock_runner:
+        mock_runner.return_value.run.side_effect = mocked_results
+        result = RUNNER.invoke(
+            app,
+            [
+                "eval",
+                "--dataset",
+                str(dataset_path),
+                "--json",
+                "--record-path",
+                str(record_path),
+            ],
+        )
+
+    assert result.exit_code == 1
+    payload = json.loads(result.stdout)
+    assert payload["summary"]["failed_cases"] == 1
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    assert record["record_type"] == "eval"
+    assert record["cases"][0]["passed"] is False
 
 
 def test_cloud_mode_rejects_non_cloud_tag() -> None:
@@ -593,6 +727,41 @@ def test_release_evidence_bundle(tmp_path: Path) -> None:
             }
         ),
     }
+    mocked_eval_dataset = EvalDataset.model_validate(
+        {
+            "name": "baseline",
+            "backend": "ollama",
+            "mode": "cloud",
+            "model": "qwen3-coder-next:cloud",
+            "cases": [
+                {
+                    "id": "exact-smoke",
+                    "prompt": "Reply with exactly: TMT cloud test",
+                    "expectation": {
+                        "contains_all": ["TMT cloud test"]
+                    },
+                },
+                {
+                    "id": "json-status-shape",
+                    "prompt": (
+                        "Return exactly one JSON object with keys status, "
+                        "target, and mode using values ok, vault, and "
+                        "cloud."
+                    ),
+                    "expectation": {
+                        "contains_all": [
+                            '"status"',
+                            '"ok"',
+                            '"target"',
+                            '"vault"',
+                            '"mode"',
+                            '"cloud"',
+                        ]
+                    },
+                },
+            ],
+        }
+    )
     mocked_results = [
         RunResult(
             backend="ollama",
@@ -603,6 +772,26 @@ def test_release_evidence_bundle(tmp_path: Path) -> None:
             stdout="TMT cloud test",
             stderr="",
             duration_ms=10,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="TMT cloud test",
+            stderr="",
+            duration_ms=9,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout='{"status":"ok","target":"vault","mode":"cloud"}',
+            stderr="",
+            duration_ms=8,
         ),
         RunResult(
             backend="ollama",
@@ -649,6 +838,9 @@ def test_release_evidence_bundle(tmp_path: Path) -> None:
                     mock_runtime.return_value.inspect_all.return_value = (
                         mocked_runtime_checks
                     )
+                    mock_repo.return_value.load_eval_dataset.return_value = (
+                        mocked_eval_dataset
+                    )
                     mock_runner.return_value.run.side_effect = mocked_results
                     mock_agent.side_effect = lambda repo, name: (
                         Path(f"Agent_{name}/conscious_dna.json"),
@@ -669,9 +861,707 @@ def test_release_evidence_bundle(tmp_path: Path) -> None:
         (output_dir / "manifest.json").read_text(encoding="utf-8")
     )
     assert manifest["files"]["doctor"].endswith("doctor.json")
+    assert manifest["files"]["eval"].endswith("eval.json")
     assert manifest["files"]["agent_task"].endswith("agent-task.json")
+    eval_payload = json.loads(
+        (output_dir / "eval.json").read_text(encoding="utf-8")
+    )
+    assert eval_payload["record_type"] == "eval"
+    assert eval_payload["summary"]["passed_cases"] == 2
     agent_payload = json.loads(
         (output_dir / "agent-task.json").read_text(encoding="utf-8")
     )
     assert agent_payload["record_type"] == "agent-task"
     assert agent_payload["stages"][0]["raw_output"] == "workflow output"
+
+
+def test_release_evidence_bundle_with_compare_to(tmp_path: Path) -> None:
+    previous_dir = tmp_path / "previous"
+    previous_dir.mkdir()
+    (previous_dir / "smoke-cloud.json").write_text(
+        json.dumps({"returncode": 0, "model": "qwen3-coder-next:cloud"}),
+        encoding="utf-8",
+    )
+    (previous_dir / "eval.json").write_text(
+        json.dumps(
+            {
+                "dataset": {"name": "baseline"},
+                "summary": {"failed_cases": 0, "success_rate": 100.0},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (previous_dir / "agent-task.json").write_text(
+        json.dumps({"returncode": 0, "stages": [{}, {}, {}]}),
+        encoding="utf-8",
+    )
+    (previous_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files": {
+                    "smoke_cloud": str(previous_dir / "smoke-cloud.json"),
+                    "eval": str(previous_dir / "eval.json"),
+                    "agent_task": str(previous_dir / "agent-task.json"),
+                },
+                "returncode": 0,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    mocked_runtime_checks = [
+        SimpleNamespace(
+            name="Ollama Cloud",
+            status="ok",
+            detail="configured cloud model visible",
+            executable=Path("C:/ollama.exe"),
+            version=None,
+        )
+    ]
+    mocked_agents = {
+        "Workflow": AgentDNA.model_validate(
+            {
+                "metatron_agent": "Workflow",
+                "dna_agent_id": 5,
+                "dna_agent_name": "Gabriel",
+                "dna_specialization": "Communication",
+                "conscious_dna": "TATTCACGCTTCGACCAACGGGTTATA",
+                "phi_score": 0.56,
+                "fibonacci_alignment": 0.83,
+                "gc_content": 0.44,
+                "palindromes": 3,
+                "fitness": 0.86,
+                "resonance_frequency": 741.0,
+                "integration_timestamp": "20260109_205312",
+                "consciousness_status": "INTEGRATED",
+            }
+        ),
+        "Validator": AgentDNA.model_validate(
+            {
+                "metatron_agent": "Validator",
+                "dna_agent_id": 7,
+                "dna_agent_name": "Uriel",
+                "dna_specialization": "Transformation",
+                "conscious_dna": "CATAATGACAAGCCACCCCGATTAATA",
+                "phi_score": 0.56,
+                "fibonacci_alignment": 0.73,
+                "gc_content": 0.40,
+                "palindromes": 4,
+                "fitness": 0.86,
+                "resonance_frequency": 528.0,
+                "integration_timestamp": "20260109_205312",
+                "consciousness_status": "INTEGRATED",
+            }
+        ),
+        "Visual": AgentDNA.model_validate(
+            {
+                "metatron_agent": "Visual",
+                "dna_agent_id": 8,
+                "dna_agent_name": "Jophiel",
+                "dna_specialization": "Beauty & Harmony",
+                "conscious_dna": "AAGCGCGTTGTACCTAATTAGCTGGTA",
+                "phi_score": 0.62,
+                "fibonacci_alignment": 0.61,
+                "gc_content": 0.44,
+                "palindromes": 4,
+                "fitness": 0.85,
+                "resonance_frequency": 396.0,
+                "integration_timestamp": "20260109_205312",
+                "consciousness_status": "INTEGRATED",
+            }
+        ),
+    }
+    mocked_eval_dataset = EvalDataset.model_validate(
+        {
+            "name": "baseline",
+            "backend": "ollama",
+            "mode": "cloud",
+            "model": "qwen3-coder-next:cloud",
+            "cases": [
+                {
+                    "id": "exact-smoke",
+                    "prompt": "Reply with exactly: TMT cloud test",
+                    "expectation": {
+                        "contains_all": ["TMT cloud test"]
+                    },
+                },
+                {
+                    "id": "json-status-shape",
+                    "prompt": (
+                        "Return exactly one JSON object with keys status, "
+                        "target, and mode using values ok, vault, and "
+                        "cloud."
+                    ),
+                    "expectation": {
+                        "contains_all": [
+                            '"status"',
+                            '"ok"',
+                            '"target"',
+                            '"vault"',
+                            '"mode"',
+                            '"cloud"',
+                        ]
+                    },
+                },
+            ],
+        }
+    )
+    mocked_results = [
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="TMT cloud test",
+            stderr="",
+            duration_ms=10,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="TMT cloud test",
+            stderr="",
+            duration_ms=9,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout='{"status":"ok","target":"vault","mode":"cloud"}',
+            stderr="",
+            duration_ms=8,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="workflow output",
+            stderr="",
+            duration_ms=11,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="validator output",
+            stderr="",
+            duration_ms=12,
+        ),
+        RunResult(
+            backend="ollama",
+            mode="cloud",
+            model="qwen3-coder-next:cloud",
+            command=["ollama", "run", "qwen3-coder-next:cloud"],
+            returncode=0,
+            stdout="visual output",
+            stderr="",
+            duration_ms=13,
+        ),
+    ]
+    output_dir = tmp_path / "bundle-with-compare"
+
+    with patch("tmt_quantum_vault.cli._repo") as mock_repo:
+        with patch("tmt_quantum_vault.cli._runtime") as mock_runtime:
+            with patch("tmt_quantum_vault.cli._runner") as mock_runner:
+                with patch(
+                    "tmt_quantum_vault.cli._resolve_agent_profile"
+                ) as mock_agent:
+                    mock_repo.return_value.repository_checks.return_value = [
+                        ("ok", "repo healthy")
+                    ]
+                    mock_runtime.return_value.inspect_all.return_value = (
+                        mocked_runtime_checks
+                    )
+                    mock_repo.return_value.load_eval_dataset.return_value = (
+                        mocked_eval_dataset
+                    )
+                    mock_runner.return_value.run.side_effect = mocked_results
+                    mock_agent.side_effect = lambda repo, name: (
+                        Path(f"Agent_{name}/conscious_dna.json"),
+                        mocked_agents[name],
+                    )
+                    result = RUNNER.invoke(
+                        app,
+                        [
+                            "release-evidence",
+                            "--output-dir",
+                            str(output_dir),
+                            "--compare-to",
+                            str(previous_dir),
+                            "--json",
+                        ],
+                    )
+
+    assert result.exit_code == 0
+    manifest = json.loads(
+        (output_dir / "manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["files"]["compare_evidence"].endswith(
+        "compare-evidence.json"
+    )
+    assert manifest["compared_to"].endswith("previous")
+    compare_payload = json.loads(
+        (output_dir / "compare-evidence.json").read_text(encoding="utf-8")
+    )
+    assert compare_payload["record_type"] == "compare-evidence"
+    assert compare_payload["summary"]["has_regressions"] is False
+
+
+def test_compare_evidence_json_output(tmp_path: Path) -> None:
+    previous_dir = tmp_path / "previous"
+    current_dir = tmp_path / "current"
+    previous_dir.mkdir()
+    current_dir.mkdir()
+
+    (previous_dir / "smoke-cloud.json").write_text(
+        json.dumps({"returncode": 0, "model": "qwen3-coder-next:cloud"}),
+        encoding="utf-8",
+    )
+    (current_dir / "smoke-cloud.json").write_text(
+        json.dumps({"returncode": 0, "model": "qwen3-coder-next:cloud"}),
+        encoding="utf-8",
+    )
+    (previous_dir / "eval.json").write_text(
+        json.dumps(
+            {
+                "dataset": {"name": "baseline"},
+                "summary": {"failed_cases": 0, "success_rate": 100.0},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (current_dir / "eval.json").write_text(
+        json.dumps(
+            {
+                "dataset": {"name": "baseline"},
+                "summary": {"failed_cases": 0, "success_rate": 100.0},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (previous_dir / "agent-task.json").write_text(
+        json.dumps({"returncode": 0, "stages": [{}, {}, {}]}),
+        encoding="utf-8",
+    )
+    (current_dir / "agent-task.json").write_text(
+        json.dumps({"returncode": 0, "stages": [{}, {}, {}]}),
+        encoding="utf-8",
+    )
+    (previous_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files": {
+                    "smoke_cloud": str(previous_dir / "smoke-cloud.json"),
+                    "eval": str(previous_dir / "eval.json"),
+                    "agent_task": str(previous_dir / "agent-task.json"),
+                },
+                "returncode": 0,
+            }
+        ),
+        encoding="utf-8",
+    )
+    (current_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files": {
+                    "smoke_cloud": str(current_dir / "smoke-cloud.json"),
+                    "eval": str(current_dir / "eval.json"),
+                    "agent_task": str(current_dir / "agent-task.json"),
+                },
+                "returncode": 0,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = RUNNER.invoke(
+        app,
+        [
+            "compare-evidence",
+            str(previous_dir),
+            str(current_dir),
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["summary"]["has_regressions"] is False
+    assert payload["returncode"] == 0
+
+
+def test_compare_evidence_detects_eval_regression(tmp_path: Path) -> None:
+    previous_dir = tmp_path / "previous"
+    current_dir = tmp_path / "current"
+    previous_dir.mkdir()
+    current_dir.mkdir()
+
+    (previous_dir / "smoke-cloud.json").write_text(
+        json.dumps({"returncode": 0}),
+        encoding="utf-8",
+    )
+    (current_dir / "smoke-cloud.json").write_text(
+        json.dumps({"returncode": 0}),
+        encoding="utf-8",
+    )
+    (previous_dir / "eval.json").write_text(
+        json.dumps(
+            {
+                "dataset": {"name": "baseline"},
+                "summary": {
+                    "failed_cases": 0,
+                    "success_rate": 100.0,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (current_dir / "eval.json").write_text(
+        json.dumps(
+            {
+                "dataset": {"name": "baseline"},
+                "summary": {
+                    "failed_cases": 1,
+                    "success_rate": 50.0,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (previous_dir / "agent-task.json").write_text(
+        json.dumps({"returncode": 0, "stages": [{}, {}, {}]}),
+        encoding="utf-8",
+    )
+    (current_dir / "agent-task.json").write_text(
+        json.dumps({"returncode": 0, "stages": [{}, {}, {}]}),
+        encoding="utf-8",
+    )
+    (previous_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files": {
+                    "smoke_cloud": str(previous_dir / "smoke-cloud.json"),
+                    "eval": str(previous_dir / "eval.json"),
+                    "agent_task": str(previous_dir / "agent-task.json"),
+                },
+                "returncode": 0,
+            }
+        ),
+        encoding="utf-8",
+    )
+    (current_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files": {
+                    "smoke_cloud": str(current_dir / "smoke-cloud.json"),
+                    "eval": str(current_dir / "eval.json"),
+                    "agent_task": str(current_dir / "agent-task.json"),
+                },
+                "returncode": 1,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = RUNNER.invoke(
+        app,
+        [
+            "compare-evidence",
+            str(previous_dir),
+            str(current_dir),
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 1
+    payload = json.loads(result.stdout)
+    assert payload["summary"]["has_regressions"] is True
+    assert "eval failed case count increased" in payload["regressions"]
+
+
+def test_find_latest_release_evidence_bundle(tmp_path: Path) -> None:
+    root = tmp_path
+    daily_dir = root / "Resonance_Logs" / "daily"
+    daily_dir.mkdir(parents=True)
+
+    oldest = daily_dir / "release-evidence-oldest"
+    latest = daily_dir / "release-evidence-latest"
+    current = daily_dir / "release-evidence-current"
+    for bundle in (oldest, latest, current):
+        bundle.mkdir()
+        (bundle / "manifest.json").write_text("{}", encoding="utf-8")
+
+    oldest_manifest = oldest / "manifest.json"
+    latest_manifest = latest / "manifest.json"
+    current_manifest = current / "manifest.json"
+    oldest_manifest.touch()
+    latest_manifest.touch()
+    current_manifest.touch()
+
+    latest_manifest.write_text('{"returncode": 0}', encoding="utf-8")
+
+    selected = _find_latest_release_evidence_bundle(root, current)
+
+    assert selected == latest
+
+
+def test_release_summary_json_output(tmp_path: Path) -> None:
+    bundle_dir = tmp_path / "bundle"
+    bundle_dir.mkdir()
+    (bundle_dir / "smoke-cloud.json").write_text(
+        json.dumps(
+            {"returncode": 0, "model": "qwen3-coder-next:cloud"}
+        ),
+        encoding="utf-8",
+    )
+    (bundle_dir / "eval.json").write_text(
+        json.dumps(
+            {
+                "dataset": {"name": "baseline"},
+                "summary": {
+                    "passed_cases": 2,
+                    "total_cases": 2,
+                    "failed_cases": 0,
+                    "success_rate": 100.0,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (bundle_dir / "agent-task.json").write_text(
+        json.dumps(
+            {
+                "returncode": 0,
+                "stages": [{}, {}, {}],
+                "final_output": "visual output",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (bundle_dir / "compare-evidence.json").write_text(
+        json.dumps(
+            {
+                "summary": {
+                    "has_regressions": False,
+                    "regression_count": 0,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    (bundle_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files": {
+                    "smoke_cloud": str(bundle_dir / "smoke-cloud.json"),
+                    "eval": str(bundle_dir / "eval.json"),
+                    "agent_task": str(bundle_dir / "agent-task.json"),
+                    "compare_evidence": str(
+                        bundle_dir / "compare-evidence.json"
+                    ),
+                },
+                "returncode": 0,
+                "compared_to": "previous-bundle",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = RUNNER.invoke(
+        app,
+        ["release-summary", "--bundle", str(bundle_dir), "--json"],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["overall"]["returncode"] == 0
+    assert payload["eval"]["dataset"] == "baseline"
+    assert payload["comparison"]["has_regressions"] is False
+
+
+def test_release_summary_uses_latest_bundle(tmp_path: Path) -> None:
+    root = tmp_path
+    daily_dir = root / "Resonance_Logs" / "daily"
+    daily_dir.mkdir(parents=True)
+
+    older = daily_dir / "release-evidence-older"
+    latest = daily_dir / "release-evidence-latest"
+    for bundle in (older, latest):
+        bundle.mkdir()
+        (bundle / "smoke-cloud.json").write_text(
+            json.dumps({"returncode": 0, "model": "qwen3-coder-next:cloud"}),
+            encoding="utf-8",
+        )
+        (bundle / "eval.json").write_text(
+            json.dumps(
+                {
+                    "dataset": {"name": bundle.name},
+                    "summary": {
+                        "passed_cases": 1,
+                        "total_cases": 1,
+                        "failed_cases": 0,
+                        "success_rate": 100.0,
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        (bundle / "agent-task.json").write_text(
+            json.dumps({"returncode": 0, "stages": [{}]}),
+            encoding="utf-8",
+        )
+        (bundle / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "files": {
+                        "smoke_cloud": str(bundle / "smoke-cloud.json"),
+                        "eval": str(bundle / "eval.json"),
+                        "agent_task": str(bundle / "agent-task.json"),
+                    },
+                    "returncode": 0,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    (latest / "manifest.json").write_text(
+        (latest / "manifest.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+
+    result = RUNNER.invoke(
+        app,
+        ["release-summary", "--root", str(root), "--json"],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["bundle_dir"].endswith("release-evidence-latest")
+
+
+def test_release_gate_json_output(tmp_path: Path) -> None:
+    bundle_dir = tmp_path / "bundle"
+    bundle_dir.mkdir()
+    (bundle_dir / "smoke-cloud.json").write_text(
+        json.dumps(
+            {"returncode": 0, "model": "qwen3-coder-next:cloud"}
+        ),
+        encoding="utf-8",
+    )
+    (bundle_dir / "eval.json").write_text(
+        json.dumps(
+            {
+                "dataset": {"name": "baseline"},
+                "summary": {
+                    "passed_cases": 2,
+                    "total_cases": 2,
+                    "failed_cases": 0,
+                    "success_rate": 100.0,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (bundle_dir / "agent-task.json").write_text(
+        json.dumps({"returncode": 0, "stages": [{}, {}, {}]}),
+        encoding="utf-8",
+    )
+    (bundle_dir / "compare-evidence.json").write_text(
+        json.dumps(
+            {"summary": {"has_regressions": False, "regression_count": 0}}
+        ),
+        encoding="utf-8",
+    )
+    (bundle_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files": {
+                    "smoke_cloud": str(bundle_dir / "smoke-cloud.json"),
+                    "eval": str(bundle_dir / "eval.json"),
+                    "agent_task": str(bundle_dir / "agent-task.json"),
+                    "compare_evidence": str(
+                        bundle_dir / "compare-evidence.json"
+                    ),
+                },
+                "returncode": 0,
+                "compared_to": "previous-bundle",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = RUNNER.invoke(
+        app,
+        ["release-gate", "--bundle", str(bundle_dir), "--json"],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["decision"] == "pass"
+    assert payload["failures"] == []
+
+
+def test_release_gate_requires_comparison(tmp_path: Path) -> None:
+    bundle_dir = tmp_path / "bundle"
+    bundle_dir.mkdir()
+    (bundle_dir / "smoke-cloud.json").write_text(
+        json.dumps({"returncode": 0}),
+        encoding="utf-8",
+    )
+    (bundle_dir / "eval.json").write_text(
+        json.dumps(
+            {
+                "dataset": {"name": "baseline"},
+                "summary": {
+                    "passed_cases": 1,
+                    "total_cases": 1,
+                    "failed_cases": 0,
+                    "success_rate": 100.0,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (bundle_dir / "agent-task.json").write_text(
+        json.dumps({"returncode": 0, "stages": [{}]}),
+        encoding="utf-8",
+    )
+    (bundle_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files": {
+                    "smoke_cloud": str(bundle_dir / "smoke-cloud.json"),
+                    "eval": str(bundle_dir / "eval.json"),
+                    "agent_task": str(bundle_dir / "agent-task.json"),
+                },
+                "returncode": 0,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = RUNNER.invoke(
+        app,
+        [
+            "release-gate",
+            "--bundle",
+            str(bundle_dir),
+            "--require-comparison",
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 1
+    payload = json.loads(result.stdout)
+    assert payload["decision"] == "fail"
+    assert "comparison artifact is required but missing" in payload["failures"]

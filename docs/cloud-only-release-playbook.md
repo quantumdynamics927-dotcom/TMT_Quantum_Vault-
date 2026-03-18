@@ -35,7 +35,7 @@ This playbook covers release and deployment steps for running TMT Quantum Vault 
 3. Ensure the `pytest` and `diagnostics` GitHub Actions jobs pass.
 4. Set the `OLLAMA_API_KEY` repository secret and use the manual `CI` workflow as the cloud release gate.
 5. Run the manual `CI` workflow with `run_smoke=true` and set `cloud_model` to the tag you want to validate.
-6. Require both `smoke-cloud` and `agent-task-cloud` to succeed before calling the cloud release path healthy.
+6. Require `smoke-cloud`, `agent-task-cloud`, and `release-gate-cloud` to succeed before calling the cloud release path healthy.
 
 Hosted GitHub Actions validation has been confirmed for the API-key path with run `23229856619` using `qwen3-coder-next:cloud`.
 
@@ -45,6 +45,7 @@ Hosted GitHub Actions validation has been confirmed for the API-key path with ru
 - `doctor --json` combines repository health with runtime statuses.
 - `smoke-cloud` is the authoritative end-to-end connectivity check for cloud inference.
 - `release-evidence` collects the main diagnostic and runtime records into a single timestamped artifact bundle.
+- The hosted workflow now generates a baseline bundle plus a compared candidate bundle, then enforces `release-gate --require-comparison` on the candidate bundle.
 - `smoke-cloud` and `agent-task --mode cloud` use `OLLAMA_API_KEY` for direct ollama.com API access when the variable is present.
 
 ## Exportable Records

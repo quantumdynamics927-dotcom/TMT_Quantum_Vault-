@@ -167,10 +167,25 @@ The repository now includes a small Python entrypoint for validating and summari
 - `python -m tmt_quantum_vault run "..." --json` emits structured JSON for automation pipelines.
 - `python -m tmt_quantum_vault agent-task "..." --mode cloud --json --record-path Resonance_Logs/daily/agent-task.json` runs the Workflow -> Validator -> Visual chain against a cloud model with stage-specific JSON contracts and exports the result.
 - `python -m tmt_quantum_vault smoke-cloud --json --raw-final-only --record-path Resonance_Logs/daily/smoke-cloud.json` runs a real cloud-only health check against the configured cloud model and exports the result.
-- `python -m tmt_quantum_vault release-evidence --json` creates a timestamped artifact directory containing `doctor`, `runtime`, `smoke-cloud`, and `agent-task` records.
+- `python -m tmt_quantum_vault eval --dataset evals/baseline.json --mode cloud --json --record-path Resonance_Logs/daily/eval.json` runs a small prompt evaluation set and scores pass/fail expectations per case.
+- `python -m tmt_quantum_vault release-evidence --json` creates a timestamped artifact directory containing `doctor`, `runtime`, `smoke-cloud`, `eval`, and `agent-task` records.
+- `python -m tmt_quantum_vault release-evidence --compare-to previous_bundle --json` also writes a comparison artifact against a prior bundle and fails if regressions are detected.
+- `python -m tmt_quantum_vault release-evidence --compare-to-latest --json` automatically compares against the most recent earlier evidence bundle in `Resonance_Logs/daily`.
+- `python -m tmt_quantum_vault compare-evidence previous_bundle current_bundle --json` compares two evidence bundles and exits nonzero when a regression is detected.
+- `python -m tmt_quantum_vault release-summary --json` reads the newest evidence bundle and prints a compact release status document.
+- `python -m tmt_quantum_vault release-gate --json` evaluates the newest evidence bundle against a strict pass/fail policy for CI or release checks.
 - `python -m tmt_quantum_vault smoke-local --raw-final-only` runs a local smoke test through `llama.cpp` when a GGUF is present and falls back to local Ollama otherwise.
 - `python -m tmt_quantum_vault smoke-local --force-ollama --raw-final-only` bypasses `llama.cpp` and uses local Ollama directly.
 - `python -m tmt_quantum_vault smoke-local --json` emits structured JSON for automation-friendly local health checks.
+
+## Evaluations
+
+The repository now includes a minimal evaluation dataset at `evals/baseline.json`.
+
+- each case defines a prompt plus simple expectation rules: `contains_all`, `contains_any`, and `excludes`
+- `eval` reuses the same runtime path as `run`, `smoke-cloud`, and `agent-task`
+- the command returns exit code `1` when any case fails, which makes it usable as a regression gate
+- `--record-path` writes a structured eval record that can later be folded into historical release evidence
 
 ## Cloud Diagnostics
 
@@ -181,6 +196,12 @@ Use `python -m tmt_quantum_vault runtime --json` or `python -m tmt_quantum_vault
 - `smoke-cloud` performs a real end-to-end cloud invocation and is the fastest way to confirm that cloud execution is working for the current model.
 - `--record-path` on `runtime`, `doctor`, `smoke-cloud`, and `agent-task` writes structured JSON records for release evidence or incident review.
 - `release-evidence` bundles those records into one timestamped directory and writes a `manifest.json` file for release reviews.
+- `release-evidence --eval-dataset evals/baseline.json` keeps the release bundle tied to an explicit evaluation dataset.
+- `release-evidence --compare-to previous_bundle` adds `compare-evidence.json` to the bundle and folds regression detection into the bundle return code.
+- `release-evidence --compare-to-latest` uses the newest prior bundle automatically, which is the fastest operator path for iterative release checks.
+- `compare-evidence` lets you diff a fresh bundle against a previous release candidate and quickly spot smoke, eval, or agent-task regressions.
+- `release-summary` is the fastest read-only operator view for the latest bundle and can also target a specific bundle with `--bundle`.
+- `release-gate` turns the latest bundle into a single release decision and can require comparison evidence with `--require-comparison`.
 - `agent-task` exported records now include per-stage prompts, system prompts, raw outputs, normalized outputs, invoked commands, and stderr for deeper troubleshooting.
 - When `OLLAMA_API_KEY` is set, cloud runs use `https://ollama.com/api` directly instead of requiring `ollama signin`.
 
@@ -191,11 +212,12 @@ GitHub Actions now runs:
 - `pytest` on every push and pull request
 - a diagnostics job that compiles the Python sources, validates the JSON dataset, and renders a repository summary
 - a manual smoke command matrix, guarded behind `workflow_dispatch`, for cloud-only verification using the `OLLAMA_API_KEY` repository secret
+- a hosted `release-gate-cloud` job that generates baseline and candidate evidence bundles, compares them, and enforces `release-gate --require-comparison`
 - the manual smoke matrix accepts a `cloud_model` input so you can validate a specific cloud tag without editing the workflow
 
 Set `OLLAMA_API_KEY` in GitHub repository Actions secrets before running the manual smoke matrix.
 
-The hosted cloud smoke path is validated and should be treated as the release gate for Ollama Cloud access. A successful reference run used `qwen3-coder-next:cloud` through the `OLLAMA_API_KEY` path in GitHub Actions run `23229856619`.
+The hosted cloud smoke path is validated and should be treated as the release gate for Ollama Cloud access. The hosted workflow now culminates in `release-gate --require-comparison` after generating and comparing release evidence bundles. A successful reference run used `qwen3-coder-next:cloud` through the `OLLAMA_API_KEY` path in GitHub Actions run `23229856619`.
 
 ## Local Tool Artifacts
 

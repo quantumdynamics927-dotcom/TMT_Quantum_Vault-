@@ -36,6 +36,28 @@ class RuntimeConfig(VaultModel):
     )
 
 
+class EvalExpectation(VaultModel):
+    contains_all: list[str] = Field(default_factory=list)
+    contains_any: list[str] = Field(default_factory=list)
+    excludes: list[str] = Field(default_factory=list)
+
+
+class EvalCase(VaultModel):
+    id: str
+    prompt: str
+    system: str | None = None
+    expectation: EvalExpectation = Field(default_factory=EvalExpectation)
+
+
+class EvalDataset(VaultModel):
+    name: str
+    description: str | None = None
+    backend: Literal["ollama", "llama.cpp"] | None = None
+    mode: Literal["local", "cloud"] | None = None
+    model: str | None = None
+    cases: list[EvalCase] = Field(min_length=1)
+
+
 class VaultConfig(VaultModel):
     vault_name: str
     creation_timestamp: float

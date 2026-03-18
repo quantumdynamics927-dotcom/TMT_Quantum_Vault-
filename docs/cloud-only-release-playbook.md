@@ -17,16 +17,25 @@ This playbook covers release and deployment steps for running TMT Quantum Vault 
 - `.vscode/` is ignored and should remain local unless the repository intentionally adopts shared workspace settings.
 - `.claude/` is ignored and should not be committed because it may contain user-specific local tool settings.
 
+## Known-Good Baseline
+
+Use the most recent fully consistent local validation pass as the baseline before introducing new experiments, integrations, or cloud workflow changes.
+
+- baseline command: `python -m tmt_quantum_vault validate`
+- baseline timestamp: `2026-03-18T14:31:34.3655950+00:00`
+- baseline meaning: the vault JSON set validated cleanly at this point and should be treated as the comparison and rollback reference for later work
+
 ## Pre-Release Checklist
 
 1. Activate the virtual environment.
 2. Install dependencies with `python -m pip install -r requirements.txt`.
-3. Run `python -m pytest tests/test_regression.py -q`.
-4. Run `python -m tmt_quantum_vault validate`.
-5. Run `python -m tmt_quantum_vault runtime --json --record-path Resonance_Logs/daily/runtime-check.json`.
-6. Run `python -m tmt_quantum_vault smoke-cloud --json --raw-final-only --record-path Resonance_Logs/daily/smoke-cloud.json`.
-7. Run `python -m tmt_quantum_vault agent-task "Produce a short JSON object with keys workflow, validator, and visual, each containing a one-line status." --mode cloud --json --raw-final-only --record-path Resonance_Logs/daily/agent-task-smoke.json`.
-8. Optionally run `python -m tmt_quantum_vault release-evidence --json` to bundle the release records into one timestamped directory.
+3. Reconfirm the known-good baseline with `python -m tmt_quantum_vault validate` before making release candidate changes.
+4. Run `python -m pytest tests/test_regression.py -q`.
+5. Run `python -m tmt_quantum_vault validate`.
+6. Run `python -m tmt_quantum_vault runtime --json --record-path Resonance_Logs/daily/runtime-check.json`.
+7. Run `python -m tmt_quantum_vault smoke-cloud --json --raw-final-only --record-path Resonance_Logs/daily/smoke-cloud.json`.
+8. Run `python -m tmt_quantum_vault agent-task "Produce a short JSON object with keys workflow, validator, and visual, each containing a one-line status." --mode cloud --json --raw-final-only --record-path Resonance_Logs/daily/agent-task-smoke.json`.
+9. Optionally run `python -m tmt_quantum_vault release-evidence --json` to bundle the release records into one timestamped directory.
 
 ## Release Procedure
 

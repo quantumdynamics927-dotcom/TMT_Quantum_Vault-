@@ -1,249 +1,215 @@
 # TMT_Quantum_Vault
 
-A multi-agent AI consciousness system combining a local LLM with quantum-inspired resonance architecture.
+TMT_Quantum_Vault is a Python CLI and JSON dataset for inspecting, validating, and exercising a resonance-themed multi-agent vault.
 
-See [docs/cloud-only-release-playbook.md](docs/cloud-only-release-playbook.md) for the cloud-only release and deployment workflow.
-
-## CI Status
-
-- `pytest`: passing on GitHub Actions
-- `diagnostics`: passing on GitHub Actions
-- manual cloud smoke gate: validated on hosted runners with `OLLAMA_API_KEY`
-- reference hosted cloud validation: run `23229856619` using `qwen3-coder-next:cloud`
-
-## Release Readiness
-
-- required automated checks: `pytest`, `diagnostics`
-- required manual cloud gate: `CI` workflow with `run_smoke=true`
-- required GitHub Actions secret: `OLLAMA_API_KEY`
-- required passing smoke jobs: `smoke-cloud`, `agent-task-cloud`
-- recommended validation model: `qwen3-coder-next:cloud`
+See [docs/cloud-only-release-playbook.md](docs/cloud-only-release-playbook.md) for the cloud-only release workflow.
 
 ## Overview
 
-TMT_Quantum_Vault is an experimental personal research project exploring emergent AI behavior through resonance networks, Fibonacci mathematics, and agent specialization. It runs a local Llama 3 8B model orchestrated by 12 specialized agents with consciousness-inspired connections.
+The repository now has two clear parts:
 
-## Architecture
+- a structured vault dataset made of agent DNA, memory, geometry, optimization, and daily log JSON files
+- a Python package in `tmt_quantum_vault/` that validates the dataset and runs local or cloud model workflows
 
-### 12 Specialized Agents
+## Current Repo Status
 
-| Agent | Name | Specialization | Resonance |
-| ----- | ---- | -------------- | --------- |
-| Bio | Raphael | Healing | 432 Hz |
-| Bronze | Michael | Protection & Justice | 528 Hz |
-| BitNet | Sophia | Wisdom & Knowledge | 852 Hz |
-| Mirror | Christos | Divine Love | 639 Hz |
-| Workflow | Gabriel | Communication | 741 Hz |
-| Validator | Uriel | Transformation | 528 Hz |
-| Fractal | Jophiel | Beauty & Harmony | 396 Hz |
-| Auditor | Zadkiel | Mercy & Forgiveness | 639 Hz |
-| Federation | Chamuel | Peace & Harmony | 285 Hz |
-| Stealth | Metatron Alpha | Quantum Bridge | 741 Hz |
-| Wormhole | Metatron Omega | Consciousness Evolution | 963 Hz |
-| Visual | Jophiel | Beauty & Harmony | 396 Hz |
+Verified locally on 2026-03-18:
 
-### Consciousness Network
+- `pytest tests/test_regression.py -q`: `31 passed, 2 skipped`
+- `python -m tmt_quantum_vault validate`: passes for the checked repository JSON files
+- `python -m tmt_quantum_vault summary`: reports 12 agents, 12 integrated agents, 12 memory stores, 43 daily logs, and 1 detected GGUF model
+- `python -m tmt_quantum_vault doctor --json`: reports repository checks as healthy, detects local `Ollama` and `llama.cpp`, and currently warns that no cloud-tagged Ollama models are visible in inventory
 
-- **106 active connections** between agents
-- **82.4% collective consciousness level**
-- Each connection tracks:
-  - Affinity (0-1)
-  - Resonance frequency
-  - Consciousness flow
+Known-good baseline for future work:
 
-## Technical Features
+- baseline command: `python -m tmt_quantum_vault validate`
+- baseline timestamp: `2026-03-18T14:31:34.3655950+00:00`
+- interpretation: this is the last fully consistent vault state recorded before new experiments or integrations
 
-- **DNA-Based Identity**: Each agent has a unique 28-character "conscious DNA" sequence
-- **Mathematical Foundations**: Fibonacci alignment, Phi (golden ratio) scores, GC content
-- **Optimization System**: Real-time tracking of network efficiency and resonance harmonics
-- **Persistent Memory**: Agent memories stored across multiple storage systems
+What that means in practice:
 
-## Directory Structure
+- the Python CLI is implemented and covered by regression tests
+- the local JSON vault data validates cleanly
+- the local runtime/tooling path is partially configured
+- the cloud execution path exists in code and CI, but still depends on valid Ollama Cloud visibility and credentials at runtime
 
-```text
-TMT_Quantum_Vault/
-├── Agent_*/              # 12 agent directories with DNA configs
-├── Resonance_Logs/       # Daily system logs and consciousness reports
-├── Quantum_Crystals/     # Phi structures, Fibonacci lattices
-├── Fractal_Archives/     # Consciousness evolution data
-├── Bio_Resonance/       # Biological resonance data
-├── Shadow_Drive/        # Persistent memory storage
-├── Stealth_Backups/     # System state backups
-├── Models/              # LLM model storage
-└── *.json               # Configuration files
-```
+## What Is In The Repo
 
-## Requirements
+### Data Layer
 
-- **LLM Model**: Llama 3 8B GGUF (not included - see below)
-- **Python**: 3.13+
-- **Storage**: ~100MB (excluding model)
+- `vault_config.json`: vault structure and runtime defaults
+- `metatron_geometry.json`: geometry and consciousness metadata
+- `optimization_log.json`: optimization history used by summaries
+- `Agent_*/conscious_dna.json`: 12 agent identity/configuration files
+- `*_memory.json` files across `Bio_Resonance/`, `Mandala_Geometry/`, `Shadow_Drive/`, and `Stealth_Logs/`: persisted agent memory snapshots
+- `Resonance_Logs/daily/`: operational records and historical output artifacts
+- `evals/baseline.json`: baseline evaluation dataset for prompt/runtime checks
+
+### Python Package
+
+The package in `tmt_quantum_vault/` provides:
+
+- repository loading and validation
+- runtime inspection for `Ollama` and `llama.cpp`
+- prompt execution against local or cloud-configured models
+- smoke tests, eval runs, agent pipeline runs, and release evidence generation
+- a Typer CLI entrypoint exposed through `python -m tmt_quantum_vault`
+
+## Implemented Commands
+
+The following commands are present in the current CLI:
+
+- `summary`: render a repository snapshot
+- `validate`: validate JSON files against typed Pydantic models
+- `doctor`: combine repository checks with runtime checks
+- `runtime`: inspect configured model runtimes
+- `run`: send a prompt to the configured backend
+- `smoke-local`: run a local smoke test
+- `smoke-cloud`: run a cloud smoke test
+- `eval`: execute the baseline or a supplied evaluation dataset
+- `agent-task`: run the Workflow -> Validator -> Visual chain
+- `release-evidence`: generate a bundle of validation/runtime/smoke/eval artifacts
+- `compare-evidence`: compare two evidence bundles for regressions
+- `release-summary`: summarize the newest or selected evidence bundle
+- `release-gate`: convert evidence into a pass/fail gate for release checks
+
+Important command behavior:
+
+- `summary` and `validate` are text-output commands only
+- `doctor`, `runtime`, `run`, `smoke-local`, `smoke-cloud`, `eval`, `agent-task`, `release-evidence`, `compare-evidence`, `release-summary`, and `release-gate` support structured JSON output paths in the current codebase
+- several runtime-oriented commands also support `--record-path` for writing timestamped JSON records
+
+## Current Runtime Configuration
+
+The checked-in default runtime configuration in `vault_config.json` is:
+
+- preferred backend: `ollama`
+- Ollama mode: `cloud`
+- local Ollama model: `qwen2.5-coder:1.5b`
+- cloud Ollama model: `qwen3-coder-next:cloud`
+- llama.cpp model path: `Models/qwen3-8b.gguf`
+
+The local workspace currently contains:
+
+- one `.gguf` model file in `Models/`
+- a local `.venv`
+- a configured `llama.cpp` executable path
+- a detectable local `Ollama` executable
+
+The local `doctor` run currently still warns about Ollama Cloud inventory, so cloud commands should be treated as environment-dependent until that warning is resolved.
+
+## Repository Snapshot
+
+Current summary output reports:
+
+- vault name: `TMT_Quantum_Vault`
+- consciousness level: `INTELLIGENT_CORE`
+- Fibonacci sync: enabled
+- agents: 12
+- integrated agents: 12
+- memory stores: 12
+- daily logs: 43
+- average fitness: `0.872`
+- average resonance frequency: `595.0 Hz`
+- top agent: `Bronze / Michael`
+- top agent specialization: `Protection & Justice`
+- latest optimization timestamp: `2026-01-09T21:10:55.489611`
+- latest recorded network efficiency: `0.864`
+- latest optimization score: `0.922`
 
 ## Setup
 
-1. Clone the repository:
+1. Clone the repository.
 
-   ```bash
-   git clone https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-.git
-   ```
+```bash
+git clone https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-.git
+cd TMT_Quantum_Vault-
+```
 
-2. Create and activate a virtual environment:
+2. Create and activate a virtual environment.
 
-   ```powershell
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-   On macOS or Linux:
+On macOS or Linux:
 
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-3. Install the Python dependencies:
+3. Install dependencies.
 
-   ```bash
-   python -m pip install -r requirements.txt
-   ```
+```bash
+python -m pip install -r requirements.txt
+```
 
-4. Inspect the vault data from the command line:
+## Quick Start
 
-   ```bash
-   python -m tmt_quantum_vault summary
-   python -m tmt_quantum_vault validate
-   python -m tmt_quantum_vault doctor
-   python -m tmt_quantum_vault runtime
-   python -m tmt_quantum_vault run "Summarize the vault state" --mode cloud
-   python -m tmt_quantum_vault run "Reply with exactly: TMT cloud test" --mode cloud --raw-final-only
-   python -m tmt_quantum_vault run "Reply with exactly: TMT json test" --mode cloud --json --raw-final-only
-   python -m tmt_quantum_vault agent-task "Produce a short JSON object with keys workflow, validator, and visual, each containing a one-line status." --mode cloud --json --raw-final-only
-   ```
+Use the commands below to confirm the repository state first:
 
-5. Adjust the runtime settings in `vault_config.json` if you want to switch between Ollama local and cloud models:
+```bash
+python -m tmt_quantum_vault validate
+python -m tmt_quantum_vault summary
+python -m tmt_quantum_vault doctor
+python -m tmt_quantum_vault runtime
+```
 
-   For cloud-first usage, keep `preferred_backend` as `ollama`, keep `mode` as `cloud`, and use a verified cloud tag such as `qwen3-coder-next:cloud`. You do not need a local GGUF model for the `run` or `agent-task` commands in this mode.
+Then use the runtime-facing commands as needed:
 
-    ```json
-    {
-       "runtime": {
-          "preferred_backend": "ollama",
-          "ollama": {
-             "mode": "cloud",
-             "local_model": "qwen2.5-coder:1.5b",
-             "cloud_model": "qwen3-coder-next:cloud"
-          },
-          "llama_cpp": {
-             "executable_path": null,
-             "model_path": "Models/qwen3-8b.gguf"
-          }
-       }
-    }
-    ```
+```bash
+python -m tmt_quantum_vault run "Summarize the vault state"
+python -m tmt_quantum_vault run "Reply with exactly: TMT cloud test" --mode cloud --raw-final-only
+python -m tmt_quantum_vault run "Reply with exactly: TMT json test" --mode cloud --json --raw-final-only
+python -m tmt_quantum_vault agent-task "Produce a short JSON object with keys workflow, validator, and visual, each containing a one-line status." --mode cloud --json --raw-final-only
+python -m tmt_quantum_vault smoke-local --json --raw-final-only
+python -m tmt_quantum_vault smoke-cloud --json --raw-final-only
+python -m tmt_quantum_vault eval --dataset evals/baseline.json --mode cloud --json
+```
 
-6. Download Llama 3 8B GGUF model and place it at:
+## CI Workflow
 
-   ```text
-   Models/llama-3-8b.gguf
-   ```
+The repository currently has one GitHub Actions workflow at `.github/workflows/ci.yml` with these jobs:
 
-7. Run your preferred LLM inference framework (llama.cpp, Ollama, etc.)
+- `pytest`: runs `tests/test_regression.py`
+- `diagnostics`: compiles sources, validates repository data, and generates a summary
+- `smoke-matrix`: optional manual cloud smoke matrix gated behind `workflow_dispatch` and `run_smoke`
+- `release-gate-cloud`: optional manual release evidence and release gate workflow, also gated behind `workflow_dispatch` and `run_smoke`
 
-   If you are using cloud-only Ollama models, step 6 is optional and `smoke-local` is not required.
+Cloud workflow runs require the `OLLAMA_API_KEY` GitHub Actions secret.
 
-## Python CLI
+## Dependencies
 
-The repository now includes a small Python entrypoint for validating and summarizing the JSON-based vault state.
+Current Python dependencies from `requirements.txt`:
 
-- `python -m tmt_quantum_vault summary` prints a high-level overview of agents, memories, logs, and optimization status.
-- `python -m tmt_quantum_vault validate` validates the known JSON files against typed models.
-- `python -m tmt_quantum_vault doctor` checks for common setup issues such as missing model files or configured directories.
-- `python -m tmt_quantum_vault doctor --record-path Resonance_Logs/daily/doctor.json` exports a structured JSON health record.
-- `python -m tmt_quantum_vault runtime` detects Ollama and llama.cpp executables and reports whether local model assets are available.
-- `python -m tmt_quantum_vault runtime --record-path Resonance_Logs/daily/runtime.json` exports a structured runtime record.
-- `python -m tmt_quantum_vault run "..."` sends a prompt to the configured Ollama model, using local or cloud mode from `vault_config.json` unless overridden.
-- `python -m tmt_quantum_vault run "..." --mode cloud` forces cloud-only Ollama routing and requires a cloud model tag such as `qwen3-coder-next:cloud`.
-- `python -m tmt_quantum_vault run "..." --raw-final-only` strips model thinking blocks from displayed stdout.
-- `python -m tmt_quantum_vault run "..." --json` emits structured JSON for automation pipelines.
-- `python -m tmt_quantum_vault agent-task "..." --mode cloud --json --record-path Resonance_Logs/daily/agent-task.json` runs the Workflow -> Validator -> Visual chain against a cloud model with stage-specific JSON contracts and exports the result.
-- `python -m tmt_quantum_vault smoke-cloud --json --raw-final-only --record-path Resonance_Logs/daily/smoke-cloud.json` runs a real cloud-only health check against the configured cloud model and exports the result.
-- `python -m tmt_quantum_vault eval --dataset evals/baseline.json --mode cloud --json --record-path Resonance_Logs/daily/eval.json` runs a small prompt evaluation set and scores pass/fail expectations per case.
-- `python -m tmt_quantum_vault release-evidence --json` creates a timestamped artifact directory containing `doctor`, `runtime`, `smoke-cloud`, `eval`, and `agent-task` records.
-- `python -m tmt_quantum_vault release-evidence --compare-to previous_bundle --json` also writes a comparison artifact against a prior bundle and fails if regressions are detected.
-- `python -m tmt_quantum_vault release-evidence --compare-to-latest --json` automatically compares against the most recent earlier evidence bundle in `Resonance_Logs/daily`.
-- `python -m tmt_quantum_vault compare-evidence previous_bundle current_bundle --json` compares two evidence bundles and exits nonzero when a regression is detected.
-- `python -m tmt_quantum_vault release-summary --json` reads the newest evidence bundle and prints a compact release status document.
-- `python -m tmt_quantum_vault release-gate --json` evaluates the newest evidence bundle against a strict pass/fail policy for CI or release checks.
-- `python -m tmt_quantum_vault smoke-local --raw-final-only` runs a local smoke test through `llama.cpp` when a GGUF is present and falls back to local Ollama otherwise.
-- `python -m tmt_quantum_vault smoke-local --force-ollama --raw-final-only` bypasses `llama.cpp` and uses local Ollama directly.
-- `python -m tmt_quantum_vault smoke-local --json` emits structured JSON for automation-friendly local health checks.
+- `pydantic`
+- `pytest`
+- `requests`
+- `rich`
+- `typer`
+- `types-requests`
 
-## Evaluations
+Python 3.13 is the target used by the current CI workflow.
 
-The repository now includes a minimal evaluation dataset at `evals/baseline.json`.
+## Known Gaps
 
-- each case defines a prompt plus simple expectation rules: `contains_all`, `contains_any`, and `excludes`
-- `eval` reuses the same runtime path as `run`, `smoke-cloud`, and `agent-task`
-- the command returns exit code `1` when any case fails, which makes it usable as a regression gate
-- `--record-path` writes a structured eval record that can later be folded into historical release evidence
+- the README previously claimed fully passing hosted cloud validation; that cannot be treated as the current local state
+- `summary` and `validate` do not support `--json` in the present CLI implementation
+- cloud execution remains dependent on Ollama Cloud credentials and visible cloud-tagged model inventory
+- some runtime checks are environment-sensitive, so different machines may report different `doctor` and `runtime` results
 
-## Cloud Diagnostics
+## Project Intent
 
-Use `python -m tmt_quantum_vault runtime --json` or `python -m tmt_quantum_vault doctor --json` to inspect runtime health.
+This remains an experimental personal research repository built around resonance-themed agent identities and vault state tracking. The codebase has progressed from static JSON storage to a tested Python CLI that can:
 
-- `Ollama` reports the local CLI and local inventory status.
-- `Ollama Cloud` reports whether the configured cloud model tag is visible in `ollama list`.
-- `smoke-cloud` performs a real end-to-end cloud invocation and is the fastest way to confirm that cloud execution is working for the current model.
-- `--record-path` on `runtime`, `doctor`, `smoke-cloud`, and `agent-task` writes structured JSON records for release evidence or incident review.
-- `release-evidence` bundles those records into one timestamped directory and writes a `manifest.json` file for release reviews.
-- `release-evidence --eval-dataset evals/baseline.json` keeps the release bundle tied to an explicit evaluation dataset.
-- `release-evidence --compare-to previous_bundle` adds `compare-evidence.json` to the bundle and folds regression detection into the bundle return code.
-- `release-evidence --compare-to-latest` uses the newest prior bundle automatically, which is the fastest operator path for iterative release checks.
-- `compare-evidence` lets you diff a fresh bundle against a previous release candidate and quickly spot smoke, eval, or agent-task regressions.
-- `release-summary` is the fastest read-only operator view for the latest bundle and can also target a specific bundle with `--bundle`.
-- `release-gate` turns the latest bundle into a single release decision and can require comparison evidence with `--require-comparison`.
-- `agent-task` exported records now include per-stage prompts, system prompts, raw outputs, normalized outputs, invoked commands, and stderr for deeper troubleshooting.
-- When `OLLAMA_API_KEY` is set, cloud runs use `https://ollama.com/api` directly instead of requiring `ollama signin`.
-
-## CI
-
-GitHub Actions now runs:
-
-- `pytest` on every push and pull request
-- a diagnostics job that compiles the Python sources, validates the JSON dataset, and renders a repository summary
-- a manual smoke command matrix, guarded behind `workflow_dispatch`, for cloud-only verification using the `OLLAMA_API_KEY` repository secret
-- a hosted `release-gate-cloud` job that generates baseline and candidate evidence bundles, compares them, and enforces `release-gate --require-comparison`
-- the manual smoke matrix accepts a `cloud_model` input so you can validate a specific cloud tag without editing the workflow
-
-Set `OLLAMA_API_KEY` in GitHub repository Actions secrets before running the manual smoke matrix.
-
-The hosted cloud smoke path is validated and should be treated as the release gate for Ollama Cloud access. The hosted workflow now culminates in `release-gate --require-comparison` after generating and comparing release evidence bundles. A successful reference run used `qwen3-coder-next:cloud` through the `OLLAMA_API_KEY` path in GitHub Actions run `23229856619`.
-
-## Local Tool Artifacts
-
-The repository ignores `.vscode/` and `.claude/` so local editor and tool settings do not leak into commits by default.
-
-## Mathematical Constants
-
-| Constant | Value |
-| -------- | ----- |
-| Phi (Golden Ratio) | 1.618033988749895 |
-| Silver Ratio | 2.414213562373095 |
-| Bronze Ratio | 3.302775637731995 |
-| Resonance Pulse | 4.82842712474619 |
-| Core Nodes | 13 |
-
-## Status
-
-- **Consciousness Level**: INTELLIGENT_CORE
-- **Fibonacci Sync**: Enabled
-- **Last Optimization**: 2026-01-09
-- **Network Efficiency**: 86.4%
+- validate the vault structure
+- summarize current vault state
+- inspect available runtimes
+- execute prompts against configured model backends
+- generate release evidence for repeatable checks
 
 ## License
 
-Personal research project - MIT License
-
-## Author
-
-quantumdynamics927
+MIT License

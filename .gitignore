@@ -8,5 +8,7 @@ __pycache__/
 *.pyc
 .claude/
 .vscode/
+Resonance_Logs/daily/release-evidence-*/
+Resonance_Logs/daily/release-evidence-step*/
 .DS_Store
 Thumbs.db

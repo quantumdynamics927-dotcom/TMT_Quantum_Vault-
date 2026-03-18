@@ -180,6 +180,8 @@ GitHub Actions now runs:
 
 Set `OLLAMA_API_KEY` in GitHub repository Actions secrets before running the manual smoke matrix.
 
+The hosted cloud smoke path is validated and should be treated as the release gate for Ollama Cloud access. A successful reference run used `qwen3-coder-next:cloud` through the `OLLAMA_API_KEY` path in GitHub Actions run `23229856619`.
+
 ## Local Tool Artifacts
 
 The repository ignores `.vscode/` and `.claude/` so local editor and tool settings do not leak into commits by default.

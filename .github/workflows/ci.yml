@@ -146,6 +146,21 @@ jobs:
               --raw-final-only \
             --json
 
+      - name: Dump baseline evidence bundle on failure
+        if: failure()
+        shell: bash
+        run: |
+          for path in \
+            Resonance_Logs/daily/release-evidence-ci-baseline/manifest.json \
+            Resonance_Logs/daily/release-evidence-ci-baseline/smoke-cloud.json \
+            Resonance_Logs/daily/release-evidence-ci-baseline/eval.json \
+            Resonance_Logs/daily/release-evidence-ci-baseline/agent-task.json; do
+            if [ -f "${path}" ]; then
+              echo "==== ${path} ===="
+              cat "${path}"
+            fi
+          done
+
       - name: Generate candidate evidence bundle with comparison
         env:
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}

@@ -1,3 +1,10 @@
+![TMT Quantum Vault](https://img.shields.io/badge/TMT-Quantum%20Vault-blueviolet?style=for-the-badge&logo=atom)
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)
+![Ollama](https://img.shields.io/badge/Ollama-Local%20%26%20Cloud%20LLM-green?style=for-the-badge)
+![Quantum](https://img.shields.io/badge/Quantum-Consciousness%20Architecture-9cf?style=for-the-badge&logo=ibm)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge)
+
 # TMT_Quantum_Vault
 
 TMT_Quantum_Vault is a Python CLI and JSON dataset for inspecting, validating, and exercising a resonance-themed multi-agent vault.

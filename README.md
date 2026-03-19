@@ -67,6 +67,7 @@ The following commands are present in the current CLI:
 - `smoke-local`: run a local smoke test
 - `smoke-cloud`: run a cloud smoke test
 - `eval`: execute the baseline or a supplied evaluation dataset
+- `agi-eval-smoke`: convert AGI-model artifacts into an EvalDataset and run Vault eval against it
 - `agent-task`: run the Workflow -> Validator -> Visual chain
 - `release-evidence`: generate a bundle of validation/runtime/smoke/eval artifacts
 - `compare-evidence`: compare two evidence bundles for regressions
@@ -126,7 +127,7 @@ git clone https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-.git
 cd TMT_Quantum_Vault-
 ```
 
-2. Create and activate a virtual environment.
+1. Create and activate a virtual environment.
 
 ```powershell
 python -m venv .venv
@@ -140,7 +141,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-3. Install dependencies.
+1. Install dependencies.
 
 ```bash
 python -m pip install -r requirements.txt
@@ -167,6 +168,7 @@ python -m tmt_quantum_vault agent-task "Produce a short JSON object with keys wo
 python -m tmt_quantum_vault smoke-local --json --raw-final-only
 python -m tmt_quantum_vault smoke-cloud --json --raw-final-only
 python -m tmt_quantum_vault eval --dataset evals/baseline.json --mode cloud --json
+python -m tmt_quantum_vault agi-eval-smoke --root . --agi-root ../AGI-model --mode cloud --json
 ```
 
 ## CI Workflow

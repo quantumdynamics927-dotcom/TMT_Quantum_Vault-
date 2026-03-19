@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import subprocess
+import sys
+import tempfile
 import time
 from typing import Any, cast
 
@@ -991,6 +993,353 @@ def _execute_agent_task(
     return payload, final_returncode
 
 
+def _resolve_agi_root(root: Path, agi_root: Path | None) -> Path:
+    if agi_root is not None:
+        if agi_root.is_absolute():
+            return agi_root.resolve()
+        return (agi_root.resolve()).resolve()
+    return (root.resolve().parent / "AGI-model").resolve()
+
+
+def _resolve_agi_artifact_paths(
+    agi_root: Path,
+    artifacts: list[Path] | None,
+) -> list[Path]:
+    if artifacts:
+        resolved_artifacts = [
+            artifact.resolve()
+            if artifact.is_absolute()
+            else (agi_root / artifact).resolve()
+            for artifact in artifacts
+        ]
+    else:
+        resolved_artifacts = [
+            (agi_root / "phi_agent_report_20260310_231439.json").resolve(),
+            (agi_root / "dna_quantum_analysis_results.json").resolve(),
+            (
+                agi_root
+                / "ibm_hardware_aggregate_20260202_040836.json"
+            ).resolve(),
+        ]
+
+    missing = [
+        str(path)
+        for path in resolved_artifacts
+        if not path.exists()
+    ]
+    if missing:
+        raise typer.BadParameter(
+            "AGI eval artifacts are missing: " + ", ".join(missing)
+        )
+
+    return resolved_artifacts
+
+
+def _resolve_agi_dataset_output(
+    agi_root: Path,
+    dataset_output: Path | None,
+) -> tuple[Path, bool]:
+    if dataset_output is None:
+        with tempfile.NamedTemporaryFile(
+            prefix="agi-vault-eval-",
+            suffix=".json",
+            delete=False,
+        ) as handle:
+            return Path(handle.name).resolve(), True
+
+    resolved_output = (
+        dataset_output.resolve()
+        if dataset_output.is_absolute()
+        else (agi_root / dataset_output).resolve()
+    )
+    resolved_output.parent.mkdir(parents=True, exist_ok=True)
+    return resolved_output, False
+
+
+def _agi_stage_output(title: str, lines: list[str]) -> dict[str, Any]:
+    return {
+        "agent": title,
+        "persona": title,
+        "specialization": "deterministic-contract",
+        "returncode": 0,
+        "output": "\n".join(lines).strip(),
+        "stderr": "",
+    }
+
+
+def _render_metric_lines(metrics: dict[str, Any], limit: int = 6) -> list[str]:
+    selected_items = list(metrics.items())[:limit]
+    return [f"{key}: {value}" for key, value in selected_items]
+
+
+def _execute_agi_validate(
+    *,
+    root: Path,
+    agi_root: Path | None,
+    operation: str,
+    artifact: Path | None,
+    python_executable: str | None,
+    timeout: int,
+) -> tuple[dict[str, Any], int]:
+    resolved_agi_root = _resolve_agi_root(root, agi_root)
+    executable = python_executable or sys.executable
+    command = [executable, "-m", "agi_model.validate_run", operation]
+    if artifact is not None:
+        resolved_artifact = artifact
+        if not artifact.is_absolute():
+            resolved_artifact = (resolved_agi_root / artifact).resolve()
+        command.extend(["--artifact", str(resolved_artifact)])
+
+    started_at = time.perf_counter()
+    try:
+        completed = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            stdin=subprocess.DEVNULL,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            cwd=resolved_agi_root,
+            timeout=timeout,
+        )
+        duration_ms = int((time.perf_counter() - started_at) * 1000)
+    except subprocess.TimeoutExpired as exc:
+        timeout_payload = {
+            "operation": operation,
+            "passed": False,
+            "agi_root": str(resolved_agi_root),
+            "command": command,
+            "duration_ms": int((time.perf_counter() - started_at) * 1000),
+            "error": f"Validation timed out after {timeout} seconds.",
+            "stdout": exc.stdout or "",
+            "stderr": exc.stderr or "",
+            "stages": [
+                _agi_stage_output(
+                    "Workflow",
+                    [
+                        f"Attempted operation: {operation}",
+                        f"AGI root: {resolved_agi_root}",
+                    ],
+                ),
+                _agi_stage_output(
+                    "Validator",
+                    [f"Timed out after {timeout} seconds."],
+                ),
+                _agi_stage_output(
+                    "Visual",
+                    ["No metrics available because the subprocess timed out."],
+                ),
+            ],
+        }
+        return timeout_payload, 1
+
+    stdout = completed.stdout.strip()
+    stderr = completed.stderr.strip()
+    contract_result: dict[str, Any]
+    try:
+        contract_result = json.loads(stdout) if stdout else {}
+    except json.JSONDecodeError:
+        contract_result = {
+            "passed": False,
+            "error": "AGI contract output was not valid JSON.",
+            "raw_stdout": stdout,
+        }
+
+    checks = cast(list[dict[str, Any]], contract_result.get("checks", []))
+    metrics = cast(dict[str, Any], contract_result.get("metrics", {}))
+    passed = bool(contract_result.get("passed")) and completed.returncode == 0
+    failed_checks = [
+        check.get("name", "unknown")
+        for check in checks
+        if not check.get("passed", False)
+    ]
+    stages = [
+        _agi_stage_output(
+            "Workflow",
+            [
+                f"Executed AGI contract operation: {operation}",
+                f"AGI root: {resolved_agi_root}",
+                f"Command: {' '.join(command)}",
+                f"Contract version: {contract_result.get('contract_version', 'unknown')}",
+            ],
+        ),
+        _agi_stage_output(
+            "Validator",
+            [
+                f"Subprocess return code: {completed.returncode}",
+                f"Contract passed: {bool(contract_result.get('passed'))}",
+                (
+                    "Failed checks: " + ", ".join(failed_checks)
+                    if failed_checks
+                    else f"Checks passed: {len(checks)} / {len(checks) if checks else 0}"
+                ),
+                f"Error: {contract_result.get('error')}"
+                if contract_result.get("error")
+                else "No contract error reported.",
+            ],
+        ),
+        _agi_stage_output(
+            "Visual",
+            _render_metric_lines(metrics)
+            or ["No metrics were returned by the AGI contract."],
+        ),
+    ]
+    for stage in stages:
+        stage["returncode"] = completed.returncode if stage["agent"] == "Validator" else 0
+
+    payload = {
+        "operation": operation,
+        "passed": passed,
+        "agi_root": str(resolved_agi_root),
+        "command": command,
+        "duration_ms": duration_ms,
+        "subprocess_returncode": completed.returncode,
+        "result": contract_result,
+        "stdout": stdout,
+        "stderr": stderr,
+        "stages": stages,
+    }
+    return payload, 0 if passed else max(completed.returncode, 1)
+
+
+def _execute_agi_eval_smoke(
+    *,
+    root: Path,
+    agi_root: Path | None,
+    artifacts: list[Path] | None,
+    dataset_output: Path | None,
+    dataset_name: str,
+    description: str,
+    backend: str | None,
+    mode: str | None,
+    model: str | None,
+    raw_final_only: bool,
+    python_executable: str | None,
+    timeout: int,
+) -> tuple[dict[str, Any], int]:
+    resolved_agi_root = _resolve_agi_root(root, agi_root)
+    resolved_artifacts = _resolve_agi_artifact_paths(
+        resolved_agi_root,
+        artifacts,
+    )
+    resolved_dataset_output, used_temporary_path = (
+        _resolve_agi_dataset_output(resolved_agi_root, dataset_output)
+    )
+    converter_path = (
+        resolved_agi_root / "convert_agi_results_to_tmt_eval.py"
+    ).resolve()
+    executable = python_executable or sys.executable
+    generation_command = [
+        executable,
+        str(converter_path),
+        *(str(path) for path in resolved_artifacts),
+        "--output",
+        str(resolved_dataset_output),
+        "--name",
+        dataset_name,
+        "--description",
+        description,
+    ]
+    if backend is not None:
+        generation_command.extend(["--backend", backend])
+    if mode is not None:
+        generation_command.extend(["--mode", mode])
+    if model is not None:
+        generation_command.extend(["--model", model])
+
+    started_at = time.perf_counter()
+    try:
+        generation = subprocess.run(
+            generation_command,
+            check=False,
+            capture_output=True,
+            stdin=subprocess.DEVNULL,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            cwd=resolved_agi_root,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        generation_duration_ms = int(
+            (time.perf_counter() - started_at) * 1000
+        )
+        return (
+            {
+                "agi_root": str(resolved_agi_root),
+                "artifacts": [str(path) for path in resolved_artifacts],
+                "dataset_path": str(resolved_dataset_output),
+                "dataset_temporary": used_temporary_path,
+                "generation": {
+                    "command": generation_command,
+                    "returncode": 1,
+                    "duration_ms": generation_duration_ms,
+                    "stdout": (exc.stdout or "").strip(),
+                    "stderr": (
+                        (exc.stderr or "").strip()
+                        or (
+                            "AGI dataset generation timed out after "
+                            f"{timeout} seconds."
+                        )
+                    ),
+                },
+                "returncode": 1,
+            },
+            1,
+        )
+    generation_duration_ms = int(
+        (time.perf_counter() - started_at) * 1000
+    )
+
+    payload: dict[str, Any] = {
+        "agi_root": str(resolved_agi_root),
+        "artifacts": [str(path) for path in resolved_artifacts],
+        "dataset_path": str(resolved_dataset_output),
+        "dataset_temporary": used_temporary_path,
+        "generation": {
+            "command": generation_command,
+            "returncode": generation.returncode,
+            "duration_ms": generation_duration_ms,
+            "stdout": generation.stdout.strip(),
+            "stderr": generation.stderr.strip(),
+        },
+    }
+    if generation.returncode != 0:
+        payload["returncode"] = generation.returncode
+        return payload, generation.returncode
+
+    repo = _repo(root)
+    try:
+        dataset = repo.load_eval_dataset(resolved_dataset_output)
+    except Exception as exc:
+        payload["dataset_error"] = str(exc)
+        payload["returncode"] = 1
+        return payload, 1
+
+    payload["dataset"] = {
+        "name": dataset.name,
+        "description": dataset.description,
+        "backend": dataset.backend,
+        "mode": dataset.mode,
+        "model": dataset.model,
+        "cases": len(dataset.cases),
+    }
+
+    eval_payload, eval_returncode = _execute_eval(
+        root=root,
+        dataset_path=resolved_dataset_output,
+        backend=backend,
+        mode=mode,
+        model=model,
+        raw_final_only=raw_final_only,
+        timeout=timeout,
+    )
+    payload["eval"] = eval_payload
+    payload["returncode"] = eval_returncode
+    return payload, eval_returncode
+
+
 @app.command("summary")
 def summary_command(
     root: Path = typer.Option(
@@ -1599,6 +1948,10 @@ def smoke_cloud(
         raise typer.Exit(code=return_code)
 
 
+if __name__ == "__main__":
+    app()
+
+
 @app.command("eval")
 def eval_command(
     root: Path = typer.Option(
@@ -2125,6 +2478,260 @@ def agent_task(
         raise typer.Exit(code=final_returncode)
 
 
+@app.command("agi-validate")
+def agi_validate(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    agi_root: Path | None = typer.Option(
+        None,
+        "--agi-root",
+        help="Path to the AGI-model repository root. Defaults to a sibling AGI-model checkout.",
+    ),
+    operation: str = typer.Option(
+        "vae-smoke",
+        "--operation",
+        help="AGI-model contract operation to execute: vae-smoke or artifact-summary.",
+    ),
+    artifact: Path | None = typer.Option(
+        None,
+        "--artifact",
+        help="Artifact path to pass through when operation=artifact-summary.",
+    ),
+    python_executable: str | None = typer.Option(
+        None,
+        "--python",
+        help="Python executable used to invoke AGI-model. Defaults to the current interpreter.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
+    timeout: int = typer.Option(
+        120,
+        "--timeout",
+        help="Maximum runtime in seconds for the AGI-model subprocess.",
+    ),
+) -> None:
+    agi_payload, return_code = _execute_agi_validate(
+        root=root,
+        agi_root=agi_root,
+        operation=operation,
+        artifact=artifact,
+        python_executable=python_executable,
+        timeout=timeout,
+    )
+
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="agi-validate",
+        payload=agi_payload,
+    )
+
+    if json_out:
+        typer.echo(emit_json_document(agi_payload))
+        if return_code != 0:
+            raise typer.Exit(code=return_code)
+        return
+
+    console.print(
+        Panel.fit(
+            (
+                f"Operation: {agi_payload['operation']}\n"
+                f"Passed: {agi_payload['passed']}\n"
+                f"AGI root: {agi_payload['agi_root']}"
+            ),
+            title="AGI Contract Validation",
+        )
+    )
+
+    summary_table = Table(box=box.SIMPLE_HEAVY)
+    summary_table.add_column("Agent")
+    summary_table.add_column("Status")
+    summary_table.add_column("Output")
+    for stage in cast(list[dict[str, Any]], agi_payload["stages"]):
+        summary_table.add_row(
+            cast(str, stage["agent"]),
+            str(stage["returncode"]),
+            cast(str, stage["output"]),
+        )
+    console.print(summary_table)
+
+    if agi_payload.get("stderr"):
+        console.print(
+            Panel(cast(str, agi_payload["stderr"]), title="Subprocess stderr")
+        )
+
+    if return_code != 0:
+        raise typer.Exit(code=return_code)
+
+
+@app.command("agi-eval-smoke")
+def agi_eval_smoke(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    agi_root: Path | None = typer.Option(
+        None,
+        "--agi-root",
+        help=(
+            "Path to the AGI-model repository root. Defaults to a sibling "
+            "AGI-model checkout."
+        ),
+    ),
+    artifacts: list[Path] | None = typer.Option(
+        None,
+        "--artifact",
+        help=(
+            "Artifact JSON files to convert. When omitted, the checked-in "
+            "regression artifacts are used."
+        ),
+    ),
+    dataset_output: Path | None = typer.Option(
+        None,
+        "--dataset-output",
+        help=(
+            "Where to write the generated EvalDataset JSON. Defaults to a "
+            "temporary file under the system temp directory."
+        ),
+    ),
+    dataset_name: str = typer.Option(
+        "agi-artifact-regression",
+        "--dataset-name",
+        help="Dataset name written into the generated EvalDataset.",
+    ),
+    description: str = typer.Option(
+        "AGI-model artifact-derived regression and research evaluation set.",
+        "--description",
+        help="Dataset description written into the generated EvalDataset.",
+    ),
+    backend: str | None = typer.Option(
+        None,
+        "--backend",
+        help="Override the configured backend for generation metadata and eval.",
+    ),
+    mode: str | None = typer.Option(
+        None,
+        "--mode",
+        help="Override the configured Ollama mode for eval execution.",
+    ),
+    model: str | None = typer.Option(
+        None,
+        "--model",
+        help="Override the configured model name for generation and eval.",
+    ),
+    raw_final_only: bool = typer.Option(
+        False,
+        "--raw-final-only",
+        help="Strip model thinking blocks from evaluated outputs.",
+    ),
+    python_executable: str | None = typer.Option(
+        None,
+        "--python",
+        help=(
+            "Python executable used to invoke AGI-model. Defaults to the "
+            "current interpreter."
+        ),
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
+    timeout: int = typer.Option(
+        120,
+        "--timeout",
+        help=(
+            "Maximum runtime in seconds for dataset generation and each eval "
+            "case."
+        ),
+    ),
+) -> None:
+    smoke_payload, return_code = _execute_agi_eval_smoke(
+        root=root,
+        agi_root=agi_root,
+        artifacts=artifacts,
+        dataset_output=dataset_output,
+        dataset_name=dataset_name,
+        description=description,
+        backend=backend,
+        mode=mode,
+        model=model,
+        raw_final_only=raw_final_only,
+        python_executable=python_executable,
+        timeout=timeout,
+    )
+
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="agi-eval-smoke",
+        payload=smoke_payload,
+    )
+
+    if json_out:
+        typer.echo(emit_json_document(smoke_payload))
+        if return_code != 0:
+            raise typer.Exit(code=return_code)
+        return
+
+    dataset_summary = cast(dict[str, Any], smoke_payload.get("dataset", {}))
+    generation_summary = cast(
+        dict[str, Any],
+        smoke_payload["generation"],
+    )
+    console.print(
+        Panel.fit(
+            (
+                f"Dataset: {smoke_payload['dataset_path']}\n"
+                f"Cases: {dataset_summary.get('cases', 0)}\n"
+                f"Generation return code: {generation_summary['returncode']}"
+            ),
+            title="AGI Eval Smoke",
+        )
+    )
+
+    if "eval" in smoke_payload:
+        eval_summary = cast(
+            dict[str, Any],
+            cast(dict[str, Any], smoke_payload["eval"])["summary"],
+        )
+        table = Table(box=box.SIMPLE_HEAVY)
+        table.add_column("Metric")
+        table.add_column("Value")
+        table.add_row("Passed cases", str(eval_summary["passed_cases"]))
+        table.add_row("Failed cases", str(eval_summary["failed_cases"]))
+        table.add_row("Success rate", f"{eval_summary['success_rate']}%")
+        table.add_row(
+            "Total duration",
+            f"{eval_summary['total_duration_ms']} ms",
+        )
+        console.print(table)
+
+    generation_stderr = cast(str, generation_summary.get("stderr", ""))
+    if generation_stderr:
+        console.print(Panel(generation_stderr, title="Generation stderr"))
+
+    if return_code != 0:
+        raise typer.Exit(code=return_code)
+
+
 @app.command("release-evidence")
 def release_evidence(
     root: Path = typer.Option(
@@ -2359,3 +2966,7 @@ def release_evidence(
 
     if cast(int, manifest["returncode"]) != 0:
         raise typer.Exit(code=cast(int, manifest["returncode"]))
+
+
+if __name__ == "__main__":
+    app()

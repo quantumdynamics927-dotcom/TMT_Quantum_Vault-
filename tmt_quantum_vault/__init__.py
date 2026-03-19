@@ -1,3 +1,3 @@
-from .cli import app
+"""TMT Quantum Vault package."""
 
-__all__ = ["app"]
+__all__: list[str] = []

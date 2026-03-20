@@ -23,6 +23,7 @@ from .models import (
     AgentDNA,
     OptimizationEntry,
     SummarySnapshot,
+    ValidationResult,
 )
 from .output import (
     emit_json_document,
@@ -129,6 +130,70 @@ def _runtime_payload(runtime_checks: list[Any]) -> dict[str, Any]:
         ],
         "all_warnings": all_warnings,
     }
+
+
+def _json_validation_result(result: ValidationResult) -> dict[str, Any]:
+    return {
+        "path": result.path,
+        "model_name": result.model_name,
+        "valid": result.valid,
+        "error": result.error,
+    }
+
+
+def _summary_payload(summary_data: SummarySnapshot) -> dict[str, Any]:
+    top_agent = cast(AgentDNA | None, summary_data["top_agent"])
+    latest_optimization = cast(
+        OptimizationEntry | None,
+        summary_data["latest_optimization"],
+    )
+    model_files = cast(list[Path], summary_data["model_files"])
+    return {
+        "vault_name": summary_data["vault_name"],
+        "consciousness_level": summary_data["consciousness_level"],
+        "fibonacci_sync": summary_data["fibonacci_sync"],
+        "agent_count": summary_data["agent_count"],
+        "integrated_agents": summary_data["integrated_agents"],
+        "memory_store_count": summary_data["memory_store_count"],
+        "daily_log_count": summary_data["daily_log_count"],
+        "average_fitness": summary_data["average_fitness"],
+        "average_resonance_frequency": summary_data[
+            "average_resonance_frequency"
+        ],
+        "model_count": len(model_files),
+        "model_files": [path.as_posix() for path in model_files],
+        "top_agent": (
+            top_agent.model_dump(mode="json")
+            if top_agent is not None
+            else None
+        ),
+        "latest_optimization": (
+            latest_optimization.model_dump(mode="json")
+            if latest_optimization is not None
+            else None
+        ),
+        "returncode": 0,
+    }
+
+
+def _validate_payload(
+    results: list[ValidationResult],
+) -> tuple[dict[str, Any], int]:
+    failures = [result for result in results if not result.valid]
+    return (
+        {
+            "results": [
+                _json_validation_result(result) for result in results
+            ],
+            "summary": {
+                "checked_files": len(results),
+                "valid_files": len(results) - len(failures),
+                "invalid_files": len(failures),
+            },
+            "returncode": 1 if failures else 0,
+        },
+        1 if failures else 0,
+    )
 
 
 def _run_result_payload(
@@ -1347,6 +1412,11 @@ def summary_command(
         "--root",
         help="Path to the vault root directory.",
     ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
 ) -> None:
     repo = _repo(root)
     summary_data: SummarySnapshot = repo.build_summary()
@@ -1356,6 +1426,10 @@ def summary_command(
         summary_data["latest_optimization"],
     )
     model_files = cast(list[Path], summary_data["model_files"])
+
+    if json_out:
+        typer.echo(emit_json_document(_summary_payload(summary_data)))
+        return
 
     console.print(
         Panel.fit(
@@ -1419,10 +1493,22 @@ def validate(
         "--root",
         help="Path to the vault root directory.",
     ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
 ) -> None:
     repo = _repo(root)
     results = repo.validate_repository()
     failures = [result for result in results if not result.valid]
+
+    if json_out:
+        payload, return_code = _validate_payload(results)
+        typer.echo(emit_json_document(payload))
+        if return_code != 0:
+            raise typer.Exit(code=return_code)
+        return
 
     table = Table(box=box.SIMPLE_HEAVY)
     table.add_column("File")

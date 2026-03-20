@@ -10,6 +10,7 @@
 TMT_Quantum_Vault is a Python CLI and JSON dataset for inspecting, validating, and exercising a resonance-themed multi-agent vault.
 
 See [docs/cloud-only-release-playbook.md](docs/cloud-only-release-playbook.md) for the cloud-only release workflow.
+See [docs/secret-scanning-policy.md](docs/secret-scanning-policy.md) for repository rules on secret handling and scan triage.
 
 ## Overview
 
@@ -24,7 +25,7 @@ Verified locally on 2026-03-18:
 
 - `pytest tests/test_regression.py -q`: `31 passed, 2 skipped`
 - `python -m tmt_quantum_vault validate`: passes for the checked repository JSON files
-- `python -m tmt_quantum_vault summary`: reports 12 agents, 12 integrated agents, 12 memory stores, 43 daily logs, and 1 detected GGUF model
+- `python -m tmt_quantum_vault summary`: reports 12 agents, 12 integrated agents, 12 memory stores, 43 daily logs, and counts only `Models/*.gguf` as detected llama.cpp model artifacts
 - `python -m tmt_quantum_vault doctor --json`: reports repository checks as healthy, detects local `Ollama` and `llama.cpp`, and currently warns that no cloud-tagged Ollama models are visible in inventory
 
 Known-good baseline for future work:
@@ -83,7 +84,7 @@ The following commands are present in the current CLI:
 
 Important command behavior:
 
-- `summary` and `validate` are text-output commands only
+- `summary` and `validate` support `--json` for structured output
 - `doctor`, `runtime`, `run`, `smoke-local`, `smoke-cloud`, `eval`, `agent-task`, `release-evidence`, `compare-evidence`, `release-summary`, and `release-gate` support structured JSON output paths in the current codebase
 - several runtime-oriented commands also support `--record-path` for writing timestamped JSON records
 
@@ -99,7 +100,8 @@ The checked-in default runtime configuration in `vault_config.json` is:
 
 The local workspace currently contains:
 
-- one `.gguf` model file in `Models/`
+- no checked-in `.gguf` model file in `Models/` in the current checkout
+- one unsupported `.resonance` artifact in `Models/` that is not treated as a runnable llama.cpp model
 - a local `.venv`
 - a configured `llama.cpp` executable path
 - a detectable local `Ollama` executable
@@ -189,6 +191,13 @@ The repository currently has one GitHub Actions workflow at `.github/workflows/c
 
 Cloud workflow runs require the `OLLAMA_API_KEY` GitHub Actions secret.
 
+## Secret Handling
+
+- live credentials must not be committed to the repository
+- secret names and CI secret references are allowed when they do not embed real values
+- generated cache directories are excluded from meaningful secret-scanning review because they create false positives
+- see [docs/secret-scanning-policy.md](docs/secret-scanning-policy.md) for the full review and incident workflow
+
 ## Dependencies
 
 Current Python dependencies from `requirements.txt`:
@@ -205,7 +214,7 @@ Python 3.13 is the target used by the current CI workflow.
 ## Known Gaps
 
 - the README previously claimed fully passing hosted cloud validation; that cannot be treated as the current local state
-- `summary` and `validate` do not support `--json` in the present CLI implementation
+- model detection is intentionally limited to `.gguf` files; other files under `Models/` are reported as unsupported artifacts rather than runnable models
 - cloud execution remains dependent on Ollama Cloud credentials and visible cloud-tagged model inventory
 - some runtime checks are environment-sensitive, so different machines may report different `doctor` and `runtime` results
 

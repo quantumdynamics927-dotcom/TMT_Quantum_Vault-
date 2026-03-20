@@ -65,25 +65,64 @@ class RuntimeInspector:
     def inspect_llama_cpp(self) -> RuntimeStatus:
         executable = self._find_llama_cpp_executable()
         model_files = self._configured_model_files()
+        configured_model_path = self._configured_model_path()
+        serialized_artifacts = self._serialized_model_artifacts()
+        unsupported_artifacts = self._unsupported_model_artifacts()
 
         if executable is None and not model_files:
+            detail = (
+                "No llama.cpp executable detected and no GGUF models "
+                "found in Models/."
+            )
+            if (
+                configured_model_path is not None
+                and not configured_model_path.exists()
+            ):
+                detail += (
+                    " Configured model path is missing: "
+                    f"{configured_model_path.relative_to(self.root)}."
+                )
+            if serialized_artifacts:
+                detail += (
+                    " Serialized agent artifact(s) present: "
+                    + ", ".join(path.name for path in serialized_artifacts)
+                    + "."
+                )
+            if unsupported_artifacts:
+                detail += (
+                    " Unsupported artifact(s) present: "
+                    + ", ".join(path.name for path in unsupported_artifacts)
+                    + "."
+                )
             return RuntimeStatus(
                 name="llama.cpp",
                 status="warning",
-                detail=(
-                    "No llama.cpp executable detected and no GGUF models "
-                    "found in Models/."
-                ),
+                detail=detail,
             )
 
         if executable is None:
+            detail = (
+                f"Detected {len(model_files)} GGUF model(s) in Models/, "
+                "but no llama.cpp executable was found."
+            )
+            if (
+                configured_model_path is not None
+                and not configured_model_path.exists()
+            ):
+                detail += (
+                    " Configured model path is missing: "
+                    f"{configured_model_path.relative_to(self.root)}."
+                )
+            if serialized_artifacts:
+                detail += (
+                    " Serialized agent artifact(s) present: "
+                    + ", ".join(path.name for path in serialized_artifacts)
+                    + "."
+                )
             return RuntimeStatus(
                 name="llama.cpp",
                 status="warning",
-                detail=(
-                    f"Detected {len(model_files)} GGUF model(s) in Models/, "
-                    "but no llama.cpp executable was found."
-                ),
+                detail=detail,
             )
 
         version = self._command_output([str(executable), "--version"])
@@ -92,12 +131,40 @@ class RuntimeInspector:
                 f"llama.cpp executable found with {len(model_files)} GGUF "
                 "model(s) available in Models/."
             )
+            if (
+                configured_model_path is not None
+                and not configured_model_path.exists()
+            ):
+                detail += (
+                    " Configured model path is missing: "
+                    f"{configured_model_path.relative_to(self.root)}."
+                )
             status = "ok"
         else:
             detail = (
                 "llama.cpp executable found, but no GGUF models were found "
                 "in Models/."
             )
+            if (
+                configured_model_path is not None
+                and not configured_model_path.exists()
+            ):
+                detail += (
+                    " Configured model path is missing: "
+                    f"{configured_model_path.relative_to(self.root)}."
+                )
+            if serialized_artifacts:
+                detail += (
+                    " Serialized agent artifact(s) present: "
+                    + ", ".join(path.name for path in serialized_artifacts)
+                    + "."
+                )
+            if unsupported_artifacts:
+                detail += (
+                    " Unsupported artifact(s) present: "
+                    + ", ".join(path.name for path in unsupported_artifacts)
+                    + "."
+                )
             status = "warning"
 
         return RuntimeStatus(
@@ -234,16 +301,45 @@ class RuntimeInspector:
 
     def _configured_model_files(self) -> list[Path]:
         model_files = sorted((self.root / "Models").glob("*.gguf"))
-        if self.config is None:
+        configured_path = self._configured_model_path()
+        if configured_path is None:
             return model_files
-
-        configured_path = Path(self.config.runtime.llama_cpp.model_path)
-        if not configured_path.is_absolute():
-            configured_path = self.root / configured_path
         if configured_path.exists() and configured_path not in model_files:
             model_files.append(configured_path)
         unique_paths = list(dict.fromkeys(sorted(model_files)))
         return unique_paths
+
+    def _configured_model_path(self) -> Path | None:
+        if self.config is None:
+            return None
+        configured_path = Path(self.config.runtime.llama_cpp.model_path)
+        if not configured_path.is_absolute():
+            configured_path = self.root / configured_path
+        return configured_path
+
+    def _unsupported_model_artifacts(self) -> list[Path]:
+        models_dir = self.root / "Models"
+        if not models_dir.exists():
+            return []
+        return sorted(
+            path
+            for path in models_dir.iterdir()
+            if path.is_file()
+            and path.suffix != ".gguf"
+            and path.suffix != ".pkl"
+            and not path.name.endswith(".json.gz")
+        )
+
+    def _serialized_model_artifacts(self) -> list[Path]:
+        models_dir = self.root / "Models"
+        if not models_dir.exists():
+            return []
+        return sorted(
+            path
+            for path in models_dir.iterdir()
+            if path.is_file()
+            and (path.suffix == ".pkl" or path.name.endswith(".json.gz"))
+        )
 
     def _which(self, command: str) -> Path | None:
         resolved = shutil.which(command)

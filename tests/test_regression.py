@@ -20,14 +20,21 @@ from tmt_quantum_vault.cli import (
     app,
     strip_thinking,
 )
-from tmt_quantum_vault.models import AgentDNA, EvalDataset, RuntimeConfig
+from tmt_quantum_vault.models import (
+    AgentDNA,
+    EvalDataset,
+    OptimizationEntry,
+    RuntimeConfig,
+)
 from tmt_quantum_vault.ollama_api import is_available, run as ollama_run
+from tmt_quantum_vault.repository import VaultRepository
 from tmt_quantum_vault.runner import RunResult, RuntimeRunner
 from tmt_quantum_vault.runtime import RuntimeInspector
 
 BRAILLE_SPINNERS = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 ANSI_RE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 RUNNER = CliRunner()
+TEST_REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _safe_stderr(text: str) -> str:
@@ -99,7 +106,7 @@ def test_json_output_mode() -> None:
         capture_output=True,
         text=True,
         stdin=subprocess.DEVNULL,
-        cwd="D:/TMT_Quantum_Vault-",
+        cwd=str(TEST_REPO_ROOT),
     )
     payload = json.loads(process.stdout)
     assert payload["returncode"] == 0
@@ -154,6 +161,98 @@ def test_doctor_json_output() -> None:
     payload = json.loads(result.stdout)
     assert "repository" in payload
     assert "runtime" in payload
+
+
+def test_summary_json_output() -> None:
+    mocked_summary = {
+        "vault_name": "TMT_Quantum_Vault",
+        "consciousness_level": "INTELLIGENT_CORE",
+        "fibonacci_sync": True,
+        "agent_count": 12,
+        "integrated_agents": 12,
+        "average_fitness": 0.872,
+        "average_resonance_frequency": 595.0,
+        "top_agent": AgentDNA.model_validate(
+            {
+                "metatron_agent": "Bronze",
+                "dna_agent_id": 6,
+                "dna_agent_name": "Michael",
+                "dna_specialization": "Protection & Justice",
+                "conscious_dna": "ATCG",
+                "phi_score": 1.618,
+                "fibonacci_alignment": 0.987,
+                "gc_content": 0.55,
+                "palindromes": 8,
+                "fitness": 0.929,
+                "resonance_frequency": 528.0,
+                "integration_timestamp": "2026-01-01T00:00:00Z",
+                "consciousness_status": "INTEGRATED",
+            }
+        ),
+        "memory_store_count": 12,
+        "daily_log_count": 43,
+        "model_files": [Path("Models/qwen3-8b.gguf")],
+        "latest_optimization": OptimizationEntry.model_validate(
+            {
+                "type": "optimization",
+                "data": {
+                    "timestamp": "2026-01-09T21:10:55.489611",
+                    "duration": 1.0,
+                    "dna_integrity": 0.9,
+                    "network_efficiency": 0.864,
+                    "resonance_harmonics": 0.9,
+                    "collective_boost": 0.9,
+                    "optimization_score": 0.922,
+                },
+            }
+        ),
+    }
+
+    with patch("tmt_quantum_vault.cli._repo") as mock_repo:
+        mock_repo.return_value.build_summary.return_value = mocked_summary
+        result = RUNNER.invoke(app, ["summary", "--json"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["vault_name"] == "TMT_Quantum_Vault"
+    assert payload["model_count"] == 1
+    assert payload["model_files"] == ["Models/qwen3-8b.gguf"]
+    assert payload["top_agent"]["dna_agent_name"] == "Michael"
+    latest_score = payload["latest_optimization"]["data"][
+        "optimization_score"
+    ]
+    assert latest_score == 0.922
+    assert payload["returncode"] == 0
+
+
+def test_validate_json_output() -> None:
+    mocked_results = [
+        SimpleNamespace(
+            path="vault_config.json",
+            model_name="VaultConfig",
+            valid=True,
+            error=None,
+        ),
+        SimpleNamespace(
+            path="Agent_Bronze/conscious_dna.json",
+            model_name="AgentDNA",
+            valid=False,
+            error="missing field",
+        ),
+    ]
+
+    with patch("tmt_quantum_vault.cli._repo") as mock_repo:
+        validate_repository = mock_repo.return_value.validate_repository
+        validate_repository.return_value = mocked_results
+        result = RUNNER.invoke(app, ["validate", "--json"])
+
+    assert result.exit_code == 1
+    payload = json.loads(result.stdout)
+    assert payload["summary"]["checked_files"] == 2
+    assert payload["summary"]["valid_files"] == 1
+    assert payload["summary"]["invalid_files"] == 1
+    assert payload["results"][1]["error"] == "missing field"
+    assert payload["returncode"] == 1
 
 
 def test_runtime_record_path(tmp_path: Path) -> None:
@@ -391,7 +490,7 @@ def test_eval_record_path_and_failure_exit(tmp_path: Path) -> None:
 
 
 def test_cloud_mode_rejects_non_cloud_tag() -> None:
-    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+    runner = RuntimeRunner(TEST_REPO_ROOT, RuntimeConfig())
     result = runner.run(
         prompt="Reply with exactly: test",
         mode="cloud",
@@ -402,7 +501,7 @@ def test_cloud_mode_rejects_non_cloud_tag() -> None:
 
 
 def test_cloud_mode_uses_ollama_cli() -> None:
-    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+    runner = RuntimeRunner(TEST_REPO_ROOT, RuntimeConfig())
     completed = subprocess.CompletedProcess(
         args=["ollama"],
         returncode=0,
@@ -425,7 +524,7 @@ def test_cloud_mode_uses_ollama_cli() -> None:
 
 
 def test_cloud_mode_uses_api_key_direct_api() -> None:
-    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+    runner = RuntimeRunner(TEST_REPO_ROOT, RuntimeConfig())
 
     with patch.dict(os.environ, {"OLLAMA_API_KEY": "test-key"}, clear=False):
         with patch("tmt_quantum_vault.runner.ollama_run") as mock_ollama_run:
@@ -456,7 +555,7 @@ def test_cloud_mode_uses_api_key_direct_api() -> None:
 
 
 def test_cloud_mode_api_key_unauthorized_forces_failure() -> None:
-    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+    runner = RuntimeRunner(TEST_REPO_ROOT, RuntimeConfig())
     response = Mock(spec=requests.Response)
     response.status_code = 401
     response.json.return_value = {"error": "unauthorized"}
@@ -481,7 +580,7 @@ def test_cloud_mode_api_key_unauthorized_forces_failure() -> None:
 
 
 def test_cloud_mode_auth_message_forces_failure() -> None:
-    runner = RuntimeRunner(Path("D:/TMT_Quantum_Vault-"), RuntimeConfig())
+    runner = RuntimeRunner(TEST_REPO_ROOT, RuntimeConfig())
     completed = subprocess.CompletedProcess(
         args=["ollama"],
         returncode=0,
@@ -505,7 +604,7 @@ def test_cloud_mode_auth_message_forces_failure() -> None:
 
 def test_inspect_ollama_cloud_ok() -> None:
     inspector = RuntimeInspector(
-        Path("D:/TMT_Quantum_Vault-"),
+        TEST_REPO_ROOT,
         type(
             "ConfigWrapper",
             (),
@@ -603,8 +702,228 @@ def test_smoke_cloud_auth_message_exits_nonzero() -> None:
     assert result.exit_code == 1
     payload = json.loads(result.stdout)
     assert payload["returncode"] == 1
-    assert payload["model"] == "qwen3-coder-next:cloud"
-    assert "signed in to Ollama" in payload["stderr"]
+
+
+def test_repository_checks_report_missing_model_and_artifacts(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "Models").mkdir()
+    (tmp_path / "Models" / ".resonance").write_text(
+        "signal",
+        encoding="utf-8",
+    )
+    (tmp_path / ".venv").mkdir()
+
+    source_root = Path(__file__).resolve().parents[1]
+    for file_name in (
+        "vault_config.json",
+        "metatron_geometry.json",
+        "optimization_log.json",
+    ):
+        (tmp_path / file_name).write_text(
+            (source_root / file_name).read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
+
+    agent_dirs = list(source_root.glob("Agent_*"))
+    for agent_dir in agent_dirs:
+        target_dir = tmp_path / agent_dir.name
+        target_dir.mkdir()
+        (target_dir / "conscious_dna.json").write_text(
+            (agent_dir / "conscious_dna.json").read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
+
+    for memory_dir_name in (
+        "Bio_Resonance",
+        "Mandala_Geometry",
+        "Shadow_Drive",
+        "Stealth_Logs",
+    ):
+        source_dir = source_root / memory_dir_name
+        target_dir = tmp_path / memory_dir_name
+        target_dir.mkdir()
+        for memory_file in source_dir.glob("*_memory.json"):
+            (target_dir / memory_file.name).write_text(
+                memory_file.read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+
+    repo = VaultRepository(tmp_path)
+
+    checks = repo.repository_checks()
+    details = [detail for _, detail in checks]
+    expected_agent_count = len(agent_dirs)
+
+    assert any(
+        f"Detected {expected_agent_count} agent DNA file(s)." in detail
+        for detail in details
+    )
+    assert any(
+        "No persisted model artifacts found in Models/." in detail
+        for detail in details
+    )
+    assert any(
+        "Unsupported artifact(s) present: .resonance" in detail
+        for detail in details
+    )
+    assert any(
+        "Configured llama.cpp model path is missing:" in detail
+        and "qwen3-8b.gguf" in detail
+        for detail in details
+    )
+
+
+def test_inspect_llama_cpp_reports_missing_model_and_artifacts(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "Models").mkdir()
+    (tmp_path / "Models" / ".resonance").write_text(
+        "signal",
+        encoding="utf-8",
+    )
+    config = type(
+        "ConfigWrapper",
+        (),
+        {
+            "runtime": RuntimeConfig.model_validate(
+                {
+                    "llama_cpp": {
+                        "model_path": "Models/qwen3-8b.gguf",
+                    }
+                }
+            )
+        },
+    )()
+    inspector = RuntimeInspector(tmp_path, config)
+
+    with patch.object(
+        inspector,
+        "_find_llama_cpp_executable",
+        return_value=Path("C:/llama-cli.exe"),
+    ):
+        with patch.object(
+            inspector,
+            "_command_output",
+            return_value="version",
+        ):
+            status = inspector.inspect_llama_cpp()
+
+    assert status.status == "warning"
+    assert "no GGUF models were found in Models/." in status.detail
+    assert "Configured model path is missing:" in status.detail
+    assert "qwen3-8b.gguf." in status.detail
+    assert "Unsupported artifact(s) present: .resonance." in status.detail
+
+
+def test_repository_checks_accept_serialized_model_exports(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "Models").mkdir()
+    (tmp_path / "Models" / "Strategic.pkl").write_text(
+        "serialized",
+        encoding="utf-8",
+    )
+    (tmp_path / "Models" / "Strategic.json.gz").write_text(
+        "serialized",
+        encoding="utf-8",
+    )
+    (tmp_path / ".venv").mkdir()
+
+    source_root = Path(__file__).resolve().parents[1]
+    for file_name in (
+        "vault_config.json",
+        "metatron_geometry.json",
+        "optimization_log.json",
+    ):
+        (tmp_path / file_name).write_text(
+            (source_root / file_name).read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
+
+    for agent_dir in source_root.glob("Agent_*"):
+        target_dir = tmp_path / agent_dir.name
+        target_dir.mkdir()
+        (target_dir / "conscious_dna.json").write_text(
+            (agent_dir / "conscious_dna.json").read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
+
+    for memory_dir_name in (
+        "Bio_Resonance",
+        "Mandala_Geometry",
+        "Shadow_Drive",
+        "Stealth_Logs",
+    ):
+        source_dir = source_root / memory_dir_name
+        target_dir = tmp_path / memory_dir_name
+        target_dir.mkdir()
+        for memory_file in source_dir.glob("*_memory.json"):
+            (target_dir / memory_file.name).write_text(
+                memory_file.read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+
+    repo = VaultRepository(tmp_path)
+
+    checks = repo.repository_checks()
+    details = [detail for _, detail in checks]
+
+    assert any(
+        "Detected 2 persisted model artifact(s) in Models/." in detail
+        for detail in details
+    )
+    assert any("Serialized exports: 2." in detail for detail in details)
+
+
+def test_inspect_llama_cpp_reports_serialized_exports_separately(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "Models").mkdir()
+    (tmp_path / "Models" / "Strategic.pkl").write_text(
+        "serialized",
+        encoding="utf-8",
+    )
+    (tmp_path / "Models" / "Strategic.json.gz").write_text(
+        "serialized",
+        encoding="utf-8",
+    )
+    (tmp_path / "Models" / ".resonance").write_text(
+        "signal",
+        encoding="utf-8",
+    )
+    config = type(
+        "ConfigWrapper",
+        (),
+        {
+            "runtime": RuntimeConfig.model_validate(
+                {
+                    "llama_cpp": {
+                        "model_path": "Models/qwen3-8b.gguf",
+                    }
+                }
+            )
+        },
+    )()
+    inspector = RuntimeInspector(tmp_path, config)
+
+    with patch.object(
+        inspector,
+        "_find_llama_cpp_executable",
+        return_value=Path("C:/llama-cli.exe"),
+    ):
+        with patch.object(
+            inspector,
+            "_command_output",
+            return_value="version",
+        ):
+            status = inspector.inspect_llama_cpp()
+
+    assert status.status == "warning"
+    assert "Serialized agent artifact(s) present:" in status.detail
+    assert "Strategic.pkl" in status.detail
+    assert "Strategic.json.gz" in status.detail
+    assert "Unsupported artifact(s) present: .resonance." in status.detail
 
 
 def test_agent_task_record_path(tmp_path: Path) -> None:

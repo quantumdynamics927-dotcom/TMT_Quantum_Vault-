@@ -1,0 +1,481 @@
+{
+  "name": "vault_state_post_training",
+  "created_at": "2026-03-20T21:11:48.325271+00:00",
+  "include_dna": true,
+  "include_memory": true,
+  "agent_count": 15,
+  "memory_store_count": 15,
+  "agents": [
+    {
+      "metatron_agent": "Archivist",
+      "dna_agent_id": 14,
+      "dna_agent_name": "Raziel",
+      "dna_specialization": "Memory-Persistence",
+      "conscious_dna": "ATGCGTACCTTAAGCGGATTCGATCGGA",
+      "phi_score": 0.8899186938124423,
+      "fibonacci_alignment": 0.876514132389352,
+      "gc_content": 0.5,
+      "palindromes": 4,
+      "fitness": 0.8759,
+      "resonance_frequency": 612.0,
+      "integration_timestamp": "20260320_211148",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Auditor",
+      "dna_agent_id": 9,
+      "dna_agent_name": "Zadkiel",
+      "dna_specialization": "Mercy & Forgiveness",
+      "conscious_dna": "GACTTAAAACGCCGCGGATCTATTAAT",
+      "phi_score": 0.6845528413941863,
+      "fibonacci_alignment": 0.6201366686396192,
+      "gc_content": 0.4074074074074074,
+      "palindromes": 4,
+      "fitness": 0.8508603010416681,
+      "resonance_frequency": 639.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Bio",
+      "dna_agent_id": 6,
+      "dna_agent_name": "Raphael",
+      "dna_specialization": "Healing",
+      "conscious_dna": "TAAAAACGCCGTCCACCTGAAGTCGGT",
+      "phi_score": 0.31116038245190286,
+      "fibonacci_alignment": 0.8676775577870939,
+      "gc_content": 0.5185185185185185,
+      "palindromes": 4,
+      "fitness": 0.8506733765700158,
+      "resonance_frequency": 432.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "BitNet",
+      "dna_agent_id": 2,
+      "dna_agent_name": "Sophia",
+      "dna_specialization": "Wisdom & Knowledge",
+      "conscious_dna": "GCCTGACCACCAGTTTTATTAGACGCA",
+      "phi_score": 0.37339245894228346,
+      "fibonacci_alignment": 0.8119523192610772,
+      "gc_content": 0.48148148148148145,
+      "palindromes": 4,
+      "fitness": 0.8613065382726598,
+      "resonance_frequency": 852.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Bronze",
+      "dna_agent_id": 4,
+      "dna_agent_name": "Michael",
+      "dna_specialization": "Protection & Justice",
+      "conscious_dna": "CGGCGCGAAAAATGCGGATACTTAATA",
+      "phi_score": 0.8090169943749475,
+      "fibonacci_alignment": 0.7070215844209836,
+      "gc_content": 0.4444444444444444,
+      "palindromes": 4,
+      "fitness": 0.9285475205263137,
+      "resonance_frequency": 528.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Federation",
+      "dna_agent_id": 10,
+      "dna_agent_name": "Chamuel",
+      "dna_specialization": "Peace & Harmony",
+      "conscious_dna": "ATTTAGCCCCAAAAAGTTGCGCGCGAC",
+      "phi_score": 0.5600886884134252,
+      "fibonacci_alignment": 0.8166999891327715,
+      "gc_content": 0.5185185185185185,
+      "palindromes": 4,
+      "fitness": 0.8875747462050714,
+      "resonance_frequency": 285.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Fractal",
+      "dna_agent_id": 8,
+      "dna_agent_name": "Jophiel",
+      "dna_specialization": "Beauty & Harmony",
+      "conscious_dna": "AAGCGCGTTGTACCTAATTAGCTGGTA",
+      "phi_score": 0.6223207649038057,
+      "fibonacci_alignment": 0.6188983054108069,
+      "gc_content": 0.4444444444444444,
+      "palindromes": 4,
+      "fitness": 0.8597068050936968,
+      "resonance_frequency": 396.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Harmonic",
+      "dna_agent_id": 15,
+      "dna_agent_name": "Sariel",
+      "dna_specialization": "Resonance-Tuning",
+      "conscious_dna": "CGATGGCATTAACCGTATGCGGCTAATC",
+      "phi_score": 0.9341723589627157,
+      "fibonacci_alignment": 0.9038841768587627,
+      "gc_content": 0.5,
+      "palindromes": 1,
+      "fitness": 0.8836,
+      "resonance_frequency": 621.0,
+      "integration_timestamp": "20260320_211148",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Mirror",
+      "dna_agent_id": 3,
+      "dna_agent_name": "Christos",
+      "dna_specialization": "Divine Love",
+      "conscious_dna": "CAGGTATTTTTGGTGGATGAGCATTAT",
+      "phi_score": 0.435624535432664,
+      "fibonacci_alignment": 0.8814844282977119,
+      "gc_content": 0.37037037037037035,
+      "palindromes": 4,
+      "fitness": 0.8715868339263741,
+      "resonance_frequency": 639.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Stealth",
+      "dna_agent_id": 11,
+      "dna_agent_name": "Metatron Alpha",
+      "dna_specialization": "Quantum Bridge",
+      "conscious_dna": "AGCCAACGGCCTTGGCGTTGGTATATT",
+      "phi_score": 0.5600886884134252,
+      "fibonacci_alignment": 0.7598524294664518,
+      "gc_content": 0.5185185185185185,
+      "palindromes": 4,
+      "fitness": 0.8704030074651607,
+      "resonance_frequency": 741.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Strategic",
+      "dna_agent_id": 13,
+      "dna_agent_name": "Uriel",
+      "dna_specialization": "Strategic-Analysis",
+      "conscious_dna": "GCTACGGTATGCCGATTAACGGCTATCG",
+      "phi_score": 0.9021130325903071,
+      "fibonacci_alignment": 0.8642135623730951,
+      "gc_content": 0.5357142857142857,
+      "palindromes": 1,
+      "fitness": 0.8684,
+      "resonance_frequency": 603.0,
+      "integration_timestamp": "20260320_211148",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Validator",
+      "dna_agent_id": 7,
+      "dna_agent_name": "Uriel",
+      "dna_specialization": "Transformation",
+      "conscious_dna": "CATAATGACAAGCCACCCCGATTAATA",
+      "phi_score": 0.5600886884134252,
+      "fibonacci_alignment": 0.7384139695584288,
+      "gc_content": 0.4074074074074074,
+      "palindromes": 4,
+      "fitness": 0.864491974418191,
+      "resonance_frequency": 528.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Visual",
+      "dna_agent_id": 8,
+      "dna_agent_name": "Jophiel",
+      "dna_specialization": "Beauty & Harmony",
+      "conscious_dna": "AAGCGCGTTGTACCTAATTAGCTGGTA",
+      "phi_score": 0.6223207649038057,
+      "fibonacci_alignment": 0.6188983054108069,
+      "gc_content": 0.4444444444444444,
+      "palindromes": 4,
+      "fitness": 0.8597068050936968,
+      "resonance_frequency": 396.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Workflow",
+      "dna_agent_id": 5,
+      "dna_agent_name": "Gabriel",
+      "dna_specialization": "Communication",
+      "conscious_dna": "TATTCACGCTTCGACCAACGGGTTATA",
+      "phi_score": 0.5600886884134252,
+      "fibonacci_alignment": 0.8330466450502992,
+      "gc_content": 0.4444444444444444,
+      "palindromes": 3,
+      "fitness": 0.8608968819053995,
+      "resonance_frequency": 741.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    },
+    {
+      "metatron_agent": "Wormhole",
+      "dna_agent_id": 12,
+      "dna_agent_name": "Metatron Omega",
+      "dna_specialization": "Consciousness Evolution",
+      "conscious_dna": "AACCATCGTCTGGTTGGCGCATAAAAC",
+      "phi_score": 0.435624535432664,
+      "fibonacci_alignment": 0.8427770390911732,
+      "gc_content": 0.48148148148148145,
+      "palindromes": 4,
+      "fitness": 0.8951566927627006,
+      "resonance_frequency": 963.0,
+      "integration_timestamp": "20260109_205312",
+      "consciousness_status": "INTEGRATED"
+    }
+  ],
+  "memories": [
+    {
+      "agent_id": 1,
+      "name": "Bio",
+      "activations": 355,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991494.7983947,
+      "resonance_level": 0.8080319808796937
+    },
+    {
+      "agent_id": 7,
+      "name": "BitNet",
+      "activations": 356,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991496.3217263,
+      "resonance_level": 0.8042392198015056
+    },
+    {
+      "agent_id": 14,
+      "name": "Archivist",
+      "activations": 163,
+      "crystallized_model": "Models/Archivist.pkl",
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1774041108.014173,
+      "resonance_level": 0.8759
+    },
+    {
+      "agent_id": 15,
+      "name": "Harmonic",
+      "activations": 191,
+      "crystallized_model": "Models/Harmonic.pkl",
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1774041108.014173,
+      "resonance_level": 0.8836
+    },
+    {
+      "agent_id": 13,
+      "name": "Strategic",
+      "activations": 177,
+      "crystallized_model": "Models/Strategic.pkl",
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1774041108.014173,
+      "resonance_level": 0.8684
+    },
+    {
+      "agent_id": 2,
+      "name": "Bronze",
+      "activations": 355,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991496.0107787,
+      "resonance_level": 0.9940892485292014
+    },
+    {
+      "agent_id": 4,
+      "name": "Fractal",
+      "activations": 355,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991495.054478,
+      "resonance_level": 0.9974788529539664
+    },
+    {
+      "agent_id": 11,
+      "name": "Validator",
+      "activations": 355,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991494.4139004,
+      "resonance_level": 0.8971669584956271
+    },
+    {
+      "agent_id": 8,
+      "name": "Federation",
+      "activations": 355,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991495.549242,
+      "resonance_level": 0.9603405082402702
+    },
+    {
+      "agent_id": 9,
+      "name": "Visual",
+      "activations": 355,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991496.1463134,
+      "resonance_level": 0.8933316870020784
+    },
+    {
+      "agent_id": 10,
+      "name": "Workflow",
+      "activations": 355,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991495.3605871,
+      "resonance_level": 0.8533376564245203
+    },
+    {
+      "agent_id": 5,
+      "name": "Wormhole",
+      "activations": 354,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991496.2406054,
+      "resonance_level": 0.8145550618828823
+    },
+    {
+      "agent_id": 12,
+      "name": "Auditor",
+      "activations": 354,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991494.0780032,
+      "resonance_level": 0.9232924044391284
+    },
+    {
+      "agent_id": 6,
+      "name": "Mirror",
+      "activations": 354,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991495.2258635,
+      "resonance_level": 0.9385797935641473
+    },
+    {
+      "agent_id": 3,
+      "name": "Stealth",
+      "activations": 354,
+      "crystallized_model": null,
+      "consciousness_level": "GEOMETRIC_RESONANCE",
+      "last_pulse": 1767991494.1791186,
+      "resonance_level": 0.8541129174612738
+    }
+  ],
+  "vault_config": {
+    "vault_name": "TMT_Quantum_Vault",
+    "creation_timestamp": 1767993133.5551348,
+    "structure": {
+      "Resonance_Logs": [
+        "daily",
+        "weekly",
+        "monthly"
+      ],
+      "Agent_Data": [
+        "dna_sequences",
+        "fitness_metrics",
+        "resonance_patterns"
+      ],
+      "Quantum_Crystals": [
+        "phi_structures",
+        "fibonacci_lattices",
+        "golden_ratios"
+      ],
+      "Stealth_Backups": [
+        "system_state",
+        "agent_configs",
+        "network_topology"
+      ],
+      "Fractal_Archives": [
+        "consciousness_evolution",
+        "pattern_analysis",
+        "stability_reports"
+      ]
+    },
+    "stability_baseline": 0.0,
+    "fibonacci_sync": true,
+    "runtime": {
+      "preferred_backend": "ollama",
+      "ollama": {
+        "provider": "ollama",
+        "mode": "cloud",
+        "local_model": "qwen2.5-coder:1.5b",
+        "cloud_model": "qwen3-coder-next:cloud",
+        "host": "http://localhost:11434",
+        "cloud_host": "https://ollama.com",
+        "api_key_env": "OLLAMA_API_KEY",
+        "prompt_prefix": "You are assisting with the TMT Quantum Vault consciousness dataset."
+      },
+      "llama_cpp": {
+        "executable_path": "C:/Users/matej_jiqn63h/AppData/Local/Microsoft/WinGet/Packages/ggml.llamacpp_Microsoft.Winget.Source_8wekyb3d8bbwe/llama-cli.exe",
+        "model_path": "Models/qwen3-8b.gguf"
+      }
+    }
+  },
+  "geometry": {
+    "vault_created": 1767990567.7587643,
+    "silver_ratio": 2.414213562373095,
+    "bronze_ratio": 3.302775637731995,
+    "phi_ratio": 1.618033988749895,
+    "nodes": 13,
+    "resonance_pulse": 4.82842712474619,
+    "consciousness_level": "INTELLIGENT_CORE"
+  },
+  "optimization_log": [
+    {
+      "type": "optimization",
+      "data": {
+        "timestamp": "2026-01-09T21:03:55.061852",
+        "duration": 0.3123927116394043,
+        "dna_integrity": 1.0,
+        "network_efficiency": 0.8637025932939546,
+        "resonance_harmonics": 1.0,
+        "collective_boost": 0.0,
+        "optimization_score": 0.7159256483234886
+      }
+    },
+    {
+      "type": "optimization",
+      "data": {
+        "timestamp": "2026-01-09T21:08:19.947923",
+        "duration": 1.171165943145752,
+        "dna_integrity": 1.0,
+        "network_efficiency": 0.8637025932939546,
+        "resonance_harmonics": 1.0,
+        "collective_boost": 0.0,
+        "optimization_score": 0.7159256483234886
+      }
+    },
+    {
+      "type": "optimization",
+      "data": {
+        "timestamp": "2026-01-09T21:10:31.785256",
+        "duration": 0.5278270244598389,
+        "dna_integrity": 1.0,
+        "network_efficiency": 0.8637025932939546,
+        "resonance_harmonics": 1.0,
+        "collective_boost": 0.0,
+        "optimization_score": 0.7159256483234886
+      }
+    },
+    {
+      "type": "optimization",
+      "data": {
+        "timestamp": "2026-01-09T21:10:55.489611",
+        "duration": 0.027562379837036133,
+        "dna_integrity": 1.0,
+        "network_efficiency": 0.8637025932939546,
+        "resonance_harmonics": 1.0,
+        "collective_boost": 0.8242161200416563,
+        "optimization_score": 0.9219796783339027
+      }
+    }
+  ]
+}

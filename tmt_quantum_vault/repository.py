@@ -67,8 +67,34 @@ class VaultRepository:
             memories.append((path, AgentMemory.model_validate(payload)))
         return memories
 
-    def model_files(self) -> list[Path]:
+    def model_artifacts(self) -> list[Path]:
+        models_dir = self.root / "Models"
+        if not models_dir.exists():
+            return []
+        return sorted(path for path in models_dir.iterdir() if path.is_file())
+
+    def serialized_model_files(self) -> list[Path]:
+        return [
+            path
+            for path in self.model_artifacts()
+            if path.suffix == ".pkl" or path.name.endswith(".json.gz")
+        ]
+
+    def llama_cpp_model_files(self) -> list[Path]:
         return sorted((self.root / "Models").glob("*.gguf"))
+
+    def model_files(self) -> list[Path]:
+        return sorted(
+            {
+                *self.llama_cpp_model_files(),
+                *self.serialized_model_files(),
+            }
+        )
+
+    def configured_model_path(self) -> Path | None:
+        config = self.load_vault_config()
+        model_path = config.runtime.llama_cpp.model_path
+        return self.resolve_path(model_path)
 
     def daily_logs(self) -> list[Path]:
         return sorted((self.root / "Resonance_Logs" / "daily").glob("*.json"))
@@ -120,6 +146,10 @@ class VaultRepository:
         vault = self.load_vault_config()
         agents = self.load_agents()
         models = self.model_files()
+        runnable_models = self.llama_cpp_model_files()
+        serialized_models = self.serialized_model_files()
+        model_artifacts = self.model_artifacts()
+        configured_model_path = self.configured_model_path()
 
         missing_directories = [
             directory_name
@@ -136,22 +166,59 @@ class VaultRepository:
                 )
             )
 
-        if len(agents) != 12:
+        if agents:
+            checks.append(
+                ("ok", f"Detected {len(agents)} agent DNA file(s).")
+            )
+        else:
+            checks.append(("warning", "No agent DNA files were found."))
+
+        if models:
+            detail = (
+                f"Detected {len(models)} persisted model artifact(s) "
+                "in Models/."
+            )
+            if runnable_models:
+                detail += f" Runnable GGUF models: {len(runnable_models)}."
+            if serialized_models:
+                detail += f" Serialized exports: {len(serialized_models)}."
+            checks.append(("ok", detail))
+        else:
+            warning_detail = "No persisted model artifacts found in Models/."
+            unsupported_artifacts = [
+                path.name
+                for path in model_artifacts
+                if path.suffix != ".gguf"
+                and path.suffix != ".pkl"
+                and not path.name.endswith(".json.gz")
+            ]
+            if unsupported_artifacts:
+                warning_detail += (
+                    " Unsupported artifact(s) present: "
+                    + ", ".join(unsupported_artifacts)
+                )
+            checks.append(("warning", warning_detail))
+
+        if (
+            configured_model_path is not None
+            and not configured_model_path.exists()
+        ):
             checks.append(
                 (
                     "warning",
-                    f"Expected 12 agent DNA files, found {len(agents)}.",
+                    "Configured llama.cpp model path is missing: "
+                    + str(configured_model_path.relative_to(self.root)),
                 )
             )
-        else:
-            checks.append(("ok", "Detected 12 agent DNA files."))
-
-        if models:
+        elif configured_model_path is not None:
+            configured_name = configured_model_path.name
             checks.append(
-                ("ok", f"Detected {len(models)} model file(s) in Models/.")
+                (
+                    "ok",
+                    "Configured llama.cpp model path exists: "
+                    + configured_name,
+                )
             )
-        else:
-            checks.append(("warning", "No GGUF model found in Models/."))
 
         if (self.root / ".venv").exists():
             checks.append(

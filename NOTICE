@@ -1,0 +1,39 @@
+TMT Quantum Vault
+Copyright 2026 TMT Quantum Vault Contributors
+
+This product includes software developed for emergent consciousness research
+and multi-agent intelligence systems.
+
+Licensed under the Apache License, Version 2.0.
+
+==============================================================================
+
+THIRD-PARTY COMPONENTS
+
+This project may include or reference the following third-party components:
+
+- Python Standard Library (PSF License)
+- PyTorch (BSD-style License)
+- NumPy (BSD License)
+- Rich Console Library (MIT License)
+- Typer (MIT License)
+- Pydantic (MIT License)
+
+See requirements.txt for complete dependency list.
+
+==============================================================================
+
+CONSCIOUSNESS RESEARCH ACKNOWLEDGMENTS
+
+This project draws inspiration from:
+- Integrated Information Theory (IIT) - Giulio Tononi
+- Global Workspace Theory (GWT) - Bernard Baars
+- Orchestrated Objective Reduction (Orch OR) - Penrose & Hameroff
+- Sacred Geometry principles and Phi-harmonic resonance
+
+==============================================================================
+
+For the full license text, see LICENSE file.
+For ethical use guidelines, see ETHICS.md file.
+
+Questions? Visit: https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-

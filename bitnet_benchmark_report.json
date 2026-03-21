@@ -1,0 +1,75 @@
+{
+  "benchmark_timestamp": "2026-03-21T02:35:48.535803",
+  "seeds": {
+    "baseline": "ee6715853076583e777aad15f8de1659",
+    "bitnet": "5388ee36a1b696766ece6635890c7325"
+  },
+  "entropy_distribution": {
+    "baseline": {
+      "avg": 0.1,
+      "std": 0.123414,
+      "min": 0.0,
+      "max": 0.850468,
+      "entropy_bits": [
+        58,
+        37,
+        11,
+        47,
+        36,
+        1,
+        0,
+        6,
+        5,
+        49
+      ]
+    },
+    "bitnet": {
+      "avg": 0.1,
+      "std": 0.122595,
+      "min": 0.0,
+      "max": 0.787764,
+      "entropy_bits": [
+        2,
+        45,
+        107,
+        12,
+        17,
+        13,
+        5,
+        0,
+        41,
+        9
+      ]
+    },
+    "improvement": {
+      "avg_delta": 0.0,
+      "std_delta": -0.000819,
+      "entropy_bits_count": 10
+    }
+  },
+  "repeat_prompt_variance": {
+    "baseline": {
+      "mean": 0.740922,
+      "std": 0.041381,
+      "range": 0.110392
+    },
+    "bitnet": {
+      "mean": 0.763851,
+      "std": 0.049105,
+      "range": 0.125661
+    },
+    "improvement": {
+      "std_reduction_pct": -18.67
+    }
+  },
+  "phi_alignment": {
+    "baseline": 1.613908,
+    "bitnet": 1.612117,
+    "improvement": 0.001791
+  },
+  "overall_improvement_score": {
+    "entropy_improvement": 0.5973,
+    "variance_improvement": 0,
+    "combined_score": 0.0029
+  }
+}

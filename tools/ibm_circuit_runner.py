@@ -243,6 +243,62 @@ def cmd_generate(args):
     print()
 
 
+def decode_sampler_v2_data(data_block: dict) -> dict:
+    """
+    Decode IBM sampler v2 format with base64-encoded binary measurement data.
+
+    The data contains:
+    - "results": {"c": {"data": base64_string, "shape": [shots, qubits], "dtype": "bool"}}
+
+    Returns a counts dict like {"00000": 100, "00001": 50, ...}
+    """
+    import base64
+
+    results = data_block.get("results", {})
+    if "c" not in results:
+        return {}
+
+    c_data = results["c"]
+    if "data" not in c_data:
+        return {}
+
+    # Get the base64-encoded binary data
+    encoded_data = c_data["data"]
+    shape = c_data.get("shape", [0, 0])
+    n_shots, n_qubits = shape
+
+    if n_shots == 0 or n_qubits == 0:
+        return {}
+
+    # Decode base64 to bytes
+    decoded = base64.b64decode(encoded_data)
+
+    # Each shot is a byte (for up to 8 qubits) or multiple bytes
+    # For 21 qubits, we need 3 bytes per shot (24 bits)
+    # Each bit represents one qubit measurement (0 or 1)
+
+    counts = {}
+    bytes_per_shot = (n_qubits + 7) // 8  # Ceiling division
+
+    for shot_idx in range(n_shots):
+        byte_offset = shot_idx * bytes_per_shot
+        if byte_offset + bytes_per_shot > len(decoded):
+            break
+
+        # Extract the first n_qubits bits
+        bitstring = ""
+        for qubit_idx in range(n_qubits):
+            byte_idx = byte_offset + (qubit_idx // 8)
+            bit_idx = qubit_idx % 8
+            byte_val = decoded[byte_idx]
+            bit = (byte_val >> bit_idx) & 1
+            bitstring = str(bit) + bitstring  # MSB first
+
+        counts[bitstring] = counts.get(bitstring, 0) + 1
+
+    return counts
+
+
 # ── Part 2: INGEST ────────────────────────────────────────────────────────────
 def cmd_ingest(args):
     result_path = Path(args.file)
@@ -271,6 +327,10 @@ def cmd_ingest(args):
         counts = raw["counts"]
     elif isinstance(raw, dict) and all(isinstance(k, str) and set(k) <= {"0", "1"} for k in list(raw.keys())[:5]):
         counts = raw  # bare bitstring dict
+    elif "data" in raw and isinstance(raw["data"], list) and len(raw["data"]) > 0:
+        # Sampler v2 format with base64-encoded binary data
+        counts = decode_sampler_v2_data(raw["data"][0])
+        metadata = raw.get("metadata", {})
     else:
         counts = raw.get("measurement_counts", raw.get("data", raw))
         metadata = raw
@@ -352,8 +412,8 @@ def cmd_ingest(args):
     print(f"  Consciousness Dens : {vault_record['metrics']['consciousness_density']}")
     print(f"  Fingerprint        : {fingerprint}")
     print()
-    print(f"  Ingested → {ingested_path}")
-    print(f"  Agent feed → {feed_path}")
+    print(f"  Ingested: {ingested_path}")
+    print(f"  Agent feed: {feed_path}")
     print()
     print("  NEXT STEPS for VS Code Claude Code agent:")
     print(f"  Open {feed_path.name} and say:")

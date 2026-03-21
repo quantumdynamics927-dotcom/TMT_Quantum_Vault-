@@ -96,7 +96,7 @@ By contributing to TMT Quantum Vault, you affirm that your contributions:
 ## 🌐 Questions & Reporting
 
 - **Ethics Questions**: Open an issue with label `ethics-question`
-- **Violation Reports**: Email security@tmt-quantum-vault.org (PGP key available)
+- **Violation Reports**: Email quantumdynamics927@gmail.com (PGP key available)
 - **Policy Proposals**: Submit PRs to this document for community review
 
 ---

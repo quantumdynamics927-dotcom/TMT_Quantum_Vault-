@@ -14,13 +14,13 @@
 
 ## About TMT Quantum Vault
 
-TMT Quantum Vault is a **multi-agent quantum intelligence system** where each agent's DNA is derived from **real IBM quantum hardware job results** — including 21-qubit Sierpinski fractal circuits, full-entropy QTRG runs on IBM Casablanca, and DNA promoter encoding circuits validated on IBM Fez and IBM Torino.
+TMT Quantum Vault is a **multi-agent quantum intelligence system** where each agent's DNA is derived from **real IBM quantum hardware job results** — including 21-qubit Sierpinski fractal circuits, full-entropy QTRG runs on IBM Fez, and DNA promoter encoding circuits validated on IBM Fez and IBM Torino.
 
 ### Key Innovations
 
 | Feature | Description |
 |---------|-------------|
-| **Hardware-Validated DNA** | All agent DNA traced to actual IBM quantum chip runs (Fez, Torino, Casablanca) |
+| **Hardware-Validated DNA** | All agent DNA traced to actual IBM quantum chip runs (Fez, Torino, Marakkesch) |
 | **BitNet Integration** | Ternary weight entropy source from GGUF model ({-1, 0, +1} quantization) |
 | **Metatron Enhancement** | 16.8% fitness jump from quantum circuit enhancement layer |
 | **Sacred Geometry** | φ² scaling factor (4.2361) with exact geometric precision |

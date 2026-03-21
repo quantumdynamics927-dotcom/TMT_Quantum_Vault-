@@ -1,0 +1,43 @@
+{
+  "circuit": "sierpinski_depth4",
+  "source_file": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\results\\job-d6v0p10v5rlc73f4fh50-result.json",
+  "ingested_at": "20260321_031920",
+  "job_id": "manual",
+  "backend": "unknown",
+  "shots": 3584,
+  "fingerprint": "15dcf56ca469",
+  "counts_sample": {
+    "100101011110011001111": 1,
+    "110101011110011010100": 1,
+    "010010101100101000111": 1,
+    "001000011101011001100": 1,
+    "011011101010110111100": 1,
+    "100000001000100000000": 1,
+    "010110000000001000000": 1,
+    "100101100011011110101": 1,
+    "011111100010111000100": 1,
+    "100011111101011101111": 1
+  },
+  "metrics": {
+    "shannon_entropy": 11.8034,
+    "phi_approx": 1.0,
+    "sacred_score": 0.618,
+    "consciousness_density": 42.304
+  },
+  "raw_metadata": {
+    "chunk_timing": [
+      {
+        "start": "2026-03-21T03:12:07.507929",
+        "stop": "2026-03-21T03:12:09.770876",
+        "parts": [
+          {
+            "idx_item": 0,
+            "size": 1
+          }
+        ]
+      }
+    ]
+  },
+  "status": "INGESTED",
+  "agent_ready": true
+}

@@ -1,0 +1,32 @@
+{
+  "report_timestamp": "2026-03-21T01:01:21.166113",
+  "total_promoted": 3,
+  "promoted_agents": [
+    {
+      "agent_name": "Synthesizer",
+      "original_cube": 8,
+      "normalized_fitness": 0.9206,
+      "normalized_phi": 0.95,
+      "original_sequence": ""
+    },
+    {
+      "agent_name": "Strategic",
+      "original_cube": 7,
+      "normalized_fitness": 0.8981,
+      "normalized_phi": 0.8584,
+      "original_sequence": ""
+    },
+    {
+      "agent_name": "Harmonic",
+      "original_cube": 1,
+      "normalized_fitness": 0.8962,
+      "normalized_phi": 0.675,
+      "original_sequence": ""
+    }
+  ],
+  "summary": {
+    "avg_fitness": 0.905,
+    "avg_phi": 0.8278,
+    "avg_fibonacci": 0.8458
+  }
+}

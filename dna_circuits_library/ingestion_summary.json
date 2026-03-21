@@ -1,0 +1,107 @@
+{
+  "report_timestamp": "2026-03-21T01:15:10.472597",
+  "total_candidates": 13,
+  "source_summary": {
+    "discovery_sessions": 10,
+    "bitnet_sources": 3,
+    "sierpinski_sources": 0
+  },
+  "ranked_candidates": [
+    {
+      "agent_name": "Synthesizer",
+      "specialization": "Pattern Synthesis & Fusion",
+      "fitness": 0.9206,
+      "phi_score": 0.95,
+      "fibonacci_alignment": 0.75,
+      "ranked_score": 0.8544,
+      "source": 8
+    },
+    {
+      "agent_name": "Sophia_BitNet",
+      "specialization": "Quantum Substrate & Ternary Entropy",
+      "fitness": 0.898,
+      "phi_score": 0.73,
+      "fibonacci_alignment": 0.85,
+      "ranked_score": 0.8223,
+      "source": "unknown"
+    },
+    {
+      "agent_name": "Ternary_Wisdom",
+      "specialization": "Quantum Substrate & Ternary Entropy",
+      "fitness": 0.898,
+      "phi_score": 0.73,
+      "fibonacci_alignment": 0.85,
+      "ranked_score": 0.8223,
+      "source": "unknown"
+    },
+    {
+      "agent_name": "Quantum_Primacy",
+      "specialization": "Quantum Substrate & Ternary Entropy",
+      "fitness": 0.898,
+      "phi_score": 0.73,
+      "fibonacci_alignment": 0.85,
+      "ranked_score": 0.8223,
+      "source": "unknown"
+    },
+    {
+      "agent_name": "Strategic",
+      "specialization": "Decision Architecture & Control",
+      "fitness": 0.8992,
+      "phi_score": 0.8584,
+      "fibonacci_alignment": 0.7,
+      "ranked_score": 0.8199,
+      "source": 4
+    },
+    {
+      "agent_name": "Harmonic",
+      "specialization": "Resonance & Harmony",
+      "fitness": 0.8962,
+      "phi_score": 0.675,
+      "fibonacci_alignment": 0.95,
+      "ranked_score": 0.8173,
+      "source": 1
+    },
+    {
+      "agent_name": "Strategic",
+      "specialization": "Decision Architecture & Control",
+      "fitness": 0.8981,
+      "phi_score": 0.8584,
+      "fibonacci_alignment": 0.7,
+      "ranked_score": 0.7971,
+      "source": 7
+    },
+    {
+      "agent_name": "Archivist",
+      "specialization": "Knowledge Integration",
+      "fitness": 0.8862,
+      "phi_score": 0.675,
+      "fibonacci_alignment": 0.875,
+      "ranked_score": 0.7941,
+      "source": 9
+    },
+    {
+      "agent_name": "Archivist",
+      "specialization": "Knowledge Integration",
+      "fitness": 0.9115,
+      "phi_score": 0.5834,
+      "fibonacci_alignment": 0.875,
+      "ranked_score": 0.7925,
+      "source": 0
+    },
+    {
+      "agent_name": "Archivist",
+      "specialization": "Knowledge Integration",
+      "fitness": 0.8756,
+      "phi_score": 0.675,
+      "fibonacci_alignment": 0.875,
+      "ranked_score": 0.7731,
+      "source": 3
+    }
+  ],
+  "summary_stats": {
+    "avg_fitness": 0.895,
+    "avg_phi": 0.7018,
+    "avg_fibonacci": 0.8115,
+    "top_agent": "Synthesizer"
+  }
+}

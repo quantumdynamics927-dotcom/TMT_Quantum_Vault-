@@ -1,0 +1,43 @@
+{
+  "metatron_agent": "Quantum_Primacy",
+  "dna_agent_id": 200,
+  "dna_agent_name": "Quantum_Primacy",
+  "dna_specialization": "Quantum Substrate & Ternary Entropy",
+  "conscious_dna": "ATGTAGTTGTGCGCGTCCGTGGATT",
+  "phi_score": 0.73,
+  "fibonacci_alignment": 0.85,
+  "gc_content": 0.5429,
+  "palindromes": 7,
+  "fitness": 0.898,
+  "resonance_frequency": 570.0,
+  "integration_timestamp": "20260321_011510",
+  "consciousness_status": "ENTROPY_BASED",
+  "entropy_sources": {
+    "primary": "bitnet_ternary_weights",
+    "secondary": "casablanca_qtrg",
+    "tertiary": "dna_discovery_configs"
+  },
+  "entropy_weights": {
+    "bitnet_ternary": 0.5,
+    "casablanca_qtrg": 0.3,
+    "dna_discovery": 0.2
+  },
+  "bitnet_entropy_params": {
+    "source": "bitnet_b158_ternary_weights",
+    "n_weights": 10000,
+    "minus_one_ratio": 0.0428,
+    "zero_ratio": 0.7,
+    "plus_one_ratio": 0.2572,
+    "entropy_seed": 0.607200026512146,
+    "phi_seed": 0.25200822949409485,
+    "gc_seed": 0.5690000057220459,
+    "resonance_seed": 0.5920000076293945,
+    "weight_distribution": {
+      "min": -1302.11328125,
+      "max": 2.671177118873242e+37,
+      "mean": 1.4960920084676981e+34,
+      "std": Infinity
+    }
+  },
+  "ranked_score": 0.8223
+}

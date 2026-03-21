@@ -1,0 +1,103 @@
+{
+  "report_timestamp": "2026-03-21T00:44:00.811652",
+  "total_templates": 4,
+  "templates": [
+    {
+      "circuit_id": "CIR_dna_34bp_ibm_fez_analysis_20251231_033008_json",
+      "rank_position": 1,
+      "rank_score": 65.41,
+      "rank_factors": [
+        "conc_phi=0.8524",
+        "fib_enh=1.1120",
+        "fib_act=0.4385",
+        "ham_watson=21.32"
+      ],
+      "dna_metrics": {
+        "consciousness_phi": 0.8524,
+        "consciousness_activation": 0.3902,
+        "fibonacci_enhancement": 1.112,
+        "fibonacci_mean_activation": 0.4385,
+        "hamming_watson_mean": 21.3237,
+        "hamming_crick_mean": 20.1725,
+        "hamming_bridge_mean": 13.4093
+      },
+      "source_file": "D:\\tmt-os\\dna_34bp_ibm_fez_analysis_20251231_033008.json"
+    },
+    {
+      "circuit_id": "CIR_dna_library_analysis_json",
+      "rank_position": 2,
+      "rank_score": 6.0,
+      "rank_factors": [
+        "gc=0.50",
+        "palindromes=2"
+      ],
+      "dna_metrics": {
+        "length": 4,
+        "gc_content": 0.5,
+        "palindrome_score": 2,
+        "phi_approx": 0.5
+      },
+      "source_file": "D:\\tmt-os\\dna_library_analysis.json"
+    },
+    {
+      "circuit_id": "CIR_dna_sequences_library_json",
+      "rank_position": 3,
+      "rank_score": 6.0,
+      "rank_factors": [
+        "gc=0.50",
+        "palindromes=2"
+      ],
+      "dna_metrics": {
+        "length": 4,
+        "gc_content": 0.5,
+        "palindrome_score": 2,
+        "phi_approx": 0.5
+      },
+      "source_file": "D:\\tmt-os\\dna_sequences_library.json"
+    },
+    {
+      "circuit_id": "CIR_dna_comparison_fez_vs_torino_20251225_014119_json",
+      "rank_position": 4,
+      "rank_score": 5.0,
+      "rank_factors": [
+        "gc=0.50",
+        "palindromes=0"
+      ],
+      "dna_metrics": {
+        "length": 10,
+        "gc_content": 0.5,
+        "palindrome_score": 0,
+        "phi_approx": 0.5
+      },
+      "source_file": "D:\\tmt-os\\dna_comparison_fez_vs_torino_20251225_014119.json"
+    }
+  ],
+  "diversity": {
+    "score_range": {
+      "min": 5.0,
+      "max": 65.41,
+      "range": 60.41
+    },
+    "unique_factors": [
+      "ham_watson=21.32",
+      "palindromes=2",
+      "fib_enh=1.1120",
+      "palindromes=0",
+      "fib_act=0.4385",
+      "conc_phi=0.8524",
+      "gc=0.50"
+    ],
+    "unique_sources": [
+      "dna_comparison_fez_vs_torino_20251225_014119.json",
+      "dna_library_analysis.json",
+      "dna_sequences_library.json",
+      "dna_34bp_ibm_fez_analysis_20251231_033008.json"
+    ]
+  },
+  "summary": {
+    "top_score": 65.41,
+    "score_spread": 60.41,
+    "unique_factors": 7,
+    "unique_sources": 4
+  }
+}

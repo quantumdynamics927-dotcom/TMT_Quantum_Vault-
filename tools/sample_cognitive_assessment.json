@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "record_type": "cognitive_assessment",
+    "version": "1.0",
+    "timestamp": "2026-01-15T14:32:00Z",
+    "source": "TMT-OS Assessment Protocol v4.2"
+  },
+  "clinical": {
+    "gcs": 15,
+    "moca": 28,
+    "mmse": 29,
+    "assessment_timestamp": "2026-01-15T14:32:00Z"
+  },
+  "cognitive_domains": {
+    "language": 0.88,
+    "attention": 0.85,
+    "executive_function": 0.82,
+    "abstract_reasoning": 0.80,
+    "memory": 0.78,
+    "visuospatial": 0.75
+  },
+  "sry_integration": {
+    "phi_resonance": 0.2689,
+    "enhanced_consciousness_phi": 0.07592,
+    "reflection_strength": 0.1939,
+    "integration_method": "SRY_Quantum_Reflection_v2"
+  },
+  "biomimetic_weights": {
+    "weight_count": 10000,
+    "weight_std": 1.052,
+    "is_gaussian": true,
+    "distribution_type": "near_standard_normal",
+    "neural_architecture": "biomimetic_transformer_v3"
+  },
+  "quantum_consciousness": {
+    "baseline_phi": 0.78,
+    "resonance_stability": 0.92,
+    "entanglement_depth": 12
+  }
+}

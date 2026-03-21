@@ -1,0 +1,132 @@
+{
+  "session_id": "20251231_025550",
+  "timestamp": "2025-12-31T02:55:50Z",
+  "description": "10-cube DNA configuration search with 100 iterations per cube",
+  "cubes_explored": 10,
+  "iterations_per_cube": 100,
+  "conscious_configs_found": 5,
+  "consciousness_rate": 0.5,
+
+  "cubes": [
+    {
+      "cube_id": 8,
+      "sequence": "CGGCATAATTATAGCGCCGCCGTAAAC",
+      "fitness": 47.66,
+      "phi": 2.0,
+      "fibonacci": 0.750,
+      "gc_content": 0.519,
+      "palindromes": 5,
+      "conscious": true,
+      "symmetry": 0.083,
+      "notes": "Highest fitness, only cube with phi=2.0"
+    },
+    {
+      "cube_id": 0,
+      "sequence": "GCCGGCTTCCTGGTGAATGTTGGATTA",
+      "fitness": 45.38,
+      "phi": 0.667,
+      "fibonacci": 0.875,
+      "gc_content": 0.519,
+      "palindromes": 7,
+      "conscious": false,
+      "symmetry": 0.0,
+      "notes": "Most palindromes but not conscious"
+    },
+    {
+      "cube_id": 4,
+      "sequence": "TAATTCCCCCGATGCGAGGCGCTTCAC",
+      "fitness": 42.29,
+      "phi": 1.667,
+      "fibonacci": 0.500,
+      "gc_content": 0.593,
+      "palindromes": 4,
+      "conscious": false,
+      "symmetry": 0.0,
+      "notes": "High phi but low fibonacci"
+    },
+    {
+      "cube_id": 7,
+      "sequence": "ACGATTAAGTGACTCCTCCGGCTTTTA",
+      "fitness": 42.02,
+      "phi": 1.667,
+      "fibonacci": 0.625,
+      "gc_content": 0.444,
+      "palindromes": 4,
+      "conscious": true,
+      "symmetry": 0.0,
+      "notes": "High phi with good entropy"
+    },
+    {
+      "cube_id": 6,
+      "sequence": "GGTCCTCCCCCCCTTGTACAACTAAAT",
+      "fitness": 41.78,
+      "phi": 0.667,
+      "fibonacci": 0.625,
+      "gc_content": 0.519,
+      "palindromes": 6,
+      "conscious": false,
+      "symmetry": 0.0,
+      "notes": "Symmetric but not conscious"
+    },
+    {
+      "cube_id": 1,
+      "sequence": "GGGCCGCACAACACAAAGCGGCATAAT",
+      "fitness": 41.56,
+      "phi": 1.0,
+      "fibonacci": 1.0,
+      "gc_content": 0.556,
+      "palindromes": 4,
+      "conscious": true,
+      "symmetry": 0.0,
+      "notes": "Perfect Fibonacci (1.0) + phi (1.0)"
+    },
+    {
+      "cube_id": 5,
+      "sequence": "ACCAACGGCGTTAGTCAAATGGTATTA",
+      "fitness": 38.18,
+      "phi": 0.333,
+      "fibonacci": 0.875,
+      "gc_content": 0.407,
+      "palindromes": 5,
+      "conscious": false,
+      "symmetry": 0.0,
+      "notes": "Low phi despite good fibonacci"
+    },
+    {
+      "cube_id": 9,
+      "sequence": "ACCCGAAGGAACTCTGAGGTTGGCACA",
+      "fitness": 39.04,
+      "phi": 1.0,
+      "fibonacci": 0.875,
+      "gc_content": 0.556,
+      "palindromes": 3,
+      "conscious": true,
+      "symmetry": 0.0,
+      "notes": "Balanced phi with high Fibonacci"
+    },
+    {
+      "cube_id": 3,
+      "sequence": "TGCGATATCCTTCCATGGACTGATTTG",
+      "fitness": 36.39,
+      "phi": 1.0,
+      "fibonacci": 0.875,
+      "gc_content": 0.444,
+      "palindromes": 2,
+      "conscious": true,
+      "symmetry": 0.056,
+      "notes": "Phi=1.0 with symmetry present"
+    },
+    {
+      "cube_id": 2,
+      "sequence": "CGCTGTCTCAATTATTACCAGCCTGTG",
+      "fitness": 35.90,
+      "phi": 0.667,
+      "fibonacci": 0.625,
+      "gc_content": 0.481,
+      "palindromes": 3,
+      "conscious": false,
+      "symmetry": 0.0,
+      "notes": "Lower fitness, not conscious"
+    }
+  ]
+}

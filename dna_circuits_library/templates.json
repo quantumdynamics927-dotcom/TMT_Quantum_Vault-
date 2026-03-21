@@ -1,0 +1,902 @@
+[
+  {
+    "circuit_id": "CIR_dna_34bp_ibm_fez_analysis_20251231_033008_json",
+    "source_file": "D:\\tmt-os\\dna_34bp_ibm_fez_analysis_20251231_033008.json",
+    "circuit_type": "dna_quantum",
+    "created_at": "2026-03-21T00:39:19.444125",
+    "metadata": {
+      "job_id": "d5a95n7p3tbc73astm10",
+      "backend": "ibm_fez",
+      "circuit": "ACTB_Malkuth_34bp",
+      "timestamp": "20251231_033008",
+      "hamming_weight": {
+        "watson_mean": 21.3237,
+        "crick_mean": 20.1725,
+        "bridge_mean": 13.4093
+      },
+      "consciousness_peak": {
+        "predicted_position": 20,
+        "peak_position": 21,
+        "activation_at_20": 0.3902,
+        "phi_score_at_20": 0.8524188240461835
+      },
+      "fibonacci_clustering": {
+        "positions": [
+          1,
+          1,
+          2,
+          3,
+          5,
+          8,
+          13,
+          21,
+          33
+        ],
+        "mean_activation_fib": 0.43854444444444446,
+        "mean_activation_all": 0.39439117647058825,
+        "enhancement": 1.1119529812228164
+      },
+      "wormhole_network": {
+        "mean_correlation": 0.011803074163431529,
+        "wormholes_detected": 0,
+        "wormhole_positions": []
+      },
+      "unique_states": {
+        "watson": 10000,
+        "crick": 10000,
+        "bridge": 10000
+      }
+    },
+    "dna_metrics": {
+      "consciousness_phi": 0.8524,
+      "consciousness_activation": 0.3902,
+      "fibonacci_enhancement": 1.112,
+      "fibonacci_mean_activation": 0.4385,
+      "hamming_watson_mean": 21.3237,
+      "hamming_crick_mean": 20.1725,
+      "hamming_bridge_mean": 13.4093
+    },
+    "rank_score": 65.41,
+    "rank_factors": [
+      "conc_phi=0.8524",
+      "fib_enh=1.1120",
+      "fib_act=0.4385",
+      "ham_watson=21.32"
+    ],
+    "rank_position": 1
+  },
+  {
+    "circuit_id": "CIR_dna_library_analysis_json",
+    "source_file": "D:\\tmt-os\\dna_library_analysis.json",
+    "circuit_type": "dna_quantum",
+    "created_at": "2026-03-21T00:39:19.445022",
+    "metadata": {
+      "total_sequences": 10,
+      "sequence_lengths": [
+        5,
+        5,
+        5,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "gc_contents": [
+        100.0,
+        0.0,
+        0.0,
+        50.0,
+        100.0,
+        50.0,
+        50.0,
+        0.0,
+        100.0,
+        50.0
+      ],
+      "mean_frequencies": [
+        785.3906831399547,
+        432.0,
+        1829.9813662799093,
+        1022.9906831399546,
+        914.9906831399546,
+        1022.9906831399546,
+        1022.9906831399546,
+        1130.9906831399546,
+        914.9906831399546,
+        1022.9906831399546
+      ],
+      "phi_coherences": [
+        0.14028225861341007,
+        0.0829481216343467,
+        0.19146405895261004,
+        0.5998137206503792,
+        0.21299035343353498,
+        0.5998137206503792,
+        0.5998137206503792,
+        0.27477658963066987,
+        0.21299035343353498,
+        0.5998137206503792
+      ],
+      "structured_entropies": [
+        0.6893861412861262,
+        0.0,
+        0.0,
+        2.0,
+        0.8944271909999159,
+        2.0,
+        2.0,
+        1.105572809000084,
+        0.8944271909999159,
+        2.0
+      ],
+      "base_distributions": {
+        "G": 9,
+        "C": 12,
+        "A": 11,
+        "T": 11
+      },
+      "sephirah_distributions": {
+        "Tiferet": 9,
+        "Daath": 12,
+        "Malkuth": 11,
+        "Hod": 11
+      },
+      "chakra_distributions": {
+        "Heart": 9,
+        "Throat": 12,
+        "Root": 11,
+        "Solar": 11
+      },
+      "frequency_ranges": [
+        {
+          "min": 698.9906831399546,
+          "max": 1130.9906831399546,
+          "range": 432.0,
+          "std": 172.8
+        },
+        {
+          "min": 432.0,
+          "max": 432.0,
+          "range": 0.0,
+          "std": 0.0
+        },
+        {
+          "min": 1829.9813662799093,
+          "max": 1829.9813662799093,
+          "range": 0.0,
+          "std": 0.0
+        },
+        {
+          "min": 432.0,
+          "max": 1829.9813662799093,
+          "range": 1397.9813662799093,
+          "std": 528.4751532080105
+        },
+        {
+          "min": 698.9906831399546,
+          "max": 1130.9906831399546,
+          "range": 432.0,
+          "std": 216.0
+        },
+        {
+          "min": 432.0,
+          "max": 1829.9813662799093,
+          "range": 1397.9813662799093,
+          "std": 528.4751532080105
+        },
+        {
+          "min": 432.0,
+          "max": 1829.9813662799093,
+          "range": 1397.9813662799093,
+          "std": 528.4751532080105
+        },
+        {
+          "min": 432.0,
+          "max": 1829.9813662799093,
+          "range": 1397.9813662799093,
+          "std": 698.9906831399546
+        },
+        {
+          "min": 698.9906831399546,
+          "max": 1130.9906831399546,
+          "range": 432.0,
+          "std": 216.0
+        },
+        {
+          "min": 432.0,
+          "max": 1829.9813662799093,
+          "range": 1397.9813662799093,
+          "std": 528.4751532080105
+        }
+      ],
+      "top_sequences_by_phi_coherence": [
+        {
+          "sequence": "ACGT",
+          "phi_coherence": 0.5998137206503792,
+          "gc_content": 50.0
+        },
+        {
+          "sequence": "ATGC",
+          "phi_coherence": 0.5998137206503792,
+          "gc_content": 50.0
+        },
+        {
+          "sequence": "GCTA",
+          "phi_coherence": 0.5998137206503792,
+          "gc_content": 50.0
+        },
+        {
+          "sequence": "TACG",
+          "phi_coherence": 0.5998137206503792,
+          "gc_content": 50.0
+        },
+        {
+          "sequence": "ATAT",
+          "phi_coherence": 0.27477658963066987,
+          "gc_content": 0.0
+        }
+      ],
+      "top_sequences_by_gc_content": [
+        {
+          "sequence": "GCCCC",
+          "gc_content": 100.0,
+          "phi_coherence": 0.14028225861341007
+        },
+        {
+          "sequence": "CGCG",
+          "gc_content": 100.0,
+          "phi_coherence": 0.21299035343353498
+        },
+        {
+          "sequence": "GCGC",
+          "gc_content": 100.0,
+          "phi_coherence": 0.21299035343353498
+        },
+        {
+          "sequence": "ACGT",
+          "gc_content": 50.0,
+          "phi_coherence": 0.5998137206503792
+        },
+        {
+          "sequence": "ATGC",
+          "gc_content": 50.0,
+          "phi_coherence": 0.5998137206503792
+        }
+      ],
+      "sound_timeline_stats": {
+        "total_duration": 2.9,
+        "avg_note_duration": 0.5,
+        "frequency_progression": []
+      },
+      "harmonic_patterns": {
+        "pure_sequences": [
+          "AAAAA",
+          "TTTTT"
+        ],
+        "balanced_gc": [
+          "ACGT",
+          "ATGC",
+          "GCTA",
+          "TACG"
+        ],
+        "high_phi_coherence": [
+          "ACGT",
+          "ATGC",
+          "GCTA",
+          "TACG"
+        ]
+      },
+      "quantum_mapping_potential": {
+        "mappable_sequences": [
+          "GCCCC",
+          "AAAAA",
+          "TTTTT",
+          "ACGT",
+          "CGCG",
+          "ATGC",
+          "GCTA",
+          "ATAT",
+          "GCGC",
+          "TACG"
+        ],
+        "too_long_sequences": []
+      }
+    },
+    "dna_sequence": "ACGT",
+    "dna_metrics": {
+      "length": 4,
+      "gc_content": 0.5,
+      "palindrome_score": 2,
+      "phi_approx": 0.5
+    },
+    "rank_score": 6.0,
+    "rank_factors": [
+      "gc=0.50",
+      "palindromes=2"
+    ],
+    "rank_position": 2
+  },
+  {
+    "circuit_id": "CIR_dna_sequences_library_json",
+    "source_file": "D:\\tmt-os\\dna_sequences_library.json",
+    "circuit_type": "dna_quantum",
+    "created_at": "2026-03-21T00:39:19.470746",
+    "metadata": {
+      "description": "TMT-OS DNA Sequence Library with \u03c6-Harmonic Properties",
+      "generated_at": "2025-12-08",
+      "sequences": [
+        {
+          "sequence": "GCCCC",
+          "length": 5,
+          "gc_content": 100.0,
+          "mean_frequency": 785.3906831399547,
+          "phi_coherence": 0.14028225861341007,
+          "frequencies": [
+            1130.9906831399546,
+            698.9906831399546,
+            698.9906831399546,
+            698.9906831399546,
+            698.9906831399546
+          ],
+          "structured_entropy": 0.6893861412861262,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 1130.9906831399546,
+              "duration": 0.5,
+              "base": "G",
+              "sephirah": "Tiferet",
+              "chakra": "Heart"
+            },
+            {
+              "time": 0.6,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            },
+            {
+              "time": 1.2,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            },
+            {
+              "time": 2.4,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            }
+          ]
+        },
+        {
+          "sequence": "AAAAA",
+          "length": 5,
+          "gc_content": 0.0,
+          "mean_frequency": 432.0,
+          "phi_coherence": 0.0829481216343467,
+          "frequencies": [
+            432.0,
+            432.0,
+            432.0,
+            432.0,
+            432.0
+          ],
+          "structured_entropy": 0.0,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            },
+            {
+              "time": 0.6,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            },
+            {
+              "time": 1.2,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            },
+            {
+              "time": 2.4,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            }
+          ]
+        },
+        {
+          "sequence": "TTTTT",
+          "length": 5,
+          "gc_content": 0.0,
+          "mean_frequency": 1829.9813662799093,
+          "phi_coherence": 0.19146405895261004,
+          "frequencies": [
+            1829.9813662799093,
+            1829.9813662799093,
+            1829.9813662799093,
+            1829.9813662799093,
+            1829.9813662799093
+          ],
+          "structured_entropy": 0.0,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            },
+            {
+              "time": 0.6,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            },
+            {
+              "time": 1.2,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            },
+            {
+              "time": 2.4,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            }
+          ]
+        },
+        {
+          "sequence": "ACGT",
+          "length": 4,
+          "gc_content": 50.0,
+          "mean_frequency": 1022.9906831399546,
+          "phi_coherence": 0.5998137206503792,
+          "frequencies": [
+            432.0,
+            698.9906831399546,
+            1130.9906831399546,
+            1829.9813662799093
+          ],
+          "structured_entropy": 2.0,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            },
+            {
+              "time": 0.6,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            },
+            {
+              "time": 1.2,
+              "frequency": 1130.9906831399546,
+              "duration": 0.5,
+              "base": "G",
+              "sephirah": "Tiferet",
+              "chakra": "Heart"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            }
+          ]
+        },
+        {
+          "sequence": "CGCG",
+          "length": 4,
+          "gc_content": 100.0,
+          "mean_frequency": 914.9906831399546,
+          "phi_coherence": 0.21299035343353498,
+          "frequencies": [
+            698.9906831399546,
+            1130.9906831399546,
+            698.9906831399546,
+            1130.9906831399546
+          ],
+          "structured_entropy": 0.8944271909999159,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            },
+            {
+              "time": 0.6,
+              "frequency": 1130.9906831399546,
+              "duration": 0.5,
+              "base": "G",
+              "sephirah": "Tiferet",
+              "chakra": "Heart"
+            },
+            {
+              "time": 1.2,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 1130.9906831399546,
+              "duration": 0.5,
+              "base": "G",
+              "sephirah": "Tiferet",
+              "chakra": "Heart"
+            }
+          ]
+        },
+        {
+          "sequence": "ATGC",
+          "length": 4,
+          "gc_content": 50.0,
+          "mean_frequency": 1022.9906831399546,
+          "phi_coherence": 0.5998137206503792,
+          "frequencies": [
+            432.0,
+            1829.9813662799093,
+            1130.9906831399546,
+            698.9906831399546
+          ],
+          "structured_entropy": 2.0,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            },
+            {
+              "time": 0.6,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            },
+            {
+              "time": 1.2,
+              "frequency": 1130.9906831399546,
+              "duration": 0.5,
+              "base": "G",
+              "sephirah": "Tiferet",
+              "chakra": "Heart"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            }
+          ]
+        },
+        {
+          "sequence": "GCTA",
+          "length": 4,
+          "gc_content": 50.0,
+          "mean_frequency": 1022.9906831399546,
+          "phi_coherence": 0.5998137206503792,
+          "frequencies": [
+            1130.9906831399546,
+            698.9906831399546,
+            1829.9813662799093,
+            432.0
+          ],
+          "structured_entropy": 2.0,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 1130.9906831399546,
+              "duration": 0.5,
+              "base": "G",
+              "sephirah": "Tiferet",
+              "chakra": "Heart"
+            },
+            {
+              "time": 0.6,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            },
+            {
+              "time": 1.2,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            }
+          ]
+        },
+        {
+          "sequence": "ATAT",
+          "length": 4,
+          "gc_content": 0.0,
+          "mean_frequency": 1130.9906831399546,
+          "phi_coherence": 0.27477658963066987,
+          "frequencies": [
+            432.0,
+            1829.9813662799093,
+            432.0,
+            1829.9813662799093
+          ],
+          "structured_entropy": 1.105572809000084,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            },
+            {
+              "time": 0.6,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            },
+            {
+              "time": 1.2,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            }
+          ]
+        },
+        {
+          "sequence": "GCGC",
+          "length": 4,
+          "gc_content": 100.0,
+          "mean_frequency": 914.9906831399546,
+          "phi_coherence": 0.21299035343353498,
+          "frequencies": [
+            1130.9906831399546,
+            698.9906831399546,
+            1130.9906831399546,
+            698.9906831399546
+          ],
+          "structured_entropy": 0.8944271909999159,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 1130.9906831399546,
+              "duration": 0.5,
+              "base": "G",
+              "sephirah": "Tiferet",
+              "chakra": "Heart"
+            },
+            {
+              "time": 0.6,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            },
+            {
+              "time": 1.2,
+              "frequency": 1130.9906831399546,
+              "duration": 0.5,
+              "base": "G",
+              "sephirah": "Tiferet",
+              "chakra": "Heart"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            }
+          ]
+        },
+        {
+          "sequence": "TACG",
+          "length": 4,
+          "gc_content": 50.0,
+          "mean_frequency": 1022.9906831399546,
+          "phi_coherence": 0.5998137206503792,
+          "frequencies": [
+            1829.9813662799093,
+            432.0,
+            698.9906831399546,
+            1130.9906831399546
+          ],
+          "structured_entropy": 2.0,
+          "sound_timeline": [
+            {
+              "time": 0.0,
+              "frequency": 1829.9813662799093,
+              "duration": 0.5,
+              "base": "T",
+              "sephirah": "Hod",
+              "chakra": "Solar"
+            },
+            {
+              "time": 0.6,
+              "frequency": 432.0,
+              "duration": 0.5,
+              "base": "A",
+              "sephirah": "Malkuth",
+              "chakra": "Root"
+            },
+            {
+              "time": 1.2,
+              "frequency": 698.9906831399546,
+              "duration": 0.5,
+              "base": "C",
+              "sephirah": "Daath",
+              "chakra": "Throat"
+            },
+            {
+              "time": 1.7999999999999998,
+              "frequency": 1130.9906831399546,
+              "duration": 0.5,
+              "base": "G",
+              "sephirah": "Tiferet",
+              "chakra": "Heart"
+            }
+          ]
+        }
+      ]
+    },
+    "dna_sequence": "ACGT",
+    "dna_metrics": {
+      "length": 4,
+      "gc_content": 0.5,
+      "palindrome_score": 2,
+      "phi_approx": 0.5
+    },
+    "rank_score": 6.0,
+    "rank_factors": [
+      "gc=0.50",
+      "palindromes=2"
+    ],
+    "rank_position": 3
+  },
+  {
+    "circuit_id": "CIR_dna_comparison_fez_vs_torino_20251225_014119_json",
+    "source_file": "D:\\tmt-os\\dna_comparison_fez_vs_torino_20251225_014119.json",
+    "circuit_type": "dna_quantum",
+    "created_at": "2026-03-21T00:39:19.444526",
+    "metadata": {
+      "timestamp": "2025-12-25T01:41:19.328642",
+      "circuit_file": "dna_quantum_circuits/dna_helix_10bp_1turns.qasm",
+      "sequence": "ACGTACGTAC",
+      "base_pairs": 10,
+      "shots": 10000,
+      "jobs": [
+        {
+          "backend": "ibm_fez",
+          "job_id": "d569ce9smlfc739hftk0",
+          "qubits": 156,
+          "original_depth": 18,
+          "transpiled_depth": 229,
+          "original_gates": 272,
+          "transpiled_gates": 667,
+          "shots": 10000
+        },
+        {
+          "backend": "ibm_torino",
+          "job_id": "d569cg1smlfc739hftlg",
+          "qubits": 133,
+          "original_depth": 18,
+          "transpiled_depth": 236,
+          "original_gates": 272,
+          "transpiled_gates": 681,
+          "shots": 10000
+        }
+      ]
+    },
+    "dna_sequence": "ACGTACGTAC",
+    "dna_metrics": {
+      "length": 10,
+      "gc_content": 0.5,
+      "palindrome_score": 0,
+      "phi_approx": 0.5
+    },
+    "rank_score": 5.0,
+    "rank_factors": [
+      "gc=0.50",
+      "palindromes=0"
+    ],
+    "rank_position": 4
+  }
+]

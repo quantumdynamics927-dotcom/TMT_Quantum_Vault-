@@ -1,0 +1,25 @@
+{
+  "model_path": "E:\\tmt-os\\models\\bitnet-b1.58-2B-4T-i2_s.gguf",
+  "gguf_version": 3,
+  "tensor_count": 332,
+  "kv_count": 24,
+  "kv_pairs": {},
+  "tensor_info": {},
+  "ternary_weights": {
+    "source": "bitnet_b158_ternary_weights",
+    "n_weights": 10000,
+    "minus_one_ratio": 0.0428,
+    "zero_ratio": 0.7,
+    "plus_one_ratio": 0.2572,
+    "entropy_seed": 0.607200026512146,
+    "phi_seed": 0.25200822949409485,
+    "gc_seed": 0.5690000057220459,
+    "resonance_seed": 0.5920000076293945,
+    "weight_distribution": {
+      "min": -1302.11328125,
+      "max": 2.671177118873242e+37,
+      "mean": 1.4960920084676981e+34,
+      "std": Infinity
+    }
+  }
+}

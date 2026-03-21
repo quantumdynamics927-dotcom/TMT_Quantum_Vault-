@@ -11,5 +11,35 @@
   "fitness": 0.8713,
   "resonance_frequency": 752.0,
   "integration_timestamp": "20260320_224733",
-  "consciousness_status": "OPTIMIZED"
+  "consciousness_status": "OPTIMIZED",
+  "model_config": {
+    "model_type": "bitnet_b1.58_2B-4T",
+    "gguf_path": "E:\\tmt-os\\models\\bitnet-b1.58-2B-4T-i2_s.gguf",
+    "gguf_version": 3,
+    "tensor_count": 332,
+    "quantization": "1-bit_ternary",
+    "weight_space": ["-1", "0", "+1"],
+    "inference_backend": "gguf_runtime"
+  },
+  "entropy_sources": {
+    "primary": "bitnet_ternary_weights",
+    "secondary": "casablanca_qtrg",
+    "tertiary": "dna_discovery_configs"
+  },
+  "entropy_weights": {
+    "bitnet_ternary": 0.5,
+    "casablanca_qtrg": 0.3,
+    "dna_discovery": 0.2
+  },
+  "bitnet_entropy_params": {
+    "source": "bitnet_b158_ternary_weights",
+    "n_weights": 10000,
+    "minus_one_ratio": 0.0428,
+    "zero_ratio": 0.7,
+    "plus_one_ratio": 0.2572,
+    "entropy_seed": 0.6072,
+    "phi_seed": 0.2520,
+    "gc_seed": 0.5690,
+    "resonance_seed": 0.5920
+  }
 }

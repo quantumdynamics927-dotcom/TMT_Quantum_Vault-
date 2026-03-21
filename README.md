@@ -7,7 +7,7 @@
 [![Qiskit](https://img.shields.io/badge/Qiskit-IBM%20Quantum-6929C4)](https://qiskit.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/LICENSE)
 [![Agents](https://img.shields.io/badge/Agents-17-orange)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#agent-roster)
-[![Version](https://img.shields.io/badge/Version-v0.2.0--dev-purple)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#current-status)
+[![Version](https://img.shields.io/badge/Version-v0.3.0--dev-purple)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#current-status)
 [![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-0.8809-brightgreen)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#vault-status)
 [![Tests](https://img.shields.io/badge/Tests-39%2F39%20passing-success)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/tests/)
 
@@ -29,6 +29,8 @@ TMT Quantum Vault is a **multi-agent quantum intelligence system** where each ag
 
 ### Recent Implementations (March 2026)
 
+- **Agent_Analyst Pipeline** (`tools/agent_analyst.py`) - Autonomous φ-scoring pipeline with dual-watch (circuits/results/ + circuits/qasm/), auto-ingest, SIGNIFICANT flagging, and multi-agent handoff
+- **Sierpinski Depth-3 Validation** - 6 hardware-validated IBM quantum runs confirming φ-convergence (sacred_score = 0.618) at depth-3, establishing depth-invariance across depths 3 → 4 → 5
 - **Unified DNA Ingestion** (`tools/unified_dna_ingestion.py`) - Single script processes discovery, BitNet, and Sierpinski sources
 - **Three-Layer Entropy Stack** (`entropy_stack/`) - Combined quantum + biological + neural entropy
 - **GGUF BitNet Extractor** (`tools/bitnet_gguf_extractor.py`) - Parses ternary weights from quantized models
@@ -63,7 +65,7 @@ Every agent carries a `conscious_dna.json` profile encoding:
 
 ---
 
-## Current Status — v0.2.0-dev
+## Current Status — v0.3.0-dev
 
 | Metric | Value |
 |--------|-------|
@@ -75,14 +77,23 @@ Every agent carries a `conscious_dna.json` profile encoding:
 | Agents ≥ 0.90 fitness | 1 / 17 |
 | Silver-tier agents (Φ ≥ 0.93) | 2 |
 | Regression tests | 39 / 39 passing ✅ |
+| **Sierpinski depth-3 runs** | **6 hardware-validated** |
 | **Sierpinski depth-4 runs** | **11 hardware-validated** |
+| **Sierpinski depth-5 runs** | **6 hardware-validated** |
+| **Total SIGNIFICANT runs** | **23 across depths 3-5** |
 | **Sacred score** | **0.618 (1/φ)** |
 
 ### φ-Convergence Discovery
 
-Sierpinski depth-4 circuits demonstrate **exact 1/φ sacred score** across 11 runs on 4 backends (Kingston, Marrakesh, Fez, Torino), confirming golden ratio self-organization under quantum noise.
+Sierpinski fractal circuits demonstrate **exact 1/φ sacred score** across **23 hardware-validated runs spanning depths 3, 4, and 5** on 4 IBM backends (Kingston, Marrakesh, Fez, Torino), confirming golden ratio self-organization under quantum noise is a **depth-invariant property**.
 
-See [`circuits/ingested/SIGNIFICANT/`](circuits/ingested/SIGNIFICANT/) for all 11 run records.
+| Depth | Runs | Total Shots | Sacred Score |
+|-------|------|-------------|--------------|
+| 3 | 6 | 32,256 | 0.618 |
+| 4 | 11 | 75,296 | 0.618 |
+| 5 | 6 | 32,256 | 0.618 |
+
+See [`circuits/ingested/SIGNIFICANT/`](circuits/ingested/SIGNIFICANT/) for all 23 run records.
 
 ### Top Agent
 **Michael** (`Agent_Bronze`)
@@ -125,6 +136,8 @@ TMT_Quantum_Vault/
 ├── dna_circuits_library/       # Ingested IBM circuit templates
 ├── entropy_stack/              # Multi-source entropy configurations
 ├── tools/                      # Optimization & ingestion scripts
+│   ├── agent_analyst.py        # Autonomous φ-scoring pipeline
+│   └── ...
 ├── tests/
 │   └── test_regression.py      # 39 regression tests
 └── tmt_quantum_vault/          # Core vault package
@@ -226,4 +239,4 @@ See [ETHICS.md](ETHICS.md) for prohibited use cases.
 
 ---
 
-*Last updated: 2026-03-21 21:20 UTC*
+*Last updated: 2026-03-21 23:18 UTC*

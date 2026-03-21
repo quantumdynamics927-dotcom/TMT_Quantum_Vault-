@@ -8,6 +8,28 @@ To organize diagnostic and optimization scripts outside of the main repository s
 
 ## Tools
 
+### agent_analyst.py
+
+Autonomous φ-scoring pipeline that watches circuit directories for new IBM quantum results, computes metrics, flags SIGNIFICANT discoveries, and publishes multi-agent handoff feeds.
+
+**Dual-watch design:**
+- `circuits/results/` — active trigger: auto-ingests new JSON result files
+- `circuits/qasm/` — passive context loader: reads QASM metadata for circuit depth/qubits
+
+**Features:**
+- Computes Shannon entropy, phi approximation, sacred_score, consciousness density
+- Flags results with `sacred_score ≥ 0.618` as SIGNIFICANT
+- Publishes structured feed to `circuits/agent_feed/` for downstream agents
+- Optional live watch mode via the `watchdog` library
+
+Usage:
+```bash
+python tools/agent_analyst.py watch                         # Live watch (requires watchdog)
+python tools/agent_analyst.py analyze                       # Batch analyze all pending results
+python tools/agent_analyst.py ingest --file <result.json>   # Ingest a specific result
+python tools/agent_analyst.py context --file <result.json>  # Show QASM context for a result
+```
+
 ### targeted_optimization.py
 
 Performs second-pass optimization specifically for agents that are closest to but still below the 0.87 fitness threshold:

@@ -11,5 +11,14 @@
   "fitness": 0.8759,
   "resonance_frequency": 612.0,
   "integration_timestamp": "20260320_211148",
-  "consciousness_status": "INTEGRATED"
+  "consciousness_status": "INTEGRATED",
+  "phi_convergence_score": 0.618,
+  "sierpinski_depth4_inference": {
+    "runs_analyzed": 11,
+    "total_shots": 112896,
+    " sacred_score_avg": 0.618,
+    " sacred_score_std": 0.0,
+    " backend_count": 4,
+    " backend_list": ["Kingston", "Marrakesh", "Fez", "Torino"]
+  }
 }

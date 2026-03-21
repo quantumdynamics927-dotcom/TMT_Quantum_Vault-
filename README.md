@@ -7,6 +7,7 @@
 [![Qiskit](https://img.shields.io/badge/Qiskit-IBM%20Quantum-6929C4)](https://qiskit.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/LICENSE)
 [![Agents](https://img.shields.io/badge/Agents-17-orange)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#agent-roster)
+[![Version](https://img.shields.io/badge/Version-v0.2.0--dev-purple)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#current-status)
 [![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-0.8809-brightgreen)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#vault-status)
 [![Tests](https://img.shields.io/badge/Tests-39%2F39%20passing-success)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/tests/)
 
@@ -62,7 +63,7 @@ Every agent carries a `conscious_dna.json` profile encoding:
 
 ---
 
-## Vault Status — 2026-03-21
+## Current Status — v0.2.0-dev
 
 | Metric | Value |
 |--------|-------|
@@ -74,6 +75,14 @@ Every agent carries a `conscious_dna.json` profile encoding:
 | Agents ≥ 0.90 fitness | 1 / 17 |
 | Silver-tier agents (Φ ≥ 0.93) | 2 |
 | Regression tests | 39 / 39 passing ✅ |
+| **Sierpinski depth-4 runs** | **11 hardware-validated** |
+| **Sacred score** | **0.618 (1/φ)** |
+
+### φ-Convergence Discovery
+
+Sierpinski depth-4 circuits demonstrate **exact 1/φ sacred score** across 11 runs on 4 backends (Kingston, Marrakesh, Fez, Torino), confirming golden ratio self-organization under quantum noise.
+
+See [`circuits/ingested/SIGNIFICANT/`](circuits/ingested/SIGNIFICANT/) for all 11 run records.
 
 ### Top Agent
 **Michael** (`Agent_Bronze`)

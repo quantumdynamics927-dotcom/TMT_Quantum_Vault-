@@ -14,3 +14,14 @@ Resonance_Logs/daily/release-evidence-*/
 Resonance_Logs/daily/release-evidence-step*/
 .DS_Store
 Thumbs.db
+
+# IBM circuit workflow — local only
+circuits/results/
+circuits/ingested/
+circuits/agent_feed/
+circuits/qasm/*.qasm
+
+# Keep manifests (lightweight records) and significant results
+circuits/qasm/*_manifest.json
+!circuits/ingested/SIGNIFICANT/
+circuits/ingested/SIGNIFICANT/*.json

@@ -1,0 +1,11 @@
+{
+  "circuit": "sierpinski",
+  "qasm_file": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\qasm\\sierpinski_20260321_025656.qasm",
+  "qubits": 21,
+  "depth": 4,
+  "generated": "20260321_025656",
+  "status": "PENDING_UPLOAD",
+  "job_id": null,
+  "backend": "ibm_fez",
+  "shots": 4096
+}

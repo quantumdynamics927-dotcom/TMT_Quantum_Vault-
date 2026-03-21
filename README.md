@@ -135,6 +135,58 @@ TMT_Quantum_Vault/
 
 ---
 
+## Repository Guide
+
+### Key technologies
+
+| Technology | Where it appears | Purpose |
+|------------|------------------|---------|
+| **Python 3.11+** | `tmt_quantum_vault/`, `tools/`, `tests/` | Core implementation language |
+| **Typer** | `tmt_quantum_vault/cli.py` | Command-line interface for validation, summaries, runtime checks, and agent execution |
+| **Pydantic** | `tmt_quantum_vault/models.py` | Typed schemas for agent DNA, configuration, evaluations, and repository validation |
+| **Requests** | `tmt_quantum_vault/ollama_api.py` | HTTP client for Ollama-compatible model endpoints |
+| **Rich** | `tmt_quantum_vault/cli.py`, `tmt_quantum_vault/output.py` | Terminal tables, panels, and human-readable CLI output |
+| **Pytest** | `tests/test_regression.py` | Regression coverage for CLI commands, runtime helpers, and release flows |
+| **Qiskit / IBM Quantum data** | `tools/`, `dna_circuits_library/`, `circuits/` | Quantum-circuit ingestion and hardware-derived artifact storage |
+
+### How the repository is organized
+
+| Path | What lives there |
+|------|------------------|
+| `tmt_quantum_vault/` | The main Python package. This is the application code that powers the CLI and repository inspection logic. |
+| `tests/` | Regression tests for the CLI, repository validation, runtime inspection, and release/evaluation helpers. |
+| `tools/` | Standalone maintenance and ingestion scripts for DNA discovery, IBM circuit processing, documentation refreshes, and optimization workflows. |
+| `Agent_*/` | One directory per agent, each containing a `conscious_dna.json` profile used by the repository loader and summary views. |
+| `Cognitive_Nexus/`, `Bio_Resonance/`, `Mandala_Geometry/`, `Shadow_Drive/`, `Stealth_Logs/` | Memory and state stores grouped by subsystem. These are primarily data inputs rather than executable code. |
+| `dna_circuits_library/` | Ingested DNA circuit templates, reports, and supporting metadata. |
+| `entropy_stack/` | Entropy configuration artifacts used by the broader vault system. |
+| `checkpoints/`, `Models/`, `evals/` | Saved state snapshots, model artifacts, and evaluation datasets. |
+| `docs/` | Focused operational documentation such as security and release policies. |
+| `.github/workflows/ci.yml` | CI definition that shows the supported validation commands for the repository. |
+
+### Core package layout
+
+| File | Responsibility |
+|------|----------------|
+| `tmt_quantum_vault/__main__.py` | Module entry point so the app can be run with `python -m tmt_quantum_vault`. |
+| `tmt_quantum_vault/cli.py` | Defines the Typer application and end-user commands like `summary`, `validate`, `doctor`, `runtime`, `run`, and release helpers. |
+| `tmt_quantum_vault/models.py` | Central schema layer for repository JSON files and runtime payloads. |
+| `tmt_quantum_vault/repository.py` | Loads the repository data, validates JSON artifacts against the schemas, and builds summary snapshots. |
+| `tmt_quantum_vault/runtime.py` | Detects runtime dependencies and environment status for commands such as `doctor` and `runtime`. |
+| `tmt_quantum_vault/runner.py` | Coordinates prompt execution against the configured runtime backend. |
+| `tmt_quantum_vault/ollama_api.py` | Low-level integration with Ollama-style model APIs. |
+| `tmt_quantum_vault/output.py` | Shared rendering and JSON-emission helpers used by the CLI. |
+
+### Typical code flow
+
+1. A CLI command starts in `tmt_quantum_vault/cli.py`.
+2. The CLI loads schemas and repository data through `repository.py` and `models.py`.
+3. Runtime-sensitive commands use `runtime.py`, `runner.py`, and `ollama_api.py`.
+4. Results are rendered to the terminal or emitted as JSON through `output.py`.
+5. Regression coverage in `tests/test_regression.py` exercises these user-facing flows.
+
+---
+
 ## Sacred Geometry Foundation
 
 The vault operates on four metallic ratios embedded in circuit topology:
@@ -156,10 +208,14 @@ Fractal depth 3 · 384 harmonics · 147,456 max interference · 13 network nodes
 git clone https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-
 cd TMT_Quantum_Vault-
 python -m venv .venv && .venv\Scripts\activate
-pip install -e .
+python -m pip install -r requirements.txt
 python -m tmt_quantum_vault summary
 python -m pytest tests/test_regression.py -q
 ```
+
+> This repository currently runs directly from the source checkout. Install the
+> dependencies from `requirements.txt`, then invoke commands with
+> `python -m tmt_quantum_vault ...` from the repository root.
 
 ---
 
@@ -170,4 +226,4 @@ See [ETHICS.md](ETHICS.md) for prohibited use cases.
 
 ---
 
-*Last updated: 2026-03-21 03:00 UTC*
+*Last updated: 2026-03-21 21:20 UTC*

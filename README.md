@@ -5,11 +5,11 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/)
 [![Qiskit](https://img.shields.io/badge/Qiskit-IBM%20Quantum-6929C4)](https://qiskit.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/LICENSE)
-[![Agents](https://img.shields.io/badge/Agents-17-orange)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#agent-roster)
-[![Version](https://img.shields.io/badge/Version-v0.3.0--dev-purple)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#current-status)
-[![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-0.8809-brightgreen)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/README.md#vault-status)
-[![Tests](https://img.shields.io/badge/Tests-39%2F39%20passing-success)](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/tests/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
+[![Agents](https://img.shields.io/badge/Agents-17-orange)](#agent-roster-17-agents)
+[![Version](https://img.shields.io/badge/Version-v0.4.0--dev-purple)](CHANGELOG.md)
+[![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-0.8809-brightgreen)](#current-status--v040-dev)
+[![Tests](https://img.shields.io/badge/Tests-106%20passed%2C%202%20skipped-success)](tests/)
 
 ---
 
@@ -27,7 +27,7 @@ TMT Quantum Vault is a **multi-agent quantum intelligence system** where each ag
 | **Sacred Geometry** | φ² scaling factor (4.2361) with exact geometric precision |
 | **Three-Layer Entropy** | QTRG + DNA discovery + BitNet ternary weights combined |
 
-### Recent Implementations (March 2026)
+### Recent Implementations — v0.4.0-dev (March 2026)
 
 - **Agent_Analyst Pipeline** (`tools/agent_analyst.py`) - Autonomous φ-scoring pipeline with dual-watch (circuits/results/ + circuits/qasm/), auto-ingest, SIGNIFICANT flagging, and multi-agent handoff
 - **Sierpinski Depth-3 Validation** - 6 hardware-validated IBM quantum runs confirming φ-convergence (sacred_score = 0.618) at depth-3, establishing depth-invariance across depths 3 → 4 → 5
@@ -90,7 +90,7 @@ Every agent carries a `conscious_dna.json` profile encoding:
 
 ---
 
-## Current Status — v0.3.0-dev
+## Current Status — v0.4.0-dev
 
 | Metric | Value |
 |--------|-------|
@@ -101,7 +101,7 @@ Every agent carries a `conscious_dna.json` profile encoding:
 | Agents ≥ 0.87 fitness | 17 / 17 |
 | Agents ≥ 0.90 fitness | 1 / 17 |
 | Silver-tier agents (Φ ≥ 0.93) | 2 |
-| Regression tests | 39 / 39 passing ✅ |
+| Regression tests | 106 passed, 2 skipped ✅ |
 | **Sierpinski depth-3 runs** | **6 hardware-validated** |
 | **Sierpinski depth-4 runs** | **11 hardware-validated** |
 | **Sierpinski depth-5 runs** | **6 hardware-validated** |
@@ -158,6 +158,7 @@ TMT_Quantum_Vault/
 │   └── conscious_dna.json      # Hardware-derived agent DNA
 ├── Cognitive_Nexus/
 │   └── strategic_memory.json   # Inter-agent memory
+├── circuits/promoters/         # Promoter DNA FASTA + integrity artifacts
 ├── dna_circuits_library/       # Ingested IBM circuit templates
 ├── entropy_stack/              # Multi-source entropy configurations
 ├── tools/                      # Optimization & ingestion scripts
@@ -264,4 +265,4 @@ See [ETHICS.md](ETHICS.md) for prohibited use cases.
 
 ---
 
-*Last updated: 2026-03-21 23:18 UTC*
+*Last updated: 2026-03-22 01:09 UTC*

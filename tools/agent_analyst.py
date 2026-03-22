@@ -44,8 +44,10 @@ RESULTS_DIR   = VAULT_ROOT / "circuits" / "results"
 INGESTED_DIR  = VAULT_ROOT / "circuits" / "ingested"
 AGENT_DIR     = VAULT_ROOT / "circuits" / "agent_feed"
 SIGNIFICANT_DIR = INGESTED_DIR / "SIGNIFICANT"
+PROMOTERS_DIR = VAULT_ROOT / "circuits" / "promoters"
+EXTERNAL_PROMOTERS = Path(r"E:\AGI model\tmt-os-labs\promoters")
 
-for d in [CIRCUITS_DIR, RESULTS_DIR, INGESTED_DIR, AGENT_DIR, SIGNIFICANT_DIR]:
+for d in [CIRCUITS_DIR, RESULTS_DIR, INGESTED_DIR, AGENT_DIR, SIGNIFICANT_DIR, PROMOTERS_DIR]:
     d.mkdir(parents=True, exist_ok=True)
 
 # Configuration
@@ -246,6 +248,71 @@ def ingest_result(result_path: Path, circuit_metadata: Optional[Dict] = None) ->
     return ingested_path
 
 
+# ── Promoter Circuit Generator ───────────────────────────────────────────────
+def generate_promoter_circuit(promoter_name: str, depth: int = 3) -> Optional[Path]:
+    """
+    Generate a quantum circuit from a promoter DNA sequence.
+
+    Args:
+        promoter_name: Name of the promoter (e.g., "ACTB_Malkuth")
+        depth: Fractal depth for entanglement
+
+    Returns:
+        Path to generated QASM file, or None if promoter not found
+    """
+    try:
+        # Import quantum_circuits module
+        import sys
+        sys.path.insert(0, str(VAULT_ROOT / "tools"))
+        from quantum_circuits import create_promoter_circuit, export_promoter_qasm
+
+        # Generate QASM file
+        output_path = export_promoter_qasm(promoter_name, depth, CIRCUITS_DIR)
+
+        # Parse and return circuit metadata
+        qasm_path = Path(output_path)
+        return qasm_path
+
+    except Exception as e:
+        print(f"[ERROR] Failed to generate promoter circuit: {e}")
+        return None
+
+
+def parse_promoter_from_fasta(fasta_path: Path) -> Dict[str, Any]:
+    """
+    Parse a promoter FASTA file and extract metadata.
+
+    Args:
+        fasta_path: Path to FASTA file
+
+    Returns:
+        Dictionary with promoter metadata
+    """
+    content = fasta_path.read_text(encoding="utf-8").strip()
+    lines = content.split('\n')
+
+    header = lines[0].strip().lstrip('>')
+    parts = header.split(':')
+
+    # Extract gene name from filename
+    gene_name = fasta_path.stem.replace("_promoter", "")
+
+    # DNA sequence (second line)
+    dna_sequence = lines[1].strip() if len(lines) > 1 else ""
+
+    return {
+        "name": gene_name,
+        "gene": gene_name.split('_')[0] if '_' in gene_name else gene_name,
+        "sefirah": gene_name.split('_')[-1] if '_' in gene_name else None,
+        "header": header,
+        "chromosome_coord": parts[0] if len(parts) > 0 else header,
+        "sequence": dna_sequence,
+        "length": len(dna_sequence),
+        "gc_content": sum(1 for base in dna_sequence.upper() if base in 'GC') / len(dna_sequence) if dna_sequence else 0,
+        "source_file": str(fasta_path)
+    }
+
+
 # ── Watcher handlers ─────────────────────────────────────────────────────────
 class CircuitWatcher(FileSystemEventHandler):
     """Watch circuits/ directories for new files."""
@@ -253,6 +320,7 @@ class CircuitWatcher(FileSystemEventHandler):
     def __init__(self):
         self.processed_qasm = set()
         self.processed_results = set()
+        self.processed_promoters = set()
 
     def on_created(self, event):
         if event.is_directory:
@@ -260,6 +328,28 @@ class CircuitWatcher(FileSystemEventHandler):
 
         path = Path(event.src_path)
         suffix = path.suffix.lower()
+
+        # Watch promoters/ for FASTA files (auto-generate circuits)
+        if suffix == ".fa" and path.parent.name == "promoters":
+            if path.name in self.processed_promoters:
+                return
+
+            self.processed_promoters.add(path.name)
+            print(f"\n[{datetime.now().strftime('%H:%M:%S')}] NEW PROMOTER: {path.name}")
+
+            # Parse promoter metadata
+            promoter = parse_promoter_from_fasta(path)
+            print(f"  -> Gene: {promoter['gene']}, Sefirah: {promoter['sefirah']}")
+            print(f"  -> Sequence length: {promoter['length']} bp")
+
+            # Generate circuit from promoter
+            qasm_path = generate_promoter_circuit(promoter['name'], depth=3)
+            if qasm_path:
+                print(f"  -> Generated circuit: {qasm_path.name}")
+            else:
+                print(f"  -> Circuit generation failed")
+
+            return
 
         # Watch results/ for JSON files (active trigger)
         if suffix == ".json" and path.parent.name == "results":
@@ -313,12 +403,14 @@ def cmd_watch():
         return
 
     print("Agent_Analyst started. Watching for new circuit files...")
-    print(f"  circuits/qasm/    -> passive context loader")
-    print(f"  circuits/results/ -> active trigger")
+    print(f"  circuits/promoters/ -> auto-generate circuits from FASTA")
+    print(f"  circuits/qasm/      -> passive context loader")
+    print(f"  circuits/results/   -> active trigger")
     print("Press Ctrl+C to stop.\n")
 
     event_handler = CircuitWatcher()
     observer = Observer()
+    observer.schedule(event_handler, str(PROMOTERS_DIR), recursive=False)
     observer.schedule(event_handler, str(CIRCUITS_DIR), recursive=False)
     observer.schedule(event_handler, str(RESULTS_DIR), recursive=False)
     observer.start()

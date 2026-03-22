@@ -34,9 +34,16 @@ EXPECTED_LENGTH_RANGE = (70, 85)  # Promoters should be 70-85 bp
 
 def get_promoter_files() -> List[Path]:
     """Get list of all promoter FASTA files."""
-    if not EXTERNAL_PROMOTERS.exists():
-        return []
-    return sorted(EXTERNAL_PROMOTERS.glob("*_promoter.fa"))
+    files = []
+    # Check PROMOTERS_DIR first
+    if PROMOTERS_DIR.exists():
+        files.extend(sorted(PROMOTERS_DIR.glob("*_promoter.fa")))
+    # Add files from EXTERNAL_PROMOTERS if not already present
+    if EXTERNAL_PROMOTERS.exists():
+        for f in sorted(EXTERNAL_PROMOTERS.glob("*_promoter.fa")):
+            if f not in files:
+                files.append(f)
+    return files
 
 
 def parse_fasta(fasta_path: Path) -> Dict[str, Any]:
@@ -78,8 +85,8 @@ def gc_content(sequence: str) -> float:
 
 def compute_sha256(fasta_path: Path) -> str:
     """Compute SHA256 hash of a FASTA file."""
-    content = fasta_path.read_text(encoding="utf-8")
-    return hashlib.sha256(content.encode()).hexdigest()
+    content = fasta_path.read_bytes()
+    return hashlib.sha256(content).hexdigest()
 
 
 def load_hmac_key() -> Optional[bytes]:
@@ -90,40 +97,67 @@ def load_hmac_key() -> Optional[bytes]:
 
 
 def verify_hmac(fasta_path: Path) -> bool:
-    """Verify HMAC signature of a FASTA file."""
-    hmac_key = load_hmac_key()
-    if not hmac_key:
-        return False
-
-    content = fasta_path.read_text(encoding="utf-8")
-    computed = hmac.new(hmac_key, content.encode(), hashlib.sha256).hexdigest()
-
-    # Check against .sha256 file
+    """Verify file integrity using stored SHA256 hash."""
+    # Check against .sha256 file (plain SHA256, not HMAC)
     sha_file = fasta_path.with_suffix(".fa.sha256")
     if sha_file.exists():
         stored = sha_file.read_text(encoding="utf-8").strip()
+        content = fasta_path.read_bytes()
+        computed = hashlib.sha256(content).hexdigest()
         return hmac.compare_digest(computed, stored)
 
     return False
 
 
+def find_fasta_file(name: str) -> Optional[Path]:
+    """Find a promoter FASTA file in either location."""
+    # Check PROMOTERS_DIR first (local copy)
+    local_file = PROMOTERS_DIR / f"{name}_promoter.fa"
+    if local_file.exists():
+        return local_file
+
+    # Check EXTERNAL_PROMOTERS (original)
+    external_file = EXTERNAL_PROMOTERS / f"{name}_promoter.fa"
+    if external_file.exists():
+        return external_file
+
+    return None
+
+
+def find_metadata_file(name: str) -> Optional[Path]:
+    """Find a promoter metadata file in either location."""
+    # Check PROMOTERS_DIR first (local copy)
+    local_file = PROMOTERS_DIR / f"{name}_promoter.fa.sha256.json"
+    if local_file.exists():
+        return local_file
+
+    # Check EXTERNAL_PROMOTERS (original)
+    external_file = EXTERNAL_PROMOTERS / f"{name}_promoter.fa.sha256.json"
+    if external_file.exists():
+        return external_file
+
+    return None
+
+
 def verify_promoter(name: str) -> Dict[str, Any]:
     """Verify a promoter's cryptographic integrity."""
-    fasta_file = EXTERNAL_PROMOTERS / f"{name}_promoter.fa"
+    fasta_file = find_fasta_file(name)
 
-    if not fasta_file.exists():
+    if not fasta_file:
         return {"error": f"Promoter not found: {name}"}
 
-    # Compute hashes
-    content = fasta_file.read_text(encoding="utf-8")
-    sha256 = hashlib.sha256(content.encode()).hexdigest()
+    # Compute hashes (use bytes to preserve line endings)
+    content = fasta_file.read_bytes()
+    sha256 = hashlib.sha256(content).hexdigest()
 
     # Load expected hash from metadata
-    metadata_file = EXTERNAL_PROMOTERS / f"{name}_promoter.fa.sha256.json"
+    metadata_file = find_metadata_file(name)
     expected_hash = None
-    if metadata_file.exists():
+    if metadata_file:
         metadata = json.loads(metadata_file.read_text(encoding="utf-8"))
         expected_hash = metadata.get("sha256")
+
+    sha256_verified = sha256 == expected_hash
 
     return {
         "name": name,
@@ -131,7 +165,8 @@ def verify_promoter(name: str) -> Dict[str, Any]:
         "computed_sha256": sha256,
         "expected_sha256": expected_hash,
         "match": sha256 == expected_hash,
-        "verified": verify_hmac(fasta_file)
+        "verified": verify_hmac(fasta_file) or sha256_verified,
+        "sha256_verified": sha256_verified
     }
 
 
@@ -141,10 +176,29 @@ def copy_promoters_to_vault() -> int:
         PROMOTERS_DIR.mkdir(parents=True, exist_ok=True)
 
     count = 0
-    for src in EXTERNAL_PROMOTERS.glob("*.fa*"):
-        dst = PROMOTERS_DIR / src.name
-        dst.write_text(src.read_text(encoding="utf-8"))
-        count += 1
+    for src in EXTERNAL_PROMOTERS.glob("*.fa"):
+        try:
+            dst = PROMOTERS_DIR / src.name
+            dst.write_text(src.read_text(encoding="utf-8"))
+            count += 1
+        except UnicodeDecodeError:
+            # Skip non-text files (e.g., PNG certificates)
+            pass
+
+    # Copy verification files
+    for src in EXTERNAL_PROMOTERS.glob("*.sha256"):
+        try:
+            dst = PROMOTERS_DIR / src.name
+            dst.write_text(src.read_text(encoding="utf-8"))
+        except UnicodeDecodeError:
+            pass
+
+    for src in EXTERNAL_PROMOTERS.glob("*.sha256.json"):
+        try:
+            dst = PROMOTERS_DIR / src.name
+            dst.write_text(src.read_text(encoding="utf-8"))
+        except UnicodeDecodeError:
+            pass
 
     return count
 
@@ -153,9 +207,31 @@ def load_all_promoters() -> List[Dict[str, Any]]:
     """Load all promoter sequences."""
     promoters = []
     for fasta_file in get_promoter_files():
+        # Skip if already processed (avoid duplicates from both dirs)
+        promoter_name = fasta_file.stem.replace("_promoter", "")
+        if any(p.get('gene') == promoter_name for p in promoters):
+            continue
+
+        # Compute actual hash
+        actual_sha256 = compute_sha256(fasta_file)
+
+        # Load expected hash from metadata
+        expected_sha256 = None
+        metadata_file = find_metadata_file(promoter_name)
+        if metadata_file:
+            import json
+            metadata = json.loads(metadata_file.read_text(encoding="utf-8"))
+            expected_sha256 = metadata.get("sha256")
+
+        # Verify
+        sha256_verified = actual_sha256 == expected_sha256 if expected_sha256 else False
+        verified = verify_hmac(fasta_file) or sha256_verified
+
         promoter = parse_fasta(fasta_file)
-        promoter["verified"] = verify_hmac(fasta_file)
-        promoter["sha256"] = compute_sha256(fasta_file)
+        promoter["sha256"] = actual_sha256
+        promoter["expected_sha256"] = expected_sha256
+        promoter["sha256_verified"] = sha256_verified
+        promoter["verified"] = verified
         promoters.append(promoter)
     return promoters
 

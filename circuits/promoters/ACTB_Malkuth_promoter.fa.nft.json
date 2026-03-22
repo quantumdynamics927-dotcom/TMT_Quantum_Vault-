@@ -1,0 +1,32 @@
+{
+    "name": "TMT-OS Research: PromoterDelivery - Batch #C5A3F5DB",
+    "description": "Certified Quantum-Genetic Research generated via TMT-OS Boveda Cuantica.",
+    "image": "ipfs://[Link_To_Your_Graph_Or_Logo]",
+    "external_url": "https://www.upwork.com/freelancers/~your_id",
+    "attributes": [
+        {
+            "trait_type": "Researcher",
+            "value": "Jose/Agent 13"
+        },
+        {
+            "trait_type": "Framework",
+            "value": "TMT-OS v4.0"
+        },
+        {
+            "trait_type": "Integrity_Hash",
+            "value": "fd45538406de276d4b94cfacdd8c3b07b74a47bafe8aff2d340862e9a228ce62"
+        },
+        {
+            "trait_type": "Timestamp",
+            "value": 1768358798
+        },
+        {
+            "trait_type": "Phi Score",
+            "value": 1.0
+        },
+        {
+            "trait_type": "Size",
+            "value": 74
+        }
+    ]
+}

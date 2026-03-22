@@ -41,6 +41,7 @@ TEST_REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(TEST_REPO_ROOT / "tools"))
 import promoter_loader as pl  # noqa: E402
 import agent_analyst as aa    # noqa: E402
+import update_vault_docs as uvd  # noqa: E402
 
 
 def _safe_stderr(text: str) -> str:
@@ -2579,3 +2580,19 @@ def test_real_promoter_gc_content_in_range() -> None:
     promoters = pl.load_all_promoters()
     for p in promoters:
         assert 0.0 <= p["gc_content"] <= 1.0
+
+
+def test_repository_docs_reflect_current_release_metadata() -> None:
+    readme = (TEST_REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    assert "v0.4.0-dev" in readme
+    assert "106 passed, 2 skipped" in readme
+    assert "circuits/promoters/" in readme
+    assert "blob/main" not in readme
+
+    agents = uvd.load_all_agents()
+    generated = uvd.build_readme(agents, uvd.vault_stats(agents))
+    assert "v0.4.0-dev" in generated
+    assert "106 passed, 2 skipped" in generated
+    assert "circuits/promoters/" in generated
+    assert "python -m pip install -r requirements.txt" in generated
+    assert "pip install -e ." not in generated

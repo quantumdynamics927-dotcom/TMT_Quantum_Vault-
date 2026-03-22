@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import os
 import re
@@ -35,6 +37,10 @@ BRAILLE_SPINNERS = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 ANSI_RE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 RUNNER = CliRunner()
 TEST_REPO_ROOT = Path(__file__).resolve().parents[1]
+
+sys.path.insert(0, str(TEST_REPO_ROOT / "tools"))
+import promoter_loader as pl  # noqa: E402
+import agent_analyst as aa    # noqa: E402
 
 
 def _safe_stderr(text: str) -> str:
@@ -1884,3 +1890,692 @@ def test_release_gate_requires_comparison(tmp_path: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["decision"] == "fail"
     assert "comparison artifact is required but missing" in payload["failures"]
+
+
+# ── Promoter Loader Tests ─────────────────────────────────────────────────────
+
+
+# ── promoter_loader: gc_content ───────────────────────────────────────────────
+
+def test_gc_content_empty_sequence() -> None:
+    assert pl.gc_content("") == 0.0
+
+
+def test_gc_content_pure_gc() -> None:
+    assert pl.gc_content("GCGC") == 1.0
+
+
+def test_gc_content_pure_at() -> None:
+    assert pl.gc_content("ATAT") == 0.0
+
+
+def test_gc_content_mixed() -> None:
+    result = pl.gc_content("ACGT")
+    assert result == pytest.approx(0.5)
+
+
+def test_gc_content_case_insensitive() -> None:
+    assert pl.gc_content("gcgc") == pytest.approx(pl.gc_content("GCGC"))
+
+
+# ── promoter_loader: parse_fasta ──────────────────────────────────────────────
+
+def _write_fasta(tmp_path: Path, name: str, header: str, sequence: str) -> Path:
+    fasta = tmp_path / f"{name}_promoter.fa"
+    fasta.write_text(f">{header}\n{sequence}\n", encoding="utf-8")
+    return fasta
+
+
+def test_parse_fasta_returns_gene_name(tmp_path: Path) -> None:
+    fasta = _write_fasta(
+        tmp_path, "ACTB_Malkuth",
+        "chromosome:GRCh38:7:5563902:5563932:-1",
+        "GGAATCACTTGCACCCGGGAGGCGGAGGCTG",
+    )
+    result = pl.parse_fasta(fasta)
+    assert result["gene"] == "ACTB_Malkuth"
+
+
+def test_parse_fasta_returns_sequence(tmp_path: Path) -> None:
+    seq = "GGAATCACTTGCACCCGGGAGGCGGAGGCTG"
+    fasta = _write_fasta(tmp_path, "ACTB_Malkuth", "chr7:100-130", seq)
+    result = pl.parse_fasta(fasta)
+    assert result["sequence"] == seq
+
+
+def test_parse_fasta_length(tmp_path: Path) -> None:
+    seq = "ACGTACGT"
+    fasta = _write_fasta(tmp_path, "GENE_Kether", "chr1:1-8", seq)
+    result = pl.parse_fasta(fasta)
+    assert result["length"] == 8
+
+
+def test_parse_fasta_gc_content(tmp_path: Path) -> None:
+    fasta = _write_fasta(tmp_path, "GENE_Kether", "chr1:1-4", "ACGT")
+    result = pl.parse_fasta(fasta)
+    assert result["gc_content"] == pytest.approx(0.5)
+
+
+def test_parse_fasta_chromosome_coord(tmp_path: Path) -> None:
+    fasta = _write_fasta(tmp_path, "GENE_Kether", "chromosome:GRCh38:7:100:200:-1", "ACGT")
+    result = pl.parse_fasta(fasta)
+    assert result["chromosome_coord"] == "chromosome"
+
+
+def test_parse_fasta_records_source_file(tmp_path: Path) -> None:
+    fasta = _write_fasta(tmp_path, "GENE_Kether", "chr1", "ACGT")
+    result = pl.parse_fasta(fasta)
+    assert str(fasta) in result["source_file"]
+
+
+# ── promoter_loader: compute_sha256 ──────────────────────────────────────────
+
+def test_compute_sha256_known_value(tmp_path: Path) -> None:
+    content = b"ACGT\n"
+    f = tmp_path / "test.fa"
+    f.write_bytes(content)
+    expected = hashlib.sha256(content).hexdigest()
+    assert pl.compute_sha256(f) == expected
+
+
+def test_compute_sha256_changes_with_content(tmp_path: Path) -> None:
+    f1 = tmp_path / "a.fa"
+    f2 = tmp_path / "b.fa"
+    f1.write_bytes(b"ACGT")
+    f2.write_bytes(b"TGCA")
+    assert pl.compute_sha256(f1) != pl.compute_sha256(f2)
+
+
+# ── promoter_loader: verify_hmac ─────────────────────────────────────────────
+
+def test_verify_hmac_no_sha256_file(tmp_path: Path) -> None:
+    fasta = tmp_path / "GENE_Kether_promoter.fa"
+    fasta.write_bytes(b">chr1\nACGT\n")
+    # No .sha256 file -> returns False
+    assert pl.verify_hmac(fasta) is False
+
+
+def test_verify_hmac_matching_hash(tmp_path: Path) -> None:
+    content = b">chr1\nACGT\n"
+    fasta = tmp_path / "GENE_Kether_promoter.fa"
+    fasta.write_bytes(content)
+    sha_file = tmp_path / "GENE_Kether_promoter.fa.sha256"
+    sha_file.write_text(hashlib.sha256(content).hexdigest(), encoding="utf-8")
+    assert pl.verify_hmac(fasta) is True
+
+
+def test_verify_hmac_mismatching_hash(tmp_path: Path) -> None:
+    fasta = tmp_path / "GENE_Kether_promoter.fa"
+    fasta.write_bytes(b">chr1\nACGT\n")
+    sha_file = tmp_path / "GENE_Kether_promoter.fa.sha256"
+    sha_file.write_text("0" * 64, encoding="utf-8")
+    assert pl.verify_hmac(fasta) is False
+
+
+# ── promoter_loader: find_fasta_file ─────────────────────────────────────────
+
+def test_find_fasta_file_returns_local_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    fasta = tmp_path / "ACTB_Malkuth_promoter.fa"
+    fasta.write_text(">chr7\nACGT\n", encoding="utf-8")
+    result = pl.find_fasta_file("ACTB_Malkuth")
+    assert result == fasta
+
+
+def test_find_fasta_file_returns_none_when_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    result = pl.find_fasta_file("NONEXISTENT_Gene")
+    assert result is None
+
+
+# ── promoter_loader: find_metadata_file ──────────────────────────────────────
+
+def test_find_metadata_file_returns_local_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    meta = tmp_path / "ACTB_Malkuth_promoter.fa.sha256.json"
+    meta.write_text('{"sha256": "abc"}', encoding="utf-8")
+    result = pl.find_metadata_file("ACTB_Malkuth")
+    assert result == meta
+
+
+def test_find_metadata_file_returns_none_when_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    result = pl.find_metadata_file("NONEXISTENT_Gene")
+    assert result is None
+
+
+# ── promoter_loader: verify_promoter ─────────────────────────────────────────
+
+def test_verify_promoter_not_found(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    result = pl.verify_promoter("MISSING_Gene")
+    assert "error" in result
+    assert "MISSING_Gene" in result["error"]
+
+
+def test_verify_promoter_with_matching_metadata(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    content = b">chr7\nACGTACGT\n"
+    fasta = tmp_path / "TEST_Malkuth_promoter.fa"
+    fasta.write_bytes(content)
+    sha256 = hashlib.sha256(content).hexdigest()
+    meta = tmp_path / "TEST_Malkuth_promoter.fa.sha256.json"
+    meta.write_text(json.dumps({"sha256": sha256}), encoding="utf-8")
+    result = pl.verify_promoter("TEST_Malkuth")
+    assert result["computed_sha256"] == sha256
+    assert result["expected_sha256"] == sha256
+    assert result["match"] is True
+    assert result["sha256_verified"] is True
+
+
+def test_verify_promoter_with_mismatching_metadata(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    fasta = tmp_path / "TEST_Malkuth_promoter.fa"
+    fasta.write_bytes(b">chr7\nACGT\n")
+    meta = tmp_path / "TEST_Malkuth_promoter.fa.sha256.json"
+    meta.write_text(json.dumps({"sha256": "0" * 64}), encoding="utf-8")
+    result = pl.verify_promoter("TEST_Malkuth")
+    assert result["match"] is False
+    assert result["sha256_verified"] is False
+
+
+# ── promoter_loader: load_all_promoters ──────────────────────────────────────
+
+def test_load_all_promoters_empty_directory(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    result = pl.load_all_promoters()
+    assert result == []
+
+
+def test_load_all_promoters_reads_fasta_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    fasta = tmp_path / "ACTB_Malkuth_promoter.fa"
+    fasta.write_text(">chr7:100-130\nACGTACGT\n", encoding="utf-8")
+    result = pl.load_all_promoters()
+    assert len(result) == 1
+    assert result[0]["gene"] == "ACTB_Malkuth"
+    assert result[0]["sequence"] == "ACGTACGT"
+
+
+def test_load_all_promoters_no_duplicates(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    (tmp_path / "ACTB_Malkuth_promoter.fa").write_text(
+        ">chr7\nACGT\n", encoding="utf-8"
+    )
+    result = pl.load_all_promoters()
+    genes = [p["gene"] for p in result]
+    assert len(genes) == len(set(genes))
+
+
+def test_load_all_promoters_includes_sha256(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    content = b">chr7\nACGT\n"
+    fasta = tmp_path / "ACTB_Malkuth_promoter.fa"
+    fasta.write_bytes(content)
+    result = pl.load_all_promoters()
+    assert result[0]["sha256"] == hashlib.sha256(content).hexdigest()
+
+
+# ── promoter_loader: format_output ───────────────────────────────────────────
+
+def test_format_output_contains_gene() -> None:
+    promoter = {
+        "gene": "ACTB_Malkuth",
+        "length": 32,
+        "gc_content": 0.625,
+        "verified": True,
+        "sequence": "GGAATCACTTGCACCCGGGAGGCGGAGGCTG",
+    }
+    output = pl.format_output(promoter)
+    assert "ACTB_Malkuth" in output
+    assert "32" in output
+    assert "GGAATCACTTGCACCCGGGAGGCGGAGGCTG" in output
+
+
+def test_format_output_verified_field() -> None:
+    promoter = {
+        "gene": "TEST",
+        "length": 4,
+        "gc_content": 0.5,
+        "verified": False,
+        "sequence": "ACGT",
+    }
+    output = pl.format_output(promoter)
+    assert "False" in output
+
+
+# ── promoter_loader: get_promoter_files ──────────────────────────────────────
+
+def test_get_promoter_files_uses_promoters_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    (tmp_path / "ACTB_Malkuth_promoter.fa").write_text(">chr7\nACGT\n", encoding="utf-8")
+    (tmp_path / "BDNF_Tiferet_promoter.fa").write_text(">chr11\nGCTA\n", encoding="utf-8")
+    files = pl.get_promoter_files()
+    names = [f.name for f in files]
+    assert "ACTB_Malkuth_promoter.fa" in names
+    assert "BDNF_Tiferet_promoter.fa" in names
+
+
+def test_get_promoter_files_empty_when_no_directory(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path / "nonexistent")
+    monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
+    files = pl.get_promoter_files()
+    assert files == []
+
+
+# ── Agent Analyst Tests ───────────────────────────────────────────────────────
+
+
+# ── agent_analyst: compute_metrics ───────────────────────────────────────────
+
+def test_compute_metrics_empty_counts() -> None:
+    result = aa.compute_metrics({})
+    assert result["total_shots"] == 0
+    assert result["entropy"] == 0
+    assert result["phi_approx"] == 0.0
+    assert result["sacred_score"] >= 0
+
+
+def test_compute_metrics_single_bitstring() -> None:
+    counts = {"000": 100}
+    result = aa.compute_metrics(counts)
+    assert result["total_shots"] == 100
+    assert result["entropy"] == 0.0
+    # Only one bitstring, phi_approx should be 0
+    assert result["phi_approx"] == 0.0
+
+
+def test_compute_metrics_two_equal_bitstrings() -> None:
+    counts = {"000": 50, "111": 50}
+    result = aa.compute_metrics(counts)
+    assert result["total_shots"] == 100
+    # Both equal -> phi_approx = 1.0
+    assert result["phi_approx"] == pytest.approx(1.0)
+    assert result["entropy"] == pytest.approx(1.0)
+
+
+def test_compute_metrics_sacred_score_is_float() -> None:
+    counts = {"00": 60, "11": 40}
+    result = aa.compute_metrics(counts)
+    assert isinstance(result["sacred_score"], float)
+    assert 0.0 <= result["sacred_score"] <= 1.0
+
+
+def test_compute_metrics_consciousness_density() -> None:
+    counts = {bin(i)[2:].zfill(4): 100 for i in range(16)}
+    result = aa.compute_metrics(counts)
+    assert result["consciousness_density"] > 0
+
+
+def test_compute_metrics_phi_convergent_near_golden_ratio() -> None:
+    # phi ≈ 1.618 => top/second ≈ 1.618 => sacred_score should be high
+    counts = {"00": 162, "01": 100, "10": 50, "11": 20}
+    result = aa.compute_metrics(counts)
+    # sacred_score = 1 / (1 + |phi_approx - 1.618|)
+    expected = round(1 / (1 + abs(result["phi_approx"] - 1.6180339887)), 4)
+    assert result["sacred_score"] == expected
+
+
+# ── agent_analyst: decode_sampler_v2_data ────────────────────────────────────
+
+def test_decode_sampler_v2_no_c_key() -> None:
+    result = aa.decode_sampler_v2_data({"results": {}})
+    assert result == {}
+
+
+def test_decode_sampler_v2_no_data_key() -> None:
+    result = aa.decode_sampler_v2_data({"results": {"c": {}}})
+    assert result == {}
+
+
+def test_decode_sampler_v2_zero_shape() -> None:
+    result = aa.decode_sampler_v2_data(
+        {"results": {"c": {"data": base64.b64encode(b"").decode(), "shape": [0, 0]}}}
+    )
+    assert result == {}
+
+
+def test_decode_sampler_v2_basic_measurement() -> None:
+    # 1 shot, 8 qubits: byte = 0b00000001 -> qubit 0 = 1, rest 0
+    shot_bytes = bytes([0b00000001])
+    encoded = base64.b64encode(shot_bytes).decode()
+    data_block = {"results": {"c": {"data": encoded, "shape": [1, 8]}}}
+    counts = aa.decode_sampler_v2_data(data_block)
+    assert isinstance(counts, dict)
+    assert sum(counts.values()) == 1
+
+
+def test_decode_sampler_v2_two_shots() -> None:
+    # 2 shots, 8 qubits each
+    shot_bytes = bytes([0b00000001, 0b00000010])
+    encoded = base64.b64encode(shot_bytes).decode()
+    data_block = {"results": {"c": {"data": encoded, "shape": [2, 8]}}}
+    counts = aa.decode_sampler_v2_data(data_block)
+    assert sum(counts.values()) == 2
+
+
+# ── agent_analyst: parse_qasm_depth ──────────────────────────────────────────
+
+def test_parse_qasm_depth_extracts_n_qubits(tmp_path: Path) -> None:
+    qasm = tmp_path / "test.qasm"
+    qasm.write_text(
+        "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[5];\ncreg c[5];\n",
+        encoding="utf-8",
+    )
+    result = aa.parse_qasm_depth(qasm)
+    assert result["n_qubits"] == 5
+
+
+def test_parse_qasm_depth_extracts_depth_from_comment(tmp_path: Path) -> None:
+    qasm = tmp_path / "test.qasm"
+    qasm.write_text(
+        "OPENQASM 2.0;\n// depth 4 — phi^4 angle\nqreg q[21];\ncreg c[21];\n",
+        encoding="utf-8",
+    )
+    result = aa.parse_qasm_depth(qasm)
+    assert result["depth"] == 4
+
+
+def test_parse_qasm_depth_none_when_no_depth_comment(tmp_path: Path) -> None:
+    qasm = tmp_path / "test.qasm"
+    qasm.write_text(
+        "OPENQASM 2.0;\nqreg q[21];\ncreg c[21];\n",
+        encoding="utf-8",
+    )
+    result = aa.parse_qasm_depth(qasm)
+    assert result["depth"] is None
+
+
+def test_parse_qasm_depth_returns_path_and_name(tmp_path: Path) -> None:
+    qasm = tmp_path / "sierpinski_d3.qasm"
+    qasm.write_text("qreg q[21];\n", encoding="utf-8")
+    result = aa.parse_qasm_depth(qasm)
+    assert result["qasm_name"] == "sierpinski_d3"
+    assert "sierpinski_d3.qasm" in result["qasm_path"]
+
+
+def test_parse_qasm_depth_default_n_qubits(tmp_path: Path) -> None:
+    qasm = tmp_path / "test.qasm"
+    qasm.write_text("OPENQASM 2.0;\n", encoding="utf-8")
+    result = aa.parse_qasm_depth(qasm)
+    assert result["n_qubits"] == 21
+
+
+# ── agent_analyst: analyze_result ────────────────────────────────────────────
+
+def _write_counts_json(tmp_path: Path, counts: dict, name: str = "result.json") -> Path:
+    p = tmp_path / name
+    p.write_text(json.dumps(counts), encoding="utf-8")
+    return p
+
+
+def test_analyze_result_direct_counts(tmp_path: Path) -> None:
+    counts = {"000": 500, "111": 300, "010": 200}
+    path = _write_counts_json(tmp_path, counts)
+    record = aa.analyze_result(path)
+    assert record["metrics"]["total_shots"] == 1000
+    assert record["status"] == "INGESTED"
+
+
+def test_analyze_result_nested_results_format(tmp_path: Path) -> None:
+    payload = {
+        "results": [{"data": {"counts": {"000": 600, "111": 400}}}],
+        "backend_name": "ibm_torino",
+    }
+    path = _write_counts_json(tmp_path, payload)
+    record = aa.analyze_result(path)
+    assert record["metrics"]["total_shots"] == 1000
+    assert record["backend"] == "ibm_torino"
+
+
+def test_analyze_result_counts_key(tmp_path: Path) -> None:
+    payload = {"counts": {"00": 700, "11": 300}}
+    path = _write_counts_json(tmp_path, payload)
+    record = aa.analyze_result(path)
+    assert record["metrics"]["total_shots"] == 1000
+
+
+def test_analyze_result_significant_flag_set(tmp_path: Path) -> None:
+    # sacred_score >= 0.618 triggers SIGNIFICANT
+    # sacred_score = 1/(1+|phi_approx - 1.618|)
+    # For phi_approx ≈ 1.618: counts[0]/counts[1] ≈ 1.618
+    # e.g. 162 / 100 = 1.62
+    counts = {"000": 162, "111": 100}
+    path = _write_counts_json(tmp_path, counts)
+    record = aa.analyze_result(path)
+    assert record["is_significant"] is True
+    assert record["metrics"]["sacred_score"] >= 0.618
+
+
+def test_analyze_result_not_significant(tmp_path: Path) -> None:
+    # phi_approx far from 1.618 -> lower sacred_score
+    # phi_approx = 500/100 = 5.0 -> sacred_score = 1/(1+|5-1.618|) ≈ 0.228 < 0.618
+    counts = {"00": 500, "01": 100}
+    path = _write_counts_json(tmp_path, counts)
+    record = aa.analyze_result(path)
+    assert record["is_significant"] is False
+
+
+def test_analyze_result_with_circuit_metadata(tmp_path: Path) -> None:
+    counts = {"000": 500, "111": 300}
+    path = _write_counts_json(tmp_path, counts)
+    metadata = {"qasm_name": "sierpinski_d3", "depth": 3, "n_qubits": 21}
+    record = aa.analyze_result(path, metadata)
+    assert record["circuit"] == "sierpinski_d3"
+    assert record["depth"] == 3
+    assert record["n_qubits"] == 21
+
+
+def test_analyze_result_fingerprint_is_12_chars(tmp_path: Path) -> None:
+    path = _write_counts_json(tmp_path, {"0": 100})
+    record = aa.analyze_result(path)
+    assert len(record["fingerprint"]) == 12
+
+
+def test_analyze_result_phi_convergent_flag(tmp_path: Path) -> None:
+    # phi_approx ≈ 1.618 -> sacred_score close to 0.618
+    counts = {"000": 162, "111": 100}
+    path = _write_counts_json(tmp_path, counts)
+    record = aa.analyze_result(path)
+    # phi_convergent: abs(sacred_score - 0.618) <= 0.01
+    expected = abs(record["metrics"]["sacred_score"] - 0.618) <= 0.01
+    assert record["phi_convergent"] == expected
+
+
+# ── agent_analyst: ingest_result ─────────────────────────────────────────────
+
+def test_ingest_result_creates_ingested_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ingested_dir = tmp_path / "ingested"
+    significant_dir = ingested_dir / "SIGNIFICANT"
+    agent_dir = tmp_path / "agent_feed"
+    ingested_dir.mkdir()
+    significant_dir.mkdir()
+    agent_dir.mkdir()
+    monkeypatch.setattr(aa, "INGESTED_DIR", ingested_dir)
+    monkeypatch.setattr(aa, "SIGNIFICANT_DIR", significant_dir)
+    monkeypatch.setattr(aa, "AGENT_DIR", agent_dir)
+
+    counts = {"000": 500, "111": 300}
+    result_path = tmp_path / "circuit_result.json"
+    result_path.write_text(json.dumps(counts), encoding="utf-8")
+
+    ingested_path = aa.ingest_result(result_path)
+    assert ingested_path.exists()
+    record = json.loads(ingested_path.read_text(encoding="utf-8"))
+    assert record["status"] == "INGESTED"
+
+
+def test_ingest_result_creates_agent_feed_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ingested_dir = tmp_path / "ingested"
+    significant_dir = ingested_dir / "SIGNIFICANT"
+    agent_dir = tmp_path / "agent_feed"
+    ingested_dir.mkdir()
+    significant_dir.mkdir()
+    agent_dir.mkdir()
+    monkeypatch.setattr(aa, "INGESTED_DIR", ingested_dir)
+    monkeypatch.setattr(aa, "SIGNIFICANT_DIR", significant_dir)
+    monkeypatch.setattr(aa, "AGENT_DIR", agent_dir)
+
+    counts = {"000": 500, "111": 300}
+    result_path = tmp_path / "circuit_result.json"
+    result_path.write_text(json.dumps(counts), encoding="utf-8")
+
+    aa.ingest_result(result_path)
+    feed_files = list(agent_dir.glob("feed_*.json"))
+    assert len(feed_files) == 1
+    feed = json.loads(feed_files[0].read_text(encoding="utf-8"))
+    assert "metrics" in feed
+    assert "circuit" in feed
+
+
+def test_ingest_result_significant_creates_significant_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ingested_dir = tmp_path / "ingested"
+    significant_dir = ingested_dir / "SIGNIFICANT"
+    agent_dir = tmp_path / "agent_feed"
+    ingested_dir.mkdir()
+    significant_dir.mkdir()
+    agent_dir.mkdir()
+    monkeypatch.setattr(aa, "INGESTED_DIR", ingested_dir)
+    monkeypatch.setattr(aa, "SIGNIFICANT_DIR", significant_dir)
+    monkeypatch.setattr(aa, "AGENT_DIR", agent_dir)
+
+    # sacred_score >= 0.618
+    counts = {"000": 162, "111": 100}
+    result_path = tmp_path / "significant_result.json"
+    result_path.write_text(json.dumps(counts), encoding="utf-8")
+
+    aa.ingest_result(result_path)
+    significant_files = list(significant_dir.glob("*.json"))
+    assert len(significant_files) == 1
+
+
+def test_ingest_result_not_significant_no_significant_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ingested_dir = tmp_path / "ingested"
+    significant_dir = ingested_dir / "SIGNIFICANT"
+    agent_dir = tmp_path / "agent_feed"
+    ingested_dir.mkdir()
+    significant_dir.mkdir()
+    agent_dir.mkdir()
+    monkeypatch.setattr(aa, "INGESTED_DIR", ingested_dir)
+    monkeypatch.setattr(aa, "SIGNIFICANT_DIR", significant_dir)
+    monkeypatch.setattr(aa, "AGENT_DIR", agent_dir)
+
+    # phi_approx = 500/100 = 5.0 -> sacred_score ≈ 0.228 < 0.618 -> not significant
+    counts = {"00": 500, "01": 100}
+    result_path = tmp_path / "nonsignificant_result.json"
+    result_path.write_text(json.dumps(counts), encoding="utf-8")
+
+    aa.ingest_result(result_path)
+    significant_files = list(significant_dir.glob("*.json"))
+    assert len(significant_files) == 0
+
+
+# ── agent_analyst: parse_promoter_from_fasta ─────────────────────────────────
+
+def test_parse_promoter_from_fasta_gene_and_sefirah(tmp_path: Path) -> None:
+    fasta = tmp_path / "ACTB_Malkuth_promoter.fa"
+    fasta.write_text(">chromosome:GRCh38:7:100:200:-1\nACGTACGT\n", encoding="utf-8")
+    result = aa.parse_promoter_from_fasta(fasta)
+    assert result["gene"] == "ACTB"
+    assert result["sefirah"] == "Malkuth"
+    assert result["name"] == "ACTB_Malkuth"
+
+
+def test_parse_promoter_from_fasta_sequence(tmp_path: Path) -> None:
+    seq = "GGAATCACTTGCACCCGGGAGGCGGAGGCTG"
+    fasta = tmp_path / "BDNF_Tiferet_promoter.fa"
+    fasta.write_text(f">chr11:100-130\n{seq}\n", encoding="utf-8")
+    result = aa.parse_promoter_from_fasta(fasta)
+    assert result["sequence"] == seq
+    assert result["length"] == len(seq)
+
+
+def test_parse_promoter_from_fasta_gc_content(tmp_path: Path) -> None:
+    fasta = tmp_path / "GENE_Kether_promoter.fa"
+    fasta.write_text(">chr1\nACGT\n", encoding="utf-8")
+    result = aa.parse_promoter_from_fasta(fasta)
+    assert result["gc_content"] == pytest.approx(0.5)
+
+
+def test_parse_promoter_from_fasta_no_underscore_gene(tmp_path: Path) -> None:
+    fasta = tmp_path / "SIMPLE_promoter.fa"
+    fasta.write_text(">chr1\nACGT\n", encoding="utf-8")
+    result = aa.parse_promoter_from_fasta(fasta)
+    # When gene_name has no '_' (after removing _promoter), sefirah equals gene_name
+    assert result["name"] == "SIMPLE"
+    assert result["gene"] == "SIMPLE"
+    assert result["sefirah"] is None
+
+
+# ── agent_analyst: get_processed_files ───────────────────────────────────────
+
+def test_get_processed_files_returns_file_names(tmp_path: Path) -> None:
+    (tmp_path / "result_a.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "result_b.json").write_text("{}", encoding="utf-8")
+    processed = aa.get_processed_files(tmp_path, ".json")
+    assert "result_a.json" in processed
+    assert "result_b.json" in processed
+
+
+def test_get_processed_files_filters_by_suffix(tmp_path: Path) -> None:
+    (tmp_path / "circuit.qasm").write_text("OPENQASM 2.0;", encoding="utf-8")
+    (tmp_path / "result.json").write_text("{}", encoding="utf-8")
+    processed = aa.get_processed_files(tmp_path, ".qasm")
+    assert "circuit.qasm" in processed
+    assert "result.json" not in processed
+
+
+def test_get_processed_files_empty_directory(tmp_path: Path) -> None:
+    processed = aa.get_processed_files(tmp_path, ".json")
+    assert processed == set()
+
+
+# ── promoter_loader: real promoter files (smoke tests) ───────────────────────
+
+ACTUAL_PROMOTERS_DIR = TEST_REPO_ROOT / "circuits" / "promoters"
+
+
+@pytest.mark.skipif(
+    not ACTUAL_PROMOTERS_DIR.exists(),
+    reason="circuits/promoters/ directory not present",
+)
+def test_real_promoter_files_load_successfully() -> None:
+    promoters = pl.load_all_promoters()
+    assert len(promoters) > 0
+    for p in promoters:
+        assert "gene" in p
+        assert "sequence" in p
+        assert len(p["sequence"]) > 0
+
+
+@pytest.mark.skipif(
+    not ACTUAL_PROMOTERS_DIR.exists(),
+    reason="circuits/promoters/ directory not present",
+)
+def test_real_promoter_actb_malkuth_sha256() -> None:
+    result = pl.verify_promoter("ACTB_Malkuth")
+    # Should find the file
+    assert "error" not in result
+    assert result["computed_sha256"] is not None
+
+
+@pytest.mark.skipif(
+    not ACTUAL_PROMOTERS_DIR.exists(),
+    reason="circuits/promoters/ directory not present",
+)
+def test_real_promoter_gc_content_in_range() -> None:
+    promoters = pl.load_all_promoters()
+    for p in promoters:
+        assert 0.0 <= p["gc_content"] <= 1.0

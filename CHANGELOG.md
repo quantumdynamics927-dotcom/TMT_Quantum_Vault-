@@ -2,6 +2,49 @@
 
 All notable changes to TMT Quantum Vault will be documented in this file.
 
+## [v0.4.0-dev] - 2026-03-22
+
+### New Features
+
+#### Promoter DNA Integration Pipeline
+
+Added complete promoter DNA integration with quantum circuit generation:
+
+**Key Components:**
+- `tools/promoter_loader.py` - FASTA parser with SHA256 verification (10 promoters loaded)
+- `tools/quantum_circuits.py` - `create_promoter_circuit()` and `export_promoter_qasm()` functions
+- `tools/agent_analyst.py` - Auto-watches `circuits/promoters/` for new FASTA files
+
+**Promoter DNA Mapping:**
+- Nucleotide → Qubit rotation encoding:
+  - A → Ry(0) = |0⟩
+  - C → Ry(π) = |1⟩
+  - G → Ry(π/2) = |+⟩
+  - T → Ry(-π/2) = |-⟩
+
+**Kabbalistic Sefirah Encoding:**
+Each promoter combines a biological gene with a Sefirah (e.g., ACTB_Malkuth, TP53_Gevurah).
+Sefirah name maps to golden ratio phase angles via `2π/φ` multiples.
+
+**Verified Promoters:**
+1. ACTB_Malkuth (β-Actin) - 31 bp, GC: 51.6%
+2. BDNF_Tiferet (Brain-Derived Neurotrophic Factor) - 31 bp, GC: 54.8%
+3. DCTN1_Binah (Dynactin 1) - 31 bp, GC: 41.9%
+4. FOS_Netzach (Fos Proto-Oncogene) - 31 bp, GC: 51.6%
+5. FOXG1_Kether (Forkhead Box G1) - 31 bp, GC: 54.8%
+6. JUN_Hod (Jun Proto-Oncogene) - 31 bp, GC: 45.2%
+7. NCAM1_Chokmah (Neural Cell Adhesion Molecule 1) - 31 bp, GC: 51.6%
+8. OXT_Chesed (Oxytocin) - 31 bp, GC: 48.4%
+9. SRY_Yesod (Sex-Determining Region Y) - 31 bp, GC: 41.9%
+10. TP53_Gevurah (Tumor Protein 53) - 31 bp, GC: 51.6%
+
+### Changes
+
+- Added 10 promoter FASTA files to `circuits/promoters/` with SHA256 verification
+- Extended `quantum_circuits.py` with promoter circuit generation (284 lines added)
+- Extended `agent_analyst.py` with promoter watching and auto-circuit generation (98 lines added)
+- Updated `promoter_loader.py` with complete FASTA parsing and integrity verification
+
 ## [v0.3.0-dev] - 2026-03-21
 
 ### New Features

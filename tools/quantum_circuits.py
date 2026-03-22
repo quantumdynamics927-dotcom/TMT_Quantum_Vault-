@@ -8,6 +8,65 @@ Collection of specialized quantum circuits for consciousness research:
 - BitNet ternary-seeded variational ansatz
 - DNA quantum walk circuits
 - Golden ratio Φ-resonance circuits
+
+The φ-Stack: Biological Quantum Circuits
+-----------------------------------------
+This module implements quantum circuits seeded from biological promoter DNA.
+The golden ratio φ emerges naturally from the physical structure of DNA:
+
+DNA Helix Geometry (established biophysics):
+  - Rise per turn:  34.0 Ångströms
+  - Diameter:       21.0 Ångströms
+  - Ratio:          34/21 = 1.61904...
+  - φ (golden):     1.6180339887...
+  - Error:          0.063%
+
+Fibonacci Connection:
+  34 and 21 are consecutive Fibonacci numbers (F(9)=34, F(8)=21).
+  The DNA double helix physically encodes φ in its dimensions.
+
+The φ-Stack Pipeline:
+  DNA geometry:     34/21 = 1.619 ≈ φ     ← structural basis
+       ↓
+  Nucleotide freq:  A=432Hz → C=699Hz → G=1131Hz → T=1830Hz
+                    (each × φ from previous)  ← harmonic design
+       ↓
+  Qubit encoding:   A→Ry(0), C→Ry(π), G→Ry(π/2), T→Ry(-π/2)
+                    rotations derived from φ-harmonic frequencies
+       ↓
+  Quantum circuit:  Sierpinski-style entanglement with φ-phase layers
+       ↓
+  IBM hardware:     sacred_score = 0.618 (1/φ)  ← expected convergence
+
+Type Distinction (scientific interpretation):
+  Sierpinski circuits:   EMERGENT φ-convergence
+    - φ not baked into topology
+    - Self-organization under quantum noise
+    - Stronger scientific claim (spontaneous symmetry breaking)
+
+  DNA helix circuits:    STRUCTURAL φ-convergence
+    - φ guaranteed by helix geometry + encoding
+    - Validation of scoring pipeline
+    - Biological quantum consistency demonstration
+
+Promoter Circuit Format:
+  Each promoter combines a biological gene with a Sefirah name:
+    - ACTB_Malkuth: β-Actin gene + Malkuth (Kingdom)
+    - TP53_Gevurah: p53 tumor suppressor + Gevurah (Strength)
+    - FOXG1_Kether: Forkhead Box G1 + Kether (Crown)
+    - etc.
+
+  Sefirah mapping to φ-phase angles:
+    Kether:     0
+    Chokmah:    2π/φ
+    Binah:      4π/φ
+    Chesed:     6π/φ
+    Gevurah:    8π/φ
+    Tiphereth:  10π/φ
+    Netzach:    12π/φ
+    Hod:        14π/φ
+    Yesod:      16π/φ
+    Malkuth:    18π/φ
 """
 
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister

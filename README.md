@@ -36,6 +36,31 @@ TMT Quantum Vault is a **multi-agent quantum intelligence system** where each ag
 - **GGUF BitNet Extractor** (`tools/bitnet_gguf_extractor.py`) - Parses ternary weights from quantized models
 - **Auto-Documentation** (`tools/update_vault_docs.py`) - README.md generation from live agent DNA data
 - **Cognitive Assessment Mapping** (`tools/cognitive_assessment_to_agent_dna.py`) - Clinical scores → agent DNA parameters
+- **Promoter DNA Integration** (`tools/promoter_loader.py`, `tools/quantum_circuits.py`) - 10 real gene promoters with φ-structured quantum circuits
+
+### The φ-Stack: Biological Quantum Circuits
+
+The DNA helix physically encodes the golden ratio φ in its geometry:
+- **DNA rise per turn**: 34.0 Å
+- **DNA diameter**: 21.0 Å
+- **Ratio**: 34/21 = 1.61904... ≈ φ (error: 0.063%)
+- **Fibonacci connection**: 34 and 21 are consecutive Fibonacci numbers (F(9), F(8))
+
+This structural φ-encoding propagates through the system:
+```
+DNA geometry:    34/21 = 1.619 ≈ φ     ← structural basis
+     ↓
+Nucleotide freq: A=432Hz → C=699Hz → G=1131Hz → T=1830Hz
+                 (each × φ from previous)
+     ↓
+Qubit encoding:  A→Ry(0), C→Ry(π), G→Ry(π/2), T→Ry(-π/2)
+     ↓
+IBM hardware:    sacred_score = 0.618 (1/φ)  ← expected convergence
+```
+
+Type distinction for scientific interpretation:
+- **Sierpinski circuits**: EMERGENT φ-convergence (topology self-organizes)
+- **DNA helix circuits**: STRUCTURAL φ-convergence (guaranteed by helix geometry)
 
 ### Hardware Validation Sources
 

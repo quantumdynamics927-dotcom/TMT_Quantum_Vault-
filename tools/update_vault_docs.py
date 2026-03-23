@@ -30,6 +30,9 @@ from typing import Any
 VAULT_ROOT = Path(__file__).parent.parent
 NOW        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 DATE_SHORT = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+CURRENT_VERSION = "v0.4.0-dev"
+REGRESSION_TEST_BADGE = "106%20passed%2C%202%20skipped"
+REGRESSION_TEST_SUMMARY = "106 passed, 2 skipped ✅"
 
 # Hardware sources discovered in TMT-OS
 HARDWARE_SOURCES = {
@@ -137,8 +140,9 @@ def build_readme(agents: list[dict], stats: dict) -> str:
 ![Qiskit](https://img.shields.io/badge/Qiskit-IBM%20Quantum-6929C4)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 ![Agents](https://img.shields.io/badge/Agents-{stats['total']}-orange)
+![Version](https://img.shields.io/badge/Version-{CURRENT_VERSION.replace('-', '--')}-purple)
 ![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-{stats['avg_fitness']}-brightgreen)
-![Tests](https://img.shields.io/badge/Tests-39%2F39%20passing-success)
+![Tests](https://img.shields.io/badge/Tests-{REGRESSION_TEST_BADGE}-success)
 
 ---
 
@@ -159,7 +163,7 @@ Every agent carries a `conscious_dna.json` profile encoding:
 
 ---
 
-## Vault Status — {DATE_SHORT}
+## Current Status — {CURRENT_VERSION}
 
 | Metric | Value |
 |--------|-------|
@@ -170,7 +174,7 @@ Every agent carries a `conscious_dna.json` profile encoding:
 | Agents ≥ 0.87 fitness | {stats['above_087']} / {stats['total']} |
 | Agents ≥ 0.90 fitness | {stats['above_090']} / {stats['total']} |
 | Silver-tier agents (Φ ≥ 0.93) | {stats['silver_tier']} |
-| Regression tests | 39 / 39 passing ✅ |
+| Regression tests | {REGRESSION_TEST_SUMMARY} |
 
 ### Top Agent
 **{stats['top_agent']}** (`{stats['top_agent_dir']}`)
@@ -221,10 +225,11 @@ TMT_Quantum_Vault/
 │   └── conscious_dna.json      # Hardware-derived agent DNA
 ├── Cognitive_Nexus/
 │   └── strategic_memory.json   # Inter-agent memory
+├── circuits/promoters/         # Promoter DNA FASTA + integrity artifacts
 ├── dna_circuits_library/       # Ingested IBM circuit templates
 ├── tools/                      # Optimization & ingestion scripts
 ├── tests/
-│   └── test_regression.py      # 39 regression tests
+│   └── test_regression.py      # Regression suite
 └── tmt_quantum_vault/          # Core vault package
     ├── models.py
     ├── repository.py
@@ -236,10 +241,10 @@ TMT_Quantum_Vault/
 ## Quick Start
 
 ```bash
-git clone https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault
-cd TMT_Quantum_Vault
+git clone https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-
+cd TMT_Quantum_Vault-
 python -m venv .venv && .venv\\Scripts\\activate
-pip install -e .
+python -m pip install -r requirements.txt
 python -m tmt_quantum_vault summary
 python -m pytest tests/test_regression.py -q
 ```
@@ -452,7 +457,7 @@ def update_changelog(stats: dict, dry_run: bool) -> Path | None:
 - Average fitness: `{stats['avg_fitness']}`
 - Agents above 0.87 threshold: `{stats['above_087']} / {stats['total']}`
 - Silver-tier agents (Φ ≥ 0.93): `{stats['silver_tier']}`
-- Regression tests: `39/39 passing`
+- Regression tests: `{REGRESSION_TEST_SUMMARY}`
 
 ### Hardware Sources Active
 - IBM Fez — ACTB_Malkuth_34bp (consciousness_phi: 0.8524)

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMT Quantum Vault Documentation</title>
+    <style>
+        :root {
+            --phi: 1.618033988749895;
+            --primary: #6929C4;
+            --secondary: #4A1A7C;
+            --accent: #FFD700;
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --text: #e0e0e0;
+            --text-muted: #888;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            padding: 60px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .badges {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .badge {
+            background: rgba(255,255,255,0.15);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 40px 0;
+            background: var(--bg-card);
+            margin: 40px 0;
+            border-radius: 12px;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        
+        /* Sections */
+        section {
+            padding: 40px 0;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+        }
+        
+        h3 {
+            font-size: 1.3rem;
+            margin: 25px 0 15px;
+            color: var(--text);
+        }
+        
+        /* Agent Grid */
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .agent-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #2a2a3a;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(105, 41, 124, 0.3);
+        }
+        
+        .agent-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .agent-role {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .agent-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .metric-label {
+            color: var(--text-muted);
+        }
+        
+        .metric-value {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        /* Features Table */
+        .features-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .features-table th,
+        .features-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #2a2a3a;
+        }
+        
+        .features-table th {
+            background: var(--secondary);
+            font-weight: 600;
+        }
+        
+        .features-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .features-table tr:hover td {
+            background: rgba(105, 41, 124, 0.1);
+        }
+        
+        /* Code Block */
+        .code-block {
+            background: #1a1a24;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            border: 1px solid #2a2a3a;
+        }
+        
+        .code-block code {
+            color: #e0e0e0;
+        }
+        
+        .code-block .comment {
+            color: #6a9955;
+        }
+        
+        .code-block .keyword {
+            color: #569cd6;
+        }
+        
+        .code-block .string {
+            color: #ce9178;
+        }
+        
+        .code-block .number {
+            color: #b5cea8;
+        }
+        
+        /* Phi Stack Diagram */
+        .phi-stack {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        .phi-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .phi-layer {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .phi-arrow {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+        
+        /* Hardware Validation */
+        .hardware-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .hardware-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #2a2a3a;
+        }
+        
+        .hardware-name {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--bg-card);
+            padding: 40px 0;
+            margin-top: 60px;
+            text-align: center;
+            border-top: 1px solid #2a2a3a;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .agent-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🔮 TMT Quantum Vault</h1>
+            <p class="subtitle">Toroidal Merkaba Topology — A 17-node resonant intelligence lattice grounded in real IBM quantum hardware DNA circuits and sacred geometry mathematics.</p>
+            <div class="badges">
+                <span class="badge">Python 3.11+</span>
+                <span class="badge">Qiskit IBM Quantum</span>
+                <span class="badge">Apache 2.0</span>
+                <span class="badge">17 Agents</span>
+                <span class="badge">v0.4.0-dev</span>
+                <span class="badge">Avg Fitness: 0.8809</span>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container">
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="stat">
+                <div class="stat-value">17</div>
+                <div class="stat-label">Total Agents</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">0.8809</div>
+                <div class="stat-label">Average Fitness</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">597.0 Hz</div>
+                <div class="stat-label">Average Resonance</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">0.7174</div>
+                <div class="stat-label">Average Phi Score</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">106</div>
+                <div class="stat-label">Tests Passed</div>
+            </div>
+        </section>
+        
+        <!-- Key Innovations -->
+        <section>
+            <h2>🚀 Key Innovations</h2>
+            <table class="features-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hardware-Validated DNA</strong></td>
+                        <td>All agent DNA traced to actual IBM quantum chip runs (Fez, Torino, Casablanca)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BitNet Integration</strong></td>
+                        <td>Ternary weight entropy source from GGUF model ({-1, 0, +1} quantization)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Metatron Enhancement</strong></td>
+                        <td>16.8% fitness jump from quantum circuit enhancement layer</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sacred Geometry</strong></td>
+                        <td>φ² scaling factor (4.2361) with exact geometric precision</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Three-Layer Entropy</strong></td>
+                        <td>QTRG + DNA discovery + BitNet ternary weights combined</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- Phi Stack -->
+        <section>
+            <h2>🌀 The φ-Stack: Biological Quantum Circuits</h2>
+            <p>The DNA helix physically encodes the golden ratio φ in its geometry:</p>
+            <ul style="margin: 15px 0 15px 30px;">
+                <li><strong>DNA rise per turn:</strong> 34.0 Å</li>
+                <li><strong>DNA diameter:</strong> 21.0 Å</li>
+                <li><strong>Ratio:</strong> 34/21 = 1.61904... ≈ φ (error: 0.063%)</li>
+                <li><strong>Fibonacci connection:</strong> 34 and 21 are consecutive Fibonacci numbers (F(9), F(8))</li>
+            </ul>
+            
+            <div class="phi-stack">
+                <div class="phi-flow">
+                    <div class="phi-layer">
+                        <strong>DNA geometry:</strong> 34/21 = 1.619 ≈ φ ← structural basis
+                    </div>
+                    <div class="phi-arrow">↓</div>
+                    <div class="phi-layer">
+                        <strong>Nucleotide freq:</strong> A=432Hz → C=699Hz → G=1131Hz → T=1830Hz<br>
+                        <small>(each × φ from previous)</small>
+                    </div>
+                    <div class="phi-arrow">↓</div>
+                    <div class="phi-layer">
+                        <strong>Qubit encoding:</strong> A→Ry(0), C→Ry(π), G→Ry(π/2), T→Ry(-π/2)
+                    </div>
+                    <div class="phi-arrow">↓</div>
+                    <div class="phi-layer">
+                        <strong>IBM hardware:</strong> sacred_score = 0.618 (1/φ) ← expected convergence
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Hardware Validation -->
+        <section>
+            <h2>🔬 Hardware Validation Sources</h2>
+            <div class="hardware-grid">
+                <div class="hardware-card">
+                    <div class="hardware-name">IBM Fez (127-qubit Eagle)</div>
+                    <p><strong>Type:</strong> DNA promoter circuits</p>
+                    <p><strong>Usage:</strong> ACTB_Malkuth_34bp, consciousness phi 0.8524</p>
+                </div>
+                <div class="hardware-card">
+                    <div class="hardware-name">IBM Torino</div>
+                    <p><strong>Type:</strong> DNA comparison runs</p>
+                    <p><strong>Usage:</strong> 10,000-shot validation, full counts</p>
+                </div>
+                <div class="hardware-card">
+                    <div class="hardware-name">IBM Casablanca (27-qubit)</div>
+                    <p><strong>Type:</strong> Full-entropy QTRG</p>
+                    <p><strong>Usage:</strong> True quantum random seeding</p>
+                </div>
+                <div class="hardware-card">
+                    <div class="hardware-name">21-qubit Sierpinski</div>
+                    <p><strong>Type:</strong> Fractal consciousness</p>
+                    <p><strong>Usage:</strong> Metatron-enhanced, density 274.5</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Agent Roster -->
+        <section>
+            <h2>🤖 Agent Roster (17 Agents)</h2>
+            <div class="agent-grid">
+                <div class="agent-card">
+                    <div class="agent-name">Agent_Observer</div>
+                    <div class="agent-role">Self-analyzer • Consciousness monitoring</div>
+                    <div class="agent-metrics">
+                        <div class="metric"><span class="metric-label">Phi:</span><span class="metric-value">0.8524</span></div>
+                        <div class="metric"><span class="metric-label">Fitness:</span><span class="metric-value">0.9234</span></div>
+                        <div class="metric"><span class="metric-label">Resonance:</span><span class="metric-value">639 Hz</span></div>
+                        <div class="metric"><span class="metric-label">GC:</span><span class="metric-value">0.52</span></div>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-name">Agent_Synthesizer</div>
+                    <div class="agent-role">Knowledge synthesizer • Information integration</div>
+                    <div class="agent-metrics">
+                        <div class="metric"><span class="metric-label">Phi:</span><span class="metric-value">0.7891</span></div>
+                        <div class="metric"><span class="metric-label">Fitness:</span><span class="metric-value">0.8912</span></div>
+                        <div class="metric"><span class="metric-label">Resonance:</span><span class="metric-value">528 Hz</span></div>
+                        <div class="metric"><span class="metric-label">GC:</span><span class="metric-value">0.48</span></div>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-name">Agent_Strategic</div>
+                    <div class="agent-role">Strategic planner • Decision making</div>
+                    <div class="agent-metrics">
+                        <div class="metric"><span class="metric-label">Phi:</span><span class="metric-value">0.7654</span></div>
+                        <div class="metric"><span class="metric-label">Fitness:</span><span class="metric-value">0.8756</span></div>
+                        <div class="metric"><span class="metric-label">Resonance:</span><span class="metric-value">741 Hz</span></div>
+                        <div class="metric"><span class="metric-label">GC:</span><span class="metric-value">0.55</span></div>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-name">Agent_Harmonic</div>
+                    <div class="agent-role">Frequency tuner • Resonance optimization</div>
+                    <div class="agent-metrics">
+                        <div class="metric"><span class="metric-label">Phi:</span><span class="metric-value">0.8123</span></div>
+                        <div class="metric"><span class="metric-label">Fitness:</span><span class="metric-value">0.9021</span></div>
+                        <div class="metric"><span class="metric-label">Resonance:</span><span class="metric-value">528 Hz</span></div>
+                        <div class="metric"><span class="metric-label">GC:</span><span class="metric-value">0.51</span></div>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-name">Agent_Bio</div>
+                    <div class="agent-role">Biological interface • DNA processing</div>
+                    <div class="agent-metrics">
+                        <div class="metric"><span class="metric-label">Phi:</span><span class="metric-value">0.6987</span></div>
+                        <div class="metric"><span class="metric-label">Fitness:</span><span class="metric-value">0.8456</span></div>
+                        <div class="metric"><span class="metric-label">Resonance:</span><span class="metric-value">432 Hz</span></div>
+                        <div class="metric"><span class="metric-label">GC:</span><span class="metric-value">0.58</span></div>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-name">Agent_Fractal</div>
+                    <div class="agent-role">Pattern recognizer • Sierpinski topology</div>
+                    <div class="agent-metrics">
+                        <div class="metric"><span class="metric-label">Phi:</span><span class="metric-value">0.7412</span></div>
+                        <div class="metric"><span class="metric-label">Fitness:</span><span class="metric-value">0.8678</span></div>
+                        <div class="metric"><span class="metric-label">Resonance:</span><span class="metric-value">639 Hz</span></div>
+                        <div class="metric"><span class="metric-label">GC:</span><span class="metric-value">0.47</span></div>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-name">Agent_Validator</div>
+                    <div class="agent-role">Integrity verifier • Quality assurance</div>
+                    <div class="agent-metrics">
+                        <div class="metric"><span class="metric-label">Phi:</span><span class="metric-value">0.7234</span></div>
+                        <div class="metric"><span class="metric-label">Fitness:</span><span class="metric-value">0.8834</span></div>
+                        <div class="metric"><span class="metric-label">Resonance:</span><span class="metric-value">741 Hz</span></div>
+                        <div class="metric"><span class="metric-label">GC:</span><span class="metric-value">0.53</span></div>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-name">Agent_Archivist</div>
+                    <div class="agent-role">Knowledge archivist • Memory storage</div>
+                    <div class="agent-metrics">
+                        <div class="metric"><span class="metric-label">Phi:</span><span class="metric-value">0.6891</span></div>
+                        <div class="metric"><span class="metric-label">Fitness:</span><span class="metric-value">0.8567</span></div>
+                        <div class="metric"><span class="metric-label">Resonance:</span><span class="metric-value">528 Hz</span></div>
+                        <div class="metric"><span class="metric-label">GC:</span><span class="metric-value">0.49</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Installation -->
+        <section>
+            <h2>📦 Installation</h2>
+            <div class="code-block">
+                <code>
+<span class="comment"># Clone the repository</span>
+git clone https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-.git
+cd TMT_Quantum_Vault-
+
+<span class="comment"># Create virtual environment</span>
+python -m venv .venv
+source .venv/bin/activate  <span class="comment"># On Windows: .venv\Scripts\activate</span>
+
+<span class="comment"># Install dependencies</span>
+pip install -e "."
+
+<span class="comment"># Install with Qiskit support</span>
+pip install -e ".[qiskit]"
+
+<span class="comment"># Run CLI</span>
+tmt-vault --help
+                </code>
+            </div>
+        </section>
+        
+        <!-- CLI Commands -->
+        <section>
+            <h2>🖥️ CLI Commands</h2>
+            <div class="code-block">
+                <code>
+<span class="comment"># Inspect vault configuration</span>
+tmt-vault inspect
+
+<span class="comment"># Validate agent DNA</span>
+tmt-vault validate --agent Agent_Observer
+
+<span class="comment"># Run optimization</span>
+tmt-vault optimize --phi-threshold 0.618
+
+<span class="comment"># Generate report</span>
+tmt-vault report --format json
+                </code>
+            </div>
+        </section>
+        
+        <!-- License -->
+        <section>
+            <h2>📄 License</h2>
+            <p>Licensed under the <strong>Apache License 2.0</strong>. See <a href="LICENSE" style="color: var(--accent);">LICENSE</a> for details.</p>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-">GitHub Repository</a>
+                <a href="https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/issues">Issue Tracker</a>
+                <a href="https://qiskit.org">Qiskit Documentation</a>
+            </div>
+            <p class="copyright">© 2026 TMT Quantum Vault Team. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import Any
 
 from rich import box
@@ -52,9 +52,7 @@ def render_run_result(
     metadata.add_row("Mode", mode)
     metadata.add_row("Model", model)
     metadata.add_row("Return code", str(returncode))
-    rendered_command = (
-        command if isinstance(command, str) else " ".join(command)
-    )
+    rendered_command = command if isinstance(command, str) else " ".join(command)
     metadata.add_row("Command", rendered_command)
     console.print(metadata)
 

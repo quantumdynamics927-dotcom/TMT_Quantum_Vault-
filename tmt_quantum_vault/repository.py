@@ -23,7 +23,7 @@ class VaultRepository:
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
 
-    def _load_json(self, path: Path):
+    def _load_json(self, path: Path) -> Any:
         return json.loads(path.read_text(encoding="utf-8"))
 
     def resolve_path(self, value: str | None) -> Path | None:
@@ -112,18 +112,11 @@ class VaultRepository:
         )
         top_agent = max(agents, key=lambda agent: agent.fitness, default=None)
         integrated_agents = sum(
-            agent.consciousness_status == "INTEGRATED"
-            for agent in agents
+            agent.consciousness_status == "INTEGRATED" for agent in agents
         )
-        average_fitness = (
-            mean(agent.fitness for agent in agents)
-            if agents
-            else 0.0
-        )
+        average_fitness = mean(agent.fitness for agent in agents) if agents else 0.0
         average_resonance_frequency = (
-            mean(agent.resonance_frequency for agent in agents)
-            if agents
-            else 0.0
+            mean(agent.resonance_frequency for agent in agents) if agents else 0.0
         )
 
         return {
@@ -167,17 +160,12 @@ class VaultRepository:
             )
 
         if agents:
-            checks.append(
-                ("ok", f"Detected {len(agents)} agent DNA file(s).")
-            )
+            checks.append(("ok", f"Detected {len(agents)} agent DNA file(s)."))
         else:
             checks.append(("warning", "No agent DNA files were found."))
 
         if models:
-            detail = (
-                f"Detected {len(models)} persisted model artifact(s) "
-                "in Models/."
-            )
+            detail = f"Detected {len(models)} persisted model artifact(s) in Models/."
             if runnable_models:
                 detail += f" Runnable GGUF models: {len(runnable_models)}."
             if serialized_models:
@@ -193,16 +181,12 @@ class VaultRepository:
                 and not path.name.endswith(".json.gz")
             ]
             if unsupported_artifacts:
-                warning_detail += (
-                    " Unsupported artifact(s) present: "
-                    + ", ".join(unsupported_artifacts)
+                warning_detail += " Unsupported artifact(s) present: " + ", ".join(
+                    unsupported_artifacts
                 )
             checks.append(("warning", warning_detail))
 
-        if (
-            configured_model_path is not None
-            and not configured_model_path.exists()
-        ):
+        if configured_model_path is not None and not configured_model_path.exists():
             checks.append(
                 (
                     "warning",
@@ -215,19 +199,14 @@ class VaultRepository:
             checks.append(
                 (
                     "ok",
-                    "Configured llama.cpp model path exists: "
-                    + configured_name,
+                    "Configured llama.cpp model path exists: " + configured_name,
                 )
             )
 
         if (self.root / ".venv").exists():
-            checks.append(
-                ("ok", "Local virtual environment .venv is present.")
-            )
+            checks.append(("ok", "Local virtual environment .venv is present."))
         else:
-            checks.append(
-                ("warning", "Local virtual environment .venv is missing.")
-            )
+            checks.append(("warning", "Local virtual environment .venv is missing."))
 
         return checks
 

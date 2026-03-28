@@ -4,6 +4,10 @@ Models/.cache/
 Node_13_Core/.resonance
 *.log
 .venv/
+.egg-info/
+*.egg-info/
+build/
+dist/
 .mypy_cache/
 .pytest_cache/
 __pycache__/

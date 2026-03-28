@@ -7,7 +7,6 @@ import hashlib
 import json
 import os
 import re
-import requests
 import subprocess
 import sys
 from pathlib import Path
@@ -15,6 +14,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pytest
+import requests
 from typer.testing import CliRunner
 
 from tmt_quantum_vault.cli import (
@@ -28,7 +28,8 @@ from tmt_quantum_vault.models import (
     OptimizationEntry,
     RuntimeConfig,
 )
-from tmt_quantum_vault.ollama_api import is_available, run as ollama_run
+from tmt_quantum_vault.ollama_api import is_available
+from tmt_quantum_vault.ollama_api import run as ollama_run
 from tmt_quantum_vault.repository import VaultRepository
 from tmt_quantum_vault.runner import RunResult, RuntimeRunner
 from tmt_quantum_vault.runtime import RuntimeInspector
@@ -39,8 +40,8 @@ RUNNER = CliRunner()
 TEST_REPO_ROOT = Path(__file__).resolve().parents[1]
 
 sys.path.insert(0, str(TEST_REPO_ROOT / "tools"))
+import agent_analyst as aa  # noqa: E402
 import promoter_loader as pl  # noqa: E402
-import agent_analyst as aa    # noqa: E402
 import update_vault_docs as uvd  # noqa: E402
 
 
@@ -133,9 +134,7 @@ def test_runtime_json_output() -> None:
         )
     ]
     with patch("tmt_quantum_vault.cli._runtime") as mock_runtime:
-        mock_runtime.return_value.inspect_all.return_value = (
-            mocked_runtime_checks
-        )
+        mock_runtime.return_value.inspect_all.return_value = mocked_runtime_checks
         result = RUNNER.invoke(app, ["runtime", "--json"])
 
     assert result.exit_code == 0
@@ -159,9 +158,7 @@ def test_doctor_json_output() -> None:
             mock_repo.return_value.repository_checks.return_value = [
                 ("ok", "repo healthy")
             ]
-            mock_runtime.return_value.inspect_all.return_value = (
-                mocked_runtime_checks
-            )
+            mock_runtime.return_value.inspect_all.return_value = mocked_runtime_checks
             result = RUNNER.invoke(app, ["doctor", "--json"])
 
     assert result.exit_code == 0
@@ -225,9 +222,7 @@ def test_summary_json_output() -> None:
     assert payload["model_count"] == 1
     assert payload["model_files"] == ["Models/qwen3-8b.gguf"]
     assert payload["top_agent"]["dna_agent_name"] == "Michael"
-    latest_score = payload["latest_optimization"]["data"][
-        "optimization_score"
-    ]
+    latest_score = payload["latest_optimization"]["data"]["optimization_score"]
     assert latest_score == 0.922
     assert payload["returncode"] == 0
 
@@ -275,9 +270,7 @@ def test_runtime_record_path(tmp_path: Path) -> None:
     record_path = tmp_path / "runtime-record.json"
 
     with patch("tmt_quantum_vault.cli._runtime") as mock_runtime:
-        mock_runtime.return_value.inspect_all.return_value = (
-            mocked_runtime_checks
-        )
+        mock_runtime.return_value.inspect_all.return_value = mocked_runtime_checks
         result = RUNNER.invoke(
             app,
             ["runtime", "--json", "--record-path", str(record_path)],
@@ -349,10 +342,7 @@ def test_agent_task_json_output() -> None:
     validator_prompt = call_args[1].kwargs["prompt"]
     visual_prompt = call_args[2].kwargs["prompt"]
 
-    assert (
-        "Return exactly one JSON object and nothing else."
-        in workflow_prompt
-    )
+    assert "Return exactly one JSON object and nothing else." in workflow_prompt
     assert '"stage": "Workflow"' in workflow_prompt
     assert '"required_keys"' in workflow_prompt
 
@@ -384,10 +374,7 @@ def test_eval_json_output(tmp_path: Path) -> None:
                     },
                     {
                         "id": "json-shape",
-                        "prompt": (
-                            "Return exactly one JSON object with status "
-                            "ok."
-                        ),
+                        "prompt": ("Return exactly one JSON object with status " "ok."),
                         "expectation": {
                             "contains_all": ['"status"', '"ok"'],
                             "excludes": ["```"],
@@ -603,9 +590,7 @@ def test_cloud_mode_auth_message_forces_failure() -> None:
         )
 
     assert result.returncode == 1
-    assert result.stdout == (
-        "You need to be signed in to Ollama to run Cloud models."
-    )
+    assert result.stdout == ("You need to be signed in to Ollama to run Cloud models.")
     assert "signed in to Ollama" in result.stderr
 
 
@@ -617,11 +602,7 @@ def test_inspect_ollama_cloud_ok() -> None:
             (),
             {
                 "runtime": RuntimeConfig.model_validate(
-                    {
-                        "ollama": {
-                            "cloud_model": "qwen3-coder-next:cloud"
-                        }
-                    }
+                    {"ollama": {"cloud_model": "qwen3-coder-next:cloud"}}
                 )
             },
         )(),
@@ -767,12 +748,10 @@ def test_repository_checks_report_missing_model_and_artifacts(
         for detail in details
     )
     assert any(
-        "No persisted model artifacts found in Models/." in detail
-        for detail in details
+        "No persisted model artifacts found in Models/." in detail for detail in details
     )
     assert any(
-        "Unsupported artifact(s) present: .resonance" in detail
-        for detail in details
+        "Unsupported artifact(s) present: .resonance" in detail for detail in details
     )
     assert any(
         "Configured llama.cpp model path is missing:" in detail
@@ -1063,9 +1042,7 @@ def test_release_evidence_bundle(tmp_path: Path) -> None:
                 {
                     "id": "exact-smoke",
                     "prompt": "Reply with exactly: TMT cloud test",
-                    "expectation": {
-                        "contains_all": ["TMT cloud test"]
-                    },
+                    "expectation": {"contains_all": ["TMT cloud test"]},
                 },
                 {
                     "id": "json-status-shape",
@@ -1183,15 +1160,11 @@ def test_release_evidence_bundle(tmp_path: Path) -> None:
                     )
 
     assert result.exit_code == 0
-    manifest = json.loads(
-        (output_dir / "manifest.json").read_text(encoding="utf-8")
-    )
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["files"]["doctor"].endswith("doctor.json")
     assert manifest["files"]["eval"].endswith("eval.json")
     assert manifest["files"]["agent_task"].endswith("agent-task.json")
-    eval_payload = json.loads(
-        (output_dir / "eval.json").read_text(encoding="utf-8")
-    )
+    eval_payload = json.loads((output_dir / "eval.json").read_text(encoding="utf-8"))
     assert eval_payload["record_type"] == "eval"
     assert eval_payload["summary"]["passed_cases"] == 2
     agent_payload = json.loads(
@@ -1307,9 +1280,7 @@ def test_release_evidence_bundle_with_compare_to(tmp_path: Path) -> None:
                 {
                     "id": "exact-smoke",
                     "prompt": "Reply with exactly: TMT cloud test",
-                    "expectation": {
-                        "contains_all": ["TMT cloud test"]
-                    },
+                    "expectation": {"contains_all": ["TMT cloud test"]},
                 },
                 {
                     "id": "json-status-shape",
@@ -1429,12 +1400,8 @@ def test_release_evidence_bundle_with_compare_to(tmp_path: Path) -> None:
                     )
 
     assert result.exit_code == 0
-    manifest = json.loads(
-        (output_dir / "manifest.json").read_text(encoding="utf-8")
-    )
-    assert manifest["files"]["compare_evidence"].endswith(
-        "compare-evidence.json"
-    )
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["files"]["compare_evidence"].endswith("compare-evidence.json")
     assert manifest["compared_to"].endswith("previous")
     compare_payload = json.loads(
         (output_dir / "compare-evidence.json").read_text(encoding="utf-8")
@@ -1645,9 +1612,7 @@ def test_release_summary_json_output(tmp_path: Path) -> None:
     bundle_dir = tmp_path / "bundle"
     bundle_dir.mkdir()
     (bundle_dir / "smoke-cloud.json").write_text(
-        json.dumps(
-            {"returncode": 0, "model": "qwen3-coder-next:cloud"}
-        ),
+        json.dumps({"returncode": 0, "model": "qwen3-coder-next:cloud"}),
         encoding="utf-8",
     )
     (bundle_dir / "eval.json").write_text(
@@ -1692,9 +1657,7 @@ def test_release_summary_json_output(tmp_path: Path) -> None:
                     "smoke_cloud": str(bundle_dir / "smoke-cloud.json"),
                     "eval": str(bundle_dir / "eval.json"),
                     "agent_task": str(bundle_dir / "agent-task.json"),
-                    "compare_evidence": str(
-                        bundle_dir / "compare-evidence.json"
-                    ),
+                    "compare_evidence": str(bundle_dir / "compare-evidence.json"),
                 },
                 "returncode": 0,
                 "compared_to": "previous-bundle",
@@ -1779,9 +1742,7 @@ def test_release_gate_json_output(tmp_path: Path) -> None:
     bundle_dir = tmp_path / "bundle"
     bundle_dir.mkdir()
     (bundle_dir / "smoke-cloud.json").write_text(
-        json.dumps(
-            {"returncode": 0, "model": "qwen3-coder-next:cloud"}
-        ),
+        json.dumps({"returncode": 0, "model": "qwen3-coder-next:cloud"}),
         encoding="utf-8",
     )
     (bundle_dir / "eval.json").write_text(
@@ -1803,9 +1764,7 @@ def test_release_gate_json_output(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (bundle_dir / "compare-evidence.json").write_text(
-        json.dumps(
-            {"summary": {"has_regressions": False, "regression_count": 0}}
-        ),
+        json.dumps({"summary": {"has_regressions": False, "regression_count": 0}}),
         encoding="utf-8",
     )
     (bundle_dir / "manifest.json").write_text(
@@ -1815,9 +1774,7 @@ def test_release_gate_json_output(tmp_path: Path) -> None:
                     "smoke_cloud": str(bundle_dir / "smoke-cloud.json"),
                     "eval": str(bundle_dir / "eval.json"),
                     "agent_task": str(bundle_dir / "agent-task.json"),
-                    "compare_evidence": str(
-                        bundle_dir / "compare-evidence.json"
-                    ),
+                    "compare_evidence": str(bundle_dir / "compare-evidence.json"),
                 },
                 "returncode": 0,
                 "compared_to": "previous-bundle",
@@ -1898,6 +1855,7 @@ def test_release_gate_requires_comparison(tmp_path: Path) -> None:
 
 # ── promoter_loader: gc_content ───────────────────────────────────────────────
 
+
 def test_gc_content_empty_sequence() -> None:
     assert pl.gc_content("") == 0.0
 
@@ -1921,6 +1879,7 @@ def test_gc_content_case_insensitive() -> None:
 
 # ── promoter_loader: parse_fasta ──────────────────────────────────────────────
 
+
 def _write_fasta(tmp_path: Path, name: str, header: str, sequence: str) -> Path:
     fasta = tmp_path / f"{name}_promoter.fa"
     fasta.write_text(f">{header}\n{sequence}\n", encoding="utf-8")
@@ -1929,7 +1888,8 @@ def _write_fasta(tmp_path: Path, name: str, header: str, sequence: str) -> Path:
 
 def test_parse_fasta_returns_gene_name(tmp_path: Path) -> None:
     fasta = _write_fasta(
-        tmp_path, "ACTB_Malkuth",
+        tmp_path,
+        "ACTB_Malkuth",
         "chromosome:GRCh38:7:5563902:5563932:-1",
         "GGAATCACTTGCACCCGGGAGGCGGAGGCTG",
     )
@@ -1958,7 +1918,9 @@ def test_parse_fasta_gc_content(tmp_path: Path) -> None:
 
 
 def test_parse_fasta_chromosome_coord(tmp_path: Path) -> None:
-    fasta = _write_fasta(tmp_path, "GENE_Kether", "chromosome:GRCh38:7:100:200:-1", "ACGT")
+    fasta = _write_fasta(
+        tmp_path, "GENE_Kether", "chromosome:GRCh38:7:100:200:-1", "ACGT"
+    )
     result = pl.parse_fasta(fasta)
     assert result["chromosome_coord"] == "chromosome"
 
@@ -1970,6 +1932,7 @@ def test_parse_fasta_records_source_file(tmp_path: Path) -> None:
 
 
 # ── promoter_loader: compute_sha256 ──────────────────────────────────────────
+
 
 def test_compute_sha256_known_value(tmp_path: Path) -> None:
     content = b"ACGT\n"
@@ -1988,6 +1951,7 @@ def test_compute_sha256_changes_with_content(tmp_path: Path) -> None:
 
 
 # ── promoter_loader: verify_hmac ─────────────────────────────────────────────
+
 
 def test_verify_hmac_no_sha256_file(tmp_path: Path) -> None:
     fasta = tmp_path / "GENE_Kether_promoter.fa"
@@ -2015,7 +1979,10 @@ def test_verify_hmac_mismatching_hash(tmp_path: Path) -> None:
 
 # ── promoter_loader: find_fasta_file ─────────────────────────────────────────
 
-def test_find_fasta_file_returns_local_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_find_fasta_file_returns_local_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     fasta = tmp_path / "ACTB_Malkuth_promoter.fa"
@@ -2024,7 +1991,9 @@ def test_find_fasta_file_returns_local_file(tmp_path: Path, monkeypatch: pytest.
     assert result == fasta
 
 
-def test_find_fasta_file_returns_none_when_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_find_fasta_file_returns_none_when_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     result = pl.find_fasta_file("NONEXISTENT_Gene")
@@ -2033,7 +2002,10 @@ def test_find_fasta_file_returns_none_when_missing(tmp_path: Path, monkeypatch: 
 
 # ── promoter_loader: find_metadata_file ──────────────────────────────────────
 
-def test_find_metadata_file_returns_local_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_find_metadata_file_returns_local_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     meta = tmp_path / "ACTB_Malkuth_promoter.fa.sha256.json"
@@ -2042,7 +2014,9 @@ def test_find_metadata_file_returns_local_file(tmp_path: Path, monkeypatch: pyte
     assert result == meta
 
 
-def test_find_metadata_file_returns_none_when_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_find_metadata_file_returns_none_when_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     result = pl.find_metadata_file("NONEXISTENT_Gene")
@@ -2051,7 +2025,10 @@ def test_find_metadata_file_returns_none_when_missing(tmp_path: Path, monkeypatc
 
 # ── promoter_loader: verify_promoter ─────────────────────────────────────────
 
-def test_verify_promoter_not_found(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_verify_promoter_not_found(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     result = pl.verify_promoter("MISSING_Gene")
@@ -2059,7 +2036,9 @@ def test_verify_promoter_not_found(tmp_path: Path, monkeypatch: pytest.MonkeyPat
     assert "MISSING_Gene" in result["error"]
 
 
-def test_verify_promoter_with_matching_metadata(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_verify_promoter_with_matching_metadata(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     content = b">chr7\nACGTACGT\n"
@@ -2075,7 +2054,9 @@ def test_verify_promoter_with_matching_metadata(tmp_path: Path, monkeypatch: pyt
     assert result["sha256_verified"] is True
 
 
-def test_verify_promoter_with_mismatching_metadata(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_verify_promoter_with_mismatching_metadata(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     fasta = tmp_path / "TEST_Malkuth_promoter.fa"
@@ -2089,14 +2070,19 @@ def test_verify_promoter_with_mismatching_metadata(tmp_path: Path, monkeypatch: 
 
 # ── promoter_loader: load_all_promoters ──────────────────────────────────────
 
-def test_load_all_promoters_empty_directory(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_load_all_promoters_empty_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     result = pl.load_all_promoters()
     assert result == []
 
 
-def test_load_all_promoters_reads_fasta_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_all_promoters_reads_fasta_files(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     fasta = tmp_path / "ACTB_Malkuth_promoter.fa"
@@ -2107,7 +2093,9 @@ def test_load_all_promoters_reads_fasta_files(tmp_path: Path, monkeypatch: pytes
     assert result[0]["sequence"] == "ACGTACGT"
 
 
-def test_load_all_promoters_no_duplicates(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_all_promoters_no_duplicates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     (tmp_path / "ACTB_Malkuth_promoter.fa").write_text(
@@ -2118,7 +2106,9 @@ def test_load_all_promoters_no_duplicates(tmp_path: Path, monkeypatch: pytest.Mo
     assert len(genes) == len(set(genes))
 
 
-def test_load_all_promoters_includes_sha256(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_all_promoters_includes_sha256(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     content = b">chr7\nACGT\n"
@@ -2129,6 +2119,7 @@ def test_load_all_promoters_includes_sha256(tmp_path: Path, monkeypatch: pytest.
 
 
 # ── promoter_loader: format_output ───────────────────────────────────────────
+
 
 def test_format_output_contains_gene() -> None:
     promoter = {
@@ -2158,18 +2149,27 @@ def test_format_output_verified_field() -> None:
 
 # ── promoter_loader: get_promoter_files ──────────────────────────────────────
 
-def test_get_promoter_files_uses_promoters_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_get_promoter_files_uses_promoters_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path)
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
-    (tmp_path / "ACTB_Malkuth_promoter.fa").write_text(">chr7\nACGT\n", encoding="utf-8")
-    (tmp_path / "BDNF_Tiferet_promoter.fa").write_text(">chr11\nGCTA\n", encoding="utf-8")
+    (tmp_path / "ACTB_Malkuth_promoter.fa").write_text(
+        ">chr7\nACGT\n", encoding="utf-8"
+    )
+    (tmp_path / "BDNF_Tiferet_promoter.fa").write_text(
+        ">chr11\nGCTA\n", encoding="utf-8"
+    )
     files = pl.get_promoter_files()
     names = [f.name for f in files]
     assert "ACTB_Malkuth_promoter.fa" in names
     assert "BDNF_Tiferet_promoter.fa" in names
 
 
-def test_get_promoter_files_empty_when_no_directory(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_get_promoter_files_empty_when_no_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(pl, "PROMOTERS_DIR", tmp_path / "nonexistent")
     monkeypatch.setattr(pl, "EXTERNAL_PROMOTERS", tmp_path / "external")
     files = pl.get_promoter_files()
@@ -2180,6 +2180,7 @@ def test_get_promoter_files_empty_when_no_directory(tmp_path: Path, monkeypatch:
 
 
 # ── agent_analyst: compute_metrics ───────────────────────────────────────────
+
 
 def test_compute_metrics_empty_counts() -> None:
     result = aa.compute_metrics({})
@@ -2231,6 +2232,7 @@ def test_compute_metrics_phi_convergent_near_golden_ratio() -> None:
 
 # ── agent_analyst: decode_sampler_v2_data ────────────────────────────────────
 
+
 def test_decode_sampler_v2_no_c_key() -> None:
     result = aa.decode_sampler_v2_data({"results": {}})
     assert result == {}
@@ -2269,10 +2271,11 @@ def test_decode_sampler_v2_two_shots() -> None:
 
 # ── agent_analyst: parse_qasm_depth ──────────────────────────────────────────
 
+
 def test_parse_qasm_depth_extracts_n_qubits(tmp_path: Path) -> None:
     qasm = tmp_path / "test.qasm"
     qasm.write_text(
-        "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[5];\ncreg c[5];\n",
+        'OPENQASM 2.0;\ninclude "qelib1.inc";\nqreg q[5];\ncreg c[5];\n',
         encoding="utf-8",
     )
     result = aa.parse_qasm_depth(qasm)
@@ -2315,6 +2318,7 @@ def test_parse_qasm_depth_default_n_qubits(tmp_path: Path) -> None:
 
 
 # ── agent_analyst: analyze_result ────────────────────────────────────────────
+
 
 def _write_counts_json(tmp_path: Path, counts: dict, name: str = "result.json") -> Path:
     p = tmp_path / name
@@ -2397,7 +2401,10 @@ def test_analyze_result_phi_convergent_flag(tmp_path: Path) -> None:
 
 # ── agent_analyst: ingest_result ─────────────────────────────────────────────
 
-def test_ingest_result_creates_ingested_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_ingest_result_creates_ingested_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     ingested_dir = tmp_path / "ingested"
     significant_dir = ingested_dir / "SIGNIFICANT"
     agent_dir = tmp_path / "agent_feed"
@@ -2418,7 +2425,9 @@ def test_ingest_result_creates_ingested_file(tmp_path: Path, monkeypatch: pytest
     assert record["status"] == "INGESTED"
 
 
-def test_ingest_result_creates_agent_feed_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_ingest_result_creates_agent_feed_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     ingested_dir = tmp_path / "ingested"
     significant_dir = ingested_dir / "SIGNIFICANT"
     agent_dir = tmp_path / "agent_feed"
@@ -2441,7 +2450,9 @@ def test_ingest_result_creates_agent_feed_file(tmp_path: Path, monkeypatch: pyte
     assert "circuit" in feed
 
 
-def test_ingest_result_significant_creates_significant_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_ingest_result_significant_creates_significant_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     ingested_dir = tmp_path / "ingested"
     significant_dir = ingested_dir / "SIGNIFICANT"
     agent_dir = tmp_path / "agent_feed"
@@ -2462,7 +2473,9 @@ def test_ingest_result_significant_creates_significant_file(tmp_path: Path, monk
     assert len(significant_files) == 1
 
 
-def test_ingest_result_not_significant_no_significant_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_ingest_result_not_significant_no_significant_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     ingested_dir = tmp_path / "ingested"
     significant_dir = ingested_dir / "SIGNIFICANT"
     agent_dir = tmp_path / "agent_feed"
@@ -2484,6 +2497,7 @@ def test_ingest_result_not_significant_no_significant_file(tmp_path: Path, monke
 
 
 # ── agent_analyst: parse_promoter_from_fasta ─────────────────────────────────
+
 
 def test_parse_promoter_from_fasta_gene_and_sefirah(tmp_path: Path) -> None:
     fasta = tmp_path / "ACTB_Malkuth_promoter.fa"
@@ -2521,6 +2535,7 @@ def test_parse_promoter_from_fasta_no_underscore_gene(tmp_path: Path) -> None:
 
 
 # ── agent_analyst: get_processed_files ───────────────────────────────────────
+
 
 def test_get_processed_files_returns_file_names(tmp_path: Path) -> None:
     (tmp_path / "result_a.json").write_text("{}", encoding="utf-8")

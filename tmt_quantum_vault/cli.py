@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import json
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import time
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any, cast
 
 import requests
@@ -18,13 +18,12 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from .ollama_api import run as ollama_run
 from .models import (
     AgentDNA,
-    OptimizationEntry,
     SummarySnapshot,
     ValidationResult,
 )
+from .ollama_api import run as ollama_run
 from .output import (
     emit_json_document,
     emit_json_result,
@@ -36,9 +35,7 @@ from .repository import VaultRepository
 from .runner import RuntimeRunner
 from .runtime import RuntimeInspector
 
-app = typer.Typer(
-    help="Inspect and validate the TMT Quantum Vault JSON dataset."
-)
+app = typer.Typer(help="Inspect and validate the TMT Quantum Vault JSON dataset.")
 console = Console()
 
 
@@ -90,7 +87,7 @@ def _write_record(
         resolved_path,
         {
             "record_type": record_type,
-            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            "recorded_at": datetime.now(UTC).isoformat(),
             **payload,
         },
     )
@@ -102,17 +99,14 @@ def _doctor_payload(
 ) -> dict[str, Any]:
     has_repository_warnings = any(status == "warning" for status, _ in checks)
     has_runtime_warnings = any(
-        runtime_check.status == "warning"
-        for runtime_check in runtime_checks
+        runtime_check.status == "warning" for runtime_check in runtime_checks
     )
     return {
         "repository": [
-            {"status": status, "detail": detail}
-            for status, detail in checks
+            {"status": status, "detail": detail} for status, detail in checks
         ],
         "runtime": [
-            _json_runtime_check(runtime_check)
-            for runtime_check in runtime_checks
+            _json_runtime_check(runtime_check) for runtime_check in runtime_checks
         ],
         "has_warnings": has_repository_warnings or has_runtime_warnings,
     }
@@ -120,13 +114,11 @@ def _doctor_payload(
 
 def _runtime_payload(runtime_checks: list[Any]) -> dict[str, Any]:
     all_warnings = all(
-        runtime_check.status == "warning"
-        for runtime_check in runtime_checks
+        runtime_check.status == "warning" for runtime_check in runtime_checks
     )
     return {
         "runtime": [
-            _json_runtime_check(runtime_check)
-            for runtime_check in runtime_checks
+            _json_runtime_check(runtime_check) for runtime_check in runtime_checks
         ],
         "all_warnings": all_warnings,
     }
@@ -142,12 +134,9 @@ def _json_validation_result(result: ValidationResult) -> dict[str, Any]:
 
 
 def _summary_payload(summary_data: SummarySnapshot) -> dict[str, Any]:
-    top_agent = cast(AgentDNA | None, summary_data["top_agent"])
-    latest_optimization = cast(
-        OptimizationEntry | None,
-        summary_data["latest_optimization"],
-    )
-    model_files = cast(list[Path], summary_data["model_files"])
+    top_agent = summary_data["top_agent"]
+    latest_optimization = summary_data["latest_optimization"]
+    model_files = summary_data["model_files"]
     return {
         "vault_name": summary_data["vault_name"],
         "consciousness_level": summary_data["consciousness_level"],
@@ -157,15 +146,11 @@ def _summary_payload(summary_data: SummarySnapshot) -> dict[str, Any]:
         "memory_store_count": summary_data["memory_store_count"],
         "daily_log_count": summary_data["daily_log_count"],
         "average_fitness": summary_data["average_fitness"],
-        "average_resonance_frequency": summary_data[
-            "average_resonance_frequency"
-        ],
+        "average_resonance_frequency": summary_data["average_resonance_frequency"],
         "model_count": len(model_files),
         "model_files": [path.as_posix() for path in model_files],
         "top_agent": (
-            top_agent.model_dump(mode="json")
-            if top_agent is not None
-            else None
+            top_agent.model_dump(mode="json") if top_agent is not None else None
         ),
         "latest_optimization": (
             latest_optimization.model_dump(mode="json")
@@ -182,9 +167,7 @@ def _validate_payload(
     failures = [result for result in results if not result.valid]
     return (
         {
-            "results": [
-                _json_validation_result(result) for result in results
-            ],
+            "results": [_json_validation_result(result) for result in results],
             "summary": {
                 "checked_files": len(results),
                 "valid_files": len(results) - len(failures),
@@ -274,17 +257,13 @@ def _evaluate_case_output(
         if token.casefold() not in lowered_output
     ]
     if missing_required:
-        failures.append(
-            "missing required tokens: " + ", ".join(missing_required)
-        )
+        failures.append("missing required tokens: " + ", ".join(missing_required))
 
     if case.expectation.contains_any and not any(
-        token.casefold() in lowered_output
-        for token in case.expectation.contains_any
+        token.casefold() in lowered_output for token in case.expectation.contains_any
     ):
         failures.append(
-            "missing any-of tokens: "
-            + ", ".join(case.expectation.contains_any)
+            "missing any-of tokens: " + ", ".join(case.expectation.contains_any)
         )
 
     present_excluded = [
@@ -293,9 +272,7 @@ def _evaluate_case_output(
         if token.casefold() in lowered_output
     ]
     if present_excluded:
-        failures.append(
-            "found excluded tokens: " + ", ".join(present_excluded)
-        )
+        failures.append("found excluded tokens: " + ", ".join(present_excluded))
 
     return failures
 
@@ -387,7 +364,7 @@ def _resolve_evidence_manifest_path(bundle_path: Path) -> Path:
 
 
 def _load_json_path(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))
 
 
 def _load_evidence_artifact(path: str | None) -> dict[str, Any] | None:
@@ -474,16 +451,12 @@ def _compare_eval_payloads(
     return (
         {
             "previous_dataset": (
-                cast(dict[str, Any], previous_payload.get("dataset", {})).get(
-                    "name"
-                )
+                cast(dict[str, Any], previous_payload.get("dataset", {})).get("name")
                 if previous_payload is not None
                 else None
             ),
             "current_dataset": (
-                cast(dict[str, Any], current_payload.get("dataset", {})).get(
-                    "name"
-                )
+                cast(dict[str, Any], current_payload.get("dataset", {})).get("name")
                 if current_payload is not None
                 else None
             ),
@@ -571,9 +544,7 @@ def _execute_compare_evidence(
     previous_returncode = cast(int, previous_manifest.get("returncode", 1))
     current_returncode = cast(int, current_manifest.get("returncode", 1))
     if previous_returncode == 0 and current_returncode != 0:
-        regressions.append(
-            "overall bundle returncode regressed from pass to fail"
-        )
+        regressions.append("overall bundle returncode regressed from pass to fail")
 
     payload = {
         "previous_bundle": str(previous_manifest_path.parent),
@@ -596,7 +567,7 @@ def _execute_compare_evidence(
 
 
 def _default_release_evidence_dir(root: Path) -> Path:
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     return root / "Resonance_Logs" / "daily" / f"release-evidence-{timestamp}"
 
 
@@ -613,10 +584,7 @@ def _find_latest_release_evidence_bundle(
     for candidate in daily_dir.glob("release-evidence*"):
         if not candidate.is_dir():
             continue
-        if (
-            resolved_current is not None
-            and candidate.resolve() == resolved_current
-        ):
+        if resolved_current is not None and candidate.resolve() == resolved_current:
             continue
         manifest_path = candidate / "manifest.json"
         if manifest_path.exists():
@@ -943,11 +911,7 @@ def _emit_agent_task_json(
             "stages": stages,
             "final_output": stages[-1]["output"] if stages else "",
             "returncode": next(
-                (
-                    stage["returncode"]
-                    for stage in stages
-                    if stage["returncode"] != 0
-                ),
+                (stage["returncode"] for stage in stages if stage["returncode"] != 0),
                 0,
             ),
         }
@@ -1072,26 +1036,21 @@ def _resolve_agi_artifact_paths(
 ) -> list[Path]:
     if artifacts:
         resolved_artifacts = [
-            artifact.resolve()
-            if artifact.is_absolute()
-            else (agi_root / artifact).resolve()
+            (
+                artifact.resolve()
+                if artifact.is_absolute()
+                else (agi_root / artifact).resolve()
+            )
             for artifact in artifacts
         ]
     else:
         resolved_artifacts = [
             (agi_root / "phi_agent_report_20260310_231439.json").resolve(),
             (agi_root / "dna_quantum_analysis_results.json").resolve(),
-            (
-                agi_root
-                / "ibm_hardware_aggregate_20260202_040836.json"
-            ).resolve(),
+            (agi_root / "ibm_hardware_aggregate_20260202_040836.json").resolve(),
         ]
 
-    missing = [
-        str(path)
-        for path in resolved_artifacts
-        if not path.exists()
-    ]
+    missing = [str(path) for path in resolved_artifacts if not path.exists()]
     if missing:
         raise typer.BadParameter(
             "AGI eval artifacts are missing: " + ", ".join(missing)
@@ -1239,9 +1198,11 @@ def _execute_agi_validate(
                     if failed_checks
                     else f"Checks passed: {len(checks)} / {len(checks) if checks else 0}"
                 ),
-                f"Error: {contract_result.get('error')}"
-                if contract_result.get("error")
-                else "No contract error reported.",
+                (
+                    f"Error: {contract_result.get('error')}"
+                    if contract_result.get("error")
+                    else "No contract error reported."
+                ),
             ],
         ),
         _agi_stage_output(
@@ -1251,7 +1212,9 @@ def _execute_agi_validate(
         ),
     ]
     for stage in stages:
-        stage["returncode"] = completed.returncode if stage["agent"] == "Validator" else 0
+        stage["returncode"] = (
+            completed.returncode if stage["agent"] == "Validator" else 0
+        )
 
     payload = {
         "operation": operation,
@@ -1288,8 +1251,8 @@ def _execute_agi_eval_smoke(
         resolved_agi_root,
         artifacts,
     )
-    resolved_dataset_output, used_temporary_path = (
-        _resolve_agi_dataset_output(resolved_agi_root, dataset_output)
+    resolved_dataset_output, used_temporary_path = _resolve_agi_dataset_output(
+        resolved_agi_root, dataset_output
     )
     converter_path = (
         resolved_agi_root / "convert_agi_results_to_tmt_eval.py"
@@ -1327,9 +1290,7 @@ def _execute_agi_eval_smoke(
             timeout=timeout,
         )
     except subprocess.TimeoutExpired as exc:
-        generation_duration_ms = int(
-            (time.perf_counter() - started_at) * 1000
-        )
+        generation_duration_ms = int((time.perf_counter() - started_at) * 1000)
         return (
             {
                 "agi_root": str(resolved_agi_root),
@@ -1353,9 +1314,7 @@ def _execute_agi_eval_smoke(
             },
             1,
         )
-    generation_duration_ms = int(
-        (time.perf_counter() - started_at) * 1000
-    )
+    generation_duration_ms = int((time.perf_counter() - started_at) * 1000)
 
     payload: dict[str, Any] = {
         "agi_root": str(resolved_agi_root),
@@ -1420,12 +1379,9 @@ def summary_command(
 ) -> None:
     repo = _repo(root)
     summary_data: SummarySnapshot = repo.build_summary()
-    top_agent = cast(AgentDNA | None, summary_data["top_agent"])
-    latest_optimization = cast(
-        OptimizationEntry | None,
-        summary_data["latest_optimization"],
-    )
-    model_files = cast(list[Path], summary_data["model_files"])
+    top_agent = summary_data["top_agent"]
+    latest_optimization = summary_data["latest_optimization"]
+    model_files = summary_data["model_files"]
 
     if json_out:
         typer.echo(emit_json_document(_summary_payload(summary_data)))
@@ -1763,9 +1719,7 @@ def smoke_local(
     prompt = "Reply with exactly: TMT local test"
 
     gguf = next(iter(repo.model_files()), None)
-    llama_cpp_path = repo.resolve_path(
-        runtime_config.llama_cpp.executable_path
-    )
+    llama_cpp_path = repo.resolve_path(runtime_config.llama_cpp.executable_path)
 
     can_use_llama_cpp = (
         not force_ollama
@@ -1829,8 +1783,7 @@ def smoke_local(
         except subprocess.TimeoutExpired:
             completed = None
             timeout_note = (
-                "Primary local runtime timed out; falling back to local "
-                "Ollama."
+                "Primary local runtime timed out; falling back to local " "Ollama."
             )
     else:
         try:
@@ -1883,20 +1836,16 @@ def smoke_local(
         except subprocess.TimeoutExpired:
             completed = None
             timeout_note = (
-                "llama.cpp CPU fallback timed out; falling back to local "
-                "Ollama."
+                "llama.cpp CPU fallback timed out; falling back to local " "Ollama."
             )
         backend = "llama.cpp"
 
     llama_cpp_failed = (
-        can_use_llama_cpp
-        and completed is not None
-        and completed.returncode != 0
+        can_use_llama_cpp and completed is not None and completed.returncode != 0
     )
     if llama_cpp_failed:
         timeout_note = (
-            "llama.cpp local smoke test failed; falling back to local "
-            "Ollama."
+            "llama.cpp local smoke test failed; falling back to local " "Ollama."
         )
 
     if completed is None or llama_cpp_failed:
@@ -2199,14 +2148,14 @@ def compare_evidence(
     component_table.add_row(
         "smoke-cloud",
         str(
-            cast(dict[str, Any], compare_payload["components"])[
-                "smoke_cloud"
-            ]["previous_returncode"]
+            cast(dict[str, Any], compare_payload["components"])["smoke_cloud"][
+                "previous_returncode"
+            ]
         ),
         str(
-            cast(dict[str, Any], compare_payload["components"])[
-                "smoke_cloud"
-            ]["current_returncode"]
+            cast(dict[str, Any], compare_payload["components"])["smoke_cloud"][
+                "current_returncode"
+            ]
         ),
     )
     component_table.add_row(
@@ -2225,14 +2174,14 @@ def compare_evidence(
     component_table.add_row(
         "agent-task",
         str(
-            cast(dict[str, Any], compare_payload["components"])[
-                "agent_task"
-            ]["previous_returncode"]
+            cast(dict[str, Any], compare_payload["components"])["agent_task"][
+                "previous_returncode"
+            ]
         ),
         str(
-            cast(dict[str, Any], compare_payload["components"])[
-                "agent_task"
-            ]["current_returncode"]
+            cast(dict[str, Any], compare_payload["components"])["agent_task"][
+                "current_returncode"
+            ]
         ),
     )
     console.print(component_table)
@@ -2332,17 +2281,13 @@ def release_summary(
     table.add_row(
         "agent-task",
         str(agent_task_component["returncode"]),
-        (
-            f"{agent_task_component['stage_count']} "
-            "stages"
-        ),
+        (f"{agent_task_component['stage_count']} " "stages"),
     )
     table.add_row(
         "comparison",
         str(comparison_component["has_regressions"]),
         (
-            f"{comparison_component['regression_count']} "
-            "regressions"
+            f"{comparison_component['regression_count']} " "regressions"
             if comparison_component["regression_count"] is not None
             else "no comparison artifact"
         ),
@@ -2556,9 +2501,7 @@ def agent_task(
             )
         )
         if stage["stderr"]:
-            console.print(
-                Panel(stage["stderr"], title=f"{stage['agent']} stderr")
-            )
+            console.print(Panel(stage["stderr"], title=f"{stage['agent']} stderr"))
 
     if final_returncode != 0:
         raise typer.Exit(code=final_returncode)
@@ -2744,8 +2687,7 @@ def agi_eval_smoke(
         120,
         "--timeout",
         help=(
-            "Maximum runtime in seconds for dataset generation and each eval "
-            "case."
+            "Maximum runtime in seconds for dataset generation and each eval " "case."
         ),
     ),
 ) -> None:
@@ -2872,17 +2814,13 @@ def release_evidence(
     model: str | None = typer.Option(
         None,
         "--model",
-        help=(
-            "Override the configured cloud model name for smoke and chain "
-            "runs."
-        ),
+        help=("Override the configured cloud model name for smoke and chain " "runs."),
     ),
     raw_final_only: bool = typer.Option(
         True,
         "--raw-final-only/--include-raw-thinking",
         help=(
-            "Strip model thinking blocks in bundled smoke and agent-task "
-            "outputs."
+            "Strip model thinking blocks in bundled smoke and agent-task " "outputs."
         ),
     ),
     json_out: bool = typer.Option(
@@ -2893,10 +2831,7 @@ def release_evidence(
     timeout: int = typer.Option(
         120,
         "--timeout",
-        help=(
-            "Maximum runtime in seconds for bundled smoke and agent-task "
-            "runs."
-        ),
+        help=("Maximum runtime in seconds for bundled smoke and agent-task " "runs."),
     ),
 ) -> None:
     if compare_to is not None and compare_to_latest:
@@ -2957,7 +2892,7 @@ def release_evidence(
         bundle_dir / "doctor.json",
         {
             "record_type": "doctor",
-            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            "recorded_at": datetime.now(UTC).isoformat(),
             **doctor_payload,
         },
     )
@@ -2965,7 +2900,7 @@ def release_evidence(
         bundle_dir / "runtime.json",
         {
             "record_type": "runtime",
-            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            "recorded_at": datetime.now(UTC).isoformat(),
             **runtime_payload,
         },
     )
@@ -2973,7 +2908,7 @@ def release_evidence(
         bundle_dir / "smoke-cloud.json",
         {
             "record_type": "smoke-cloud",
-            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            "recorded_at": datetime.now(UTC).isoformat(),
             **smoke_payload,
         },
     )
@@ -2981,7 +2916,7 @@ def release_evidence(
         bundle_dir / "eval.json",
         {
             "record_type": "eval",
-            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            "recorded_at": datetime.now(UTC).isoformat(),
             **eval_payload,
         },
     )
@@ -2989,7 +2924,7 @@ def release_evidence(
         bundle_dir / "agent-task.json",
         {
             "record_type": "agent-task",
-            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            "recorded_at": datetime.now(UTC).isoformat(),
             **agent_task_payload,
         },
     )
@@ -3022,7 +2957,7 @@ def release_evidence(
             bundle_dir / "compare-evidence.json",
             {
                 "record_type": "compare-evidence",
-                "recorded_at": datetime.now(timezone.utc).isoformat(),
+                "recorded_at": datetime.now(UTC).isoformat(),
                 **compare_payload,
             },
         )

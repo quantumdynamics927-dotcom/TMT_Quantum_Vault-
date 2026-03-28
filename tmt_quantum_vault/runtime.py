@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-import re
 
 from .models import VaultConfig
 
@@ -45,14 +45,10 @@ class RuntimeInspector:
 
         if model_count is None:
             detail = (
-                "Ollama executable found, but model inventory could not "
-                "be read."
+                "Ollama executable found, but model inventory could not " "be read."
             )
         else:
-            detail = (
-                f"Ollama executable found with {model_count} local "
-                "model(s)."
-            )
+            detail = f"Ollama executable found with {model_count} local " "model(s)."
 
         return RuntimeStatus(
             name="Ollama",
@@ -74,10 +70,7 @@ class RuntimeInspector:
                 "No llama.cpp executable detected and no GGUF models "
                 "found in Models/."
             )
-            if (
-                configured_model_path is not None
-                and not configured_model_path.exists()
-            ):
+            if configured_model_path is not None and not configured_model_path.exists():
                 detail += (
                     " Configured model path is missing: "
                     f"{configured_model_path.relative_to(self.root)}."
@@ -105,10 +98,7 @@ class RuntimeInspector:
                 f"Detected {len(model_files)} GGUF model(s) in Models/, "
                 "but no llama.cpp executable was found."
             )
-            if (
-                configured_model_path is not None
-                and not configured_model_path.exists()
-            ):
+            if configured_model_path is not None and not configured_model_path.exists():
                 detail += (
                     " Configured model path is missing: "
                     f"{configured_model_path.relative_to(self.root)}."
@@ -131,10 +121,7 @@ class RuntimeInspector:
                 f"llama.cpp executable found with {len(model_files)} GGUF "
                 "model(s) available in Models/."
             )
-            if (
-                configured_model_path is not None
-                and not configured_model_path.exists()
-            ):
+            if configured_model_path is not None and not configured_model_path.exists():
                 detail += (
                     " Configured model path is missing: "
                     f"{configured_model_path.relative_to(self.root)}."
@@ -145,10 +132,7 @@ class RuntimeInspector:
                 "llama.cpp executable found, but no GGUF models were found "
                 "in Models/."
             )
-            if (
-                configured_model_path is not None
-                and not configured_model_path.exists()
-            ):
+            if configured_model_path is not None and not configured_model_path.exists():
                 detail += (
                     " Configured model path is missing: "
                     f"{configured_model_path.relative_to(self.root)}."
@@ -198,8 +182,7 @@ class RuntimeInspector:
                 name="Ollama Cloud",
                 status="warning",
                 detail=(
-                    "Configured cloud model does not use a cloud tag: "
-                    f"{cloud_model}"
+                    "Configured cloud model does not use a cloud tag: " f"{cloud_model}"
                 ),
                 executable=executable,
             )
@@ -215,9 +198,7 @@ class RuntimeInspector:
 
         visible_models = self._parse_ollama_models(model_list)
         visible_cloud_models = [
-            model
-            for model in visible_models
-            if self._is_cloud_model_tag(model)
+            model for model in visible_models if self._is_cloud_model_tag(model)
         ]
         if cloud_model in visible_cloud_models:
             return RuntimeStatus(

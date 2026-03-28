@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import re
 import os
+import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -11,8 +11,9 @@ from typing import Literal, cast
 
 import requests
 
-from .ollama_api import extract_error_message, run as ollama_run
 from .models import RuntimeConfig
+from .ollama_api import extract_error_message
+from .ollama_api import run as ollama_run
 
 
 @dataclass(frozen=True)
@@ -73,9 +74,7 @@ class RuntimeRunner:
     ) -> RunResult:
         selected_mode = self._resolve_mode(mode)
         selected_model = model or self._default_ollama_model(selected_mode)
-        merged_system = (
-            system or self.runtime_config.ollama.prompt_prefix or ""
-        )
+        merged_system = system or self.runtime_config.ollama.prompt_prefix or ""
 
         if selected_mode == "cloud":
             if not self._is_cloud_model(selected_model):
@@ -212,10 +211,7 @@ class RuntimeRunner:
         timeout: int,
         api_key: str,
     ) -> RunResult:
-        command = (
-            f"{self.runtime_config.ollama.cloud_host.rstrip('/')}/api/"
-            "generate"
-        )
+        command = f"{self.runtime_config.ollama.cloud_host.rstrip('/')}/api/" "generate"
         try:
             response = ollama_run(
                 model=model,
@@ -280,17 +276,13 @@ class RuntimeRunner:
     ) -> Literal["ollama", "llama.cpp"]:
         selected_backend = backend or self.runtime_config.preferred_backend
         if selected_backend not in {"ollama", "llama.cpp"}:
-            raise ValueError(
-                "Unsupported backend. Expected one of: ollama, llama.cpp."
-            )
+            raise ValueError("Unsupported backend. Expected one of: ollama, llama.cpp.")
         return cast(Literal["ollama", "llama.cpp"], selected_backend)
 
     def _resolve_mode(self, mode: str | None) -> Literal["local", "cloud"]:
         selected_mode = mode or self.runtime_config.ollama.mode
         if selected_mode not in {"local", "cloud"}:
-            raise ValueError(
-                "Unsupported Ollama mode. Expected one of: local, cloud."
-            )
+            raise ValueError("Unsupported Ollama mode. Expected one of: local, cloud.")
         return cast(Literal["local", "cloud"], selected_mode)
 
     def _default_ollama_model(self, mode: Literal["local", "cloud"]) -> str:

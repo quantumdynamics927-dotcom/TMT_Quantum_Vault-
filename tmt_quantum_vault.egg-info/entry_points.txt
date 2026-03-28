@@ -1,0 +1,2 @@
+[console_scripts]
+tmt-vault = tmt_quantum_vault.cli:app

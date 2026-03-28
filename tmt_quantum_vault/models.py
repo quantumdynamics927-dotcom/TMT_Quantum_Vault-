@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Literal
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -31,9 +30,7 @@ class LlamaCppRuntimeConfig(VaultModel):
 class RuntimeConfig(VaultModel):
     preferred_backend: Literal["ollama", "llama.cpp"] = "ollama"
     ollama: OllamaRuntimeConfig = Field(default_factory=OllamaRuntimeConfig)
-    llama_cpp: LlamaCppRuntimeConfig = Field(
-        default_factory=LlamaCppRuntimeConfig
-    )
+    llama_cpp: LlamaCppRuntimeConfig = Field(default_factory=LlamaCppRuntimeConfig)
 
 
 class EvalExpectation(VaultModel):

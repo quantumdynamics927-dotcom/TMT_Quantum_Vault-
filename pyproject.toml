@@ -67,12 +67,12 @@ Homepage = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-"
 Documentation = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-#readme"
 Repository = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-"
 Issues = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/issues"
-Architecture = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/master/docs/ARCHITECTURE.md"
-Changelog = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/master/CHANGELOG.md"
-Contributing = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/master/CONTRIBUTING.md"
-"Code of Conduct" = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/master/CODE_OF_CONDUCT.md"
-Security = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/master/SECURITY.md"
-Ethics = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/master/ETHICS.md"
+Architecture = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/HEAD/docs/ARCHITECTURE.md"
+Changelog = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/HEAD/CHANGELOG.md"
+Contributing = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/HEAD/CONTRIBUTING.md"
+"Code of Conduct" = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/HEAD/CODE_OF_CONDUCT.md"
+Security = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/HEAD/SECURITY.md"
+Ethics = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/HEAD/ETHICS.md"
 
 [tool.setuptools]
 packages = ["tmt_quantum_vault"]

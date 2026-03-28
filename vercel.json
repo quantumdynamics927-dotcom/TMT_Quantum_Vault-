@@ -1,10 +1,10 @@
 {
   "version": 2,
   "public": true,
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+  "framework": null,
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "installCommand": null,
+  "cleanUrls": true,
+  "trailingSlash": false
 }

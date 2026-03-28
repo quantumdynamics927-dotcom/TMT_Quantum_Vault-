@@ -9,13 +9,37 @@
 [![Agents](https://img.shields.io/badge/Agents-17-orange)](#agent-roster-17-agents)
 [![Version](https://img.shields.io/badge/Version-v0.4.0--dev-purple)](CHANGELOG.md)
 [![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-0.8809-brightgreen)](#current-status--v040-dev)
-[![Tests](https://img.shields.io/badge/Tests-106%20passed%2C%202%20skipped-success)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-107%20passed%2C%202%20skipped-success)](tests/)
 
 ---
 
 ## About TMT Quantum Vault
 
-TMT Quantum Vault is a **multi-agent quantum intelligence system** where each agent's DNA is derived from **real IBM quantum hardware job results** — including 21-qubit Sierpinski fractal circuits, full-entropy QTRG runs on IBM Fez, and DNA promoter encoding circuits validated on IBM Fez and IBM Torino.
+TMT Quantum Vault is a research repository for a **multi-agent quantum intelligence
+system** whose agent DNA is derived from **real IBM quantum hardware job
+results**. The repository combines hardware-validated circuit artifacts,
+DNA-inspired data models, resonance metrics, and a typed Python CLI for
+inspection, validation, and release workflows.
+
+## Repository Snapshot
+
+| Topic | Summary |
+|-------|---------|
+| **Primary language** | Python 3.11+ |
+| **Interface** | `python -m tmt_quantum_vault` / `tmt-vault` CLI |
+| **Core package** | `tmt_quantum_vault/` |
+| **Research assets** | `Agent_*/`, `circuits/`, `dna_circuits_library/`, `entropy_stack/` |
+| **Validation status** | 107 passed, 2 skipped regression tests |
+| **Policies and governance** | [SECURITY.md](SECURITY.md), [ETHICS.md](ETHICS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
+
+## Documentation Map
+
+- **Architecture overview:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- **Release history:** [`CHANGELOG.md`](CHANGELOG.md)
+- **Contributing guide:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- **Code of conduct:** [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
+- **Security policy:** [`SECURITY.md`](SECURITY.md)
+- **Ethical use policy:** [`ETHICS.md`](ETHICS.md)
 
 ### Key Innovations
 
@@ -75,10 +99,14 @@ Type distinction for scientific interpretation:
 
 ## What is TMT Quantum Vault?
 
-TMT Quantum Vault is a multi-agent quantum intelligence system where each agent's
-DNA is derived from **real IBM quantum hardware job results** — including 21-qubit
-Sierpinski fractal circuits, full-entropy QTRG runs on IBM Casablanca, and DNA
-promoter encoding circuits validated on IBM Fez and IBM Torino.
+At its core, TMT Quantum Vault is a data-rich repository that brings together:
+
+- **Hardware-derived agent DNA** sourced from IBM Quantum execution results
+- **Typed repository models** for validating JSON artifacts and release state
+- **Operational CLI workflows** for summary generation, validation, runtime
+  inspection, and release evidence collection
+- **Research assets and logs** that preserve the provenance of agents, circuits,
+  and optimization outputs
 
 Every agent carries a `conscious_dna.json` profile encoding:
 - **Phi score** — golden ratio alignment (φ = 1.618...)
@@ -101,7 +129,7 @@ Every agent carries a `conscious_dna.json` profile encoding:
 | Agents ≥ 0.87 fitness | 17 / 17 |
 | Agents ≥ 0.90 fitness | 1 / 17 |
 | Silver-tier agents (Φ ≥ 0.93) | 2 |
-| Regression tests | 106 passed, 2 skipped ✅ |
+| Regression tests | 107 passed, 2 skipped ✅ |
 | **Sierpinski depth-3 runs** | **6 hardware-validated** |
 | **Sierpinski depth-4 runs** | **11 hardware-validated** |
 | **Sierpinski depth-5 runs** | **6 hardware-validated** |
@@ -243,18 +271,53 @@ Fractal depth 3 · 384 harmonics · 147,456 max interference · 13 network nodes
 
 ## Quick Start
 
+1. Clone the repository and create a virtual environment.
+2. Install the package in editable mode with development dependencies.
+3. Run the built-in summary, validation, and regression commands.
+
 ```bash
 git clone https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-
 cd TMT_Quantum_Vault-
-python -m venv .venv && .venv\Scripts\activate
-python -m pip install -r requirements.txt
+python -m venv .venv
+# Linux / macOS
+source .venv/bin/activate
+# Windows PowerShell
+# .venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e .[dev]
 python -m tmt_quantum_vault summary
+python -m tmt_quantum_vault validate
 python -m pytest tests/test_regression.py -q
 ```
 
-> This repository currently runs directly from the source checkout. Install the
-> dependencies from `requirements.txt`, then invoke commands with
-> `python -m tmt_quantum_vault ...` from the repository root.
+### Optional quantum extras
+
+If you need the Qiskit integration used by the research and ingestion tooling:
+
+```bash
+python -m pip install -e .[qiskit]
+```
+
+### Common validation commands
+
+```bash
+ruff check tmt_quantum_vault/ tests/test_regression.py
+black --check tmt_quantum_vault/ tests/test_regression.py
+python -m compileall tmt_quantum_vault tests
+python -m pytest tests/ -v --tb=short
+python -m tmt_quantum_vault summary
+python -m tmt_quantum_vault validate
+```
+
+---
+
+## Contributing and Support
+
+- Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request.
+- Follow [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) in all community spaces.
+- Report suspected vulnerabilities through [`SECURITY.md`](SECURITY.md), not via
+  public issues.
+- Review [`ETHICS.md`](ETHICS.md) before using the project in downstream systems.
 
 ---
 
@@ -265,4 +328,4 @@ See [ETHICS.md](ETHICS.md) for prohibited use cases.
 
 ---
 
-*Last updated: 2026-03-22 01:09 UTC*
+*Last updated: 2026-03-28 01:11 UTC*

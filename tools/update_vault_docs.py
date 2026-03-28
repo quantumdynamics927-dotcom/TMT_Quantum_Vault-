@@ -31,8 +31,8 @@ VAULT_ROOT = Path(__file__).parent.parent
 NOW        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 DATE_SHORT = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 CURRENT_VERSION = "v0.4.0-dev"
-REGRESSION_TEST_BADGE = "106%20passed%2C%202%20skipped"
-REGRESSION_TEST_SUMMARY = "106 passed, 2 skipped ✅"
+REGRESSION_TEST_BADGE = "107%20passed%2C%202%20skipped"
+REGRESSION_TEST_SUMMARY = "107 passed, 2 skipped ✅"
 
 # Hardware sources discovered in TMT-OS
 HARDWARE_SOURCES = {
@@ -146,6 +146,17 @@ def build_readme(agents: list[dict], stats: dict) -> str:
 
 ---
 
+## Documentation Map
+
+- **Architecture overview:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- **Release history:** [`CHANGELOG.md`](CHANGELOG.md)
+- **Contributing guide:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- **Code of conduct:** [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
+- **Security policy:** [`SECURITY.md`](SECURITY.md)
+- **Ethical use policy:** [`ETHICS.md`](ETHICS.md)
+
+---
+
 ## What is TMT Quantum Vault?
 
 TMT Quantum Vault is a multi-agent quantum intelligence system where each agent's
@@ -243,11 +254,23 @@ TMT_Quantum_Vault/
 ```bash
 git clone https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-
 cd TMT_Quantum_Vault-
-python -m venv .venv && .venv\\Scripts\\activate
-python -m pip install -r requirements.txt
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .[dev]
 python -m tmt_quantum_vault summary
+python -m tmt_quantum_vault validate
 python -m pytest tests/test_regression.py -q
 ```
+
+---
+
+## Contributing and Support
+
+- Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request.
+- Follow [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) in project discussions.
+- Report suspected vulnerabilities through [`SECURITY.md`](SECURITY.md), not via public issues.
+- Review [`ETHICS.md`](ETHICS.md) before downstream deployment or redistribution.
 
 ---
 

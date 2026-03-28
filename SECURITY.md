@@ -1,52 +1,75 @@
-# Security Policy — TMT_Quantum_Vault
+# Security Policy — TMT Quantum Vault
 
 ## Supported Versions
 
 | Version | Supported |
 |---------|-----------|
-| main (latest) | ✅ Active |
-| dev branches  | ⚠️ Best-effort |
-| archived tags | ❌ Not supported |
+| Latest default branch | ✅ Active |
+| Open pull request branches | ⚠️ Best-effort |
+| Archived tags and stale forks | ❌ Not supported |
 
 ## Scope
 
-This policy covers:
-- All 17-agent quantum circuits and vault logic
-- IBM Quantum hardware job submission code (Fez, Torino, Casablanca)
-- Sacred geometry / DNA circuit modules
-- BitNet ternary entropy components
-- NFT smart contract integrations
-- API keys, IBM tokens, and any credentials used in the pipeline
+This policy covers the repository code, packaged CLI, research tooling, and
+tracked data assets, including:
+
+- the `tmt_quantum_vault/` package and CLI workflows
+- repository validation and release tooling under `tools/`
+- agent DNA profiles, memory stores, and JSON configuration files
+- IBM Quantum-related circuit artifacts and ingestion helpers
+- dependency, credential, and supply-chain risks that affect this repository
 
 ## Reporting a Vulnerability
 
-**Do NOT open a public GitHub Issue for security vulnerabilities.**
+**Do not open a public GitHub issue for security vulnerabilities.**
 
-Please report privately via:
-- 📧 Email: [your-email@domain.com]
-- 🔒 GitHub Private Security Advisory:  
+Please report vulnerabilities privately using one of these channels:
+
+- 📧 Email: `quantumdynamics927@gmail.com`
+- 🔒 GitHub Private Security Advisory:
   `https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/security/advisories/new`
 
-Include in your report:
-1. Description of the vulnerability
-2. Steps to reproduce
-3. Affected modules or agents
-4. Potential impact (e.g., credential leak, circuit tampering)
+Please include:
+
+1. A clear description of the issue
+2. The affected files, commands, or workflows
+3. Reproduction steps or a proof of concept
+4. Any known impact on confidentiality, integrity, or availability
+5. Suggested mitigations, if you have them
 
 ## Response Timeline
 
-- **Acknowledgement:** within 48 hours
-- **Initial assessment:** within 7 days
-- **Patch or mitigation:** within 30 days for critical issues
+- **Acknowledgement:** within 3 business days
+- **Initial triage:** within 7 business days
+- **Status update:** after triage, with follow-up cadence based on severity
+- **Fix target:** critical issues are prioritized first, with best-effort public
+  remediation once a patch or mitigation is ready
 
-## Sensitive Data Notice
+## Handling Sensitive Information
 
-This repository interacts with IBM Quantum credentials and potentially 
-MetaMask/NFT wallet keys. Never commit API tokens, private keys, or 
-IBM access tokens. Use `.env` files or GitHub Secrets exclusively.
+Please help protect users and maintainers by following these rules:
+
+- Never commit API keys, IBM credentials, tokens, wallet secrets, or other
+  sensitive material
+- Use environment variables, `.env` files kept out of version control, or GitHub
+  Actions secrets for operational credentials
+- Redact secrets from screenshots, logs, stack traces, and sample payloads
+- If you discover exposed credentials in the repository history or automation,
+  report them privately and rotate them immediately where possible
+
+## Security Review Areas
+
+When reviewing changes, pay particular attention to:
+
+- file parsing and JSON validation paths
+- shell execution or subprocess handling
+- runtime networking and model API integrations
+- dependency updates and transitive vulnerability exposure
+- provenance and integrity of generated research artifacts
 
 ## Disclosure Policy
 
-We follow **responsible disclosure**. Once a fix is deployed, we will 
-publish a GitHub Security Advisory crediting the reporter (unless 
-anonymity is requested).
+We follow responsible disclosure. Please give maintainers a reasonable
+opportunity to investigate and remediate before sharing details publicly. When a
+fix is available, maintainers may publish a GitHub Security Advisory and credit
+the reporter unless anonymity is requested.

@@ -1,0 +1,156 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tmt-quantum-vault"
+version = "0.4.0"
+description = "Toroidal Merkaba Topology - A 17-node resonant intelligence lattice grounded in real IBM quantum hardware DNA circuits and sacred geometry mathematics"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "TMT Quantum Vault Team"}
+]
+maintainers = [
+    {name = "TMT Quantum Vault Team"}
+]
+keywords = [
+    "quantum",
+    "consciousness",
+    "agents",
+    "ibm-quantum",
+    "dna",
+    "sacred-geometry",
+    "phi",
+    "golden-ratio",
+    "multi-agent-systems"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Typing :: Typed"
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.11,<3.0",
+    "requests>=2.32,<3.0",
+    "rich>=14,<15",
+    "typer>=0.15,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3,<9.0",
+    "types-requests>=2.32,<3.0",
+    "mypy>=1.0",
+    "black>=24.0",
+    "ruff>=0.1.0",
+]
+qiskit = [
+    "qiskit>=1.0",
+    "qiskit-ibm-runtime>=0.20",
+]
+
+[project.scripts]
+tmt-vault = "tmt_quantum_vault.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-"
+Documentation = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-#readme"
+Repository = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-"
+Issues = "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/issues"
+
+[tool.setuptools]
+packages = ["tmt_quantum_vault"]
+
+[tool.setuptools.package-data]
+tmt_quantum_vault = ["py.typed"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "qiskit.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["tmt_quantum_vault"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["tmt_quantum_vault"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # defaults
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''

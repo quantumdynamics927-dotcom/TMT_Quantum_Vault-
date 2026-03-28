@@ -374,7 +374,7 @@ def test_eval_json_output(tmp_path: Path) -> None:
                     },
                     {
                         "id": "json-shape",
-                        "prompt": ("Return exactly one JSON object with status " "ok."),
+                        "prompt": "Return exactly one JSON object with status ok.",
                         "expectation": {
                             "contains_all": ['"status"', '"ok"'],
                             "excludes": ["```"],

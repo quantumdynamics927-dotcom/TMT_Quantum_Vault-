@@ -1783,7 +1783,7 @@ def smoke_local(
         except subprocess.TimeoutExpired:
             completed = None
             timeout_note = (
-                "Primary local runtime timed out; falling back to local " "Ollama."
+                "Primary local runtime timed out; falling back to local Ollama."
             )
     else:
         try:
@@ -1836,7 +1836,7 @@ def smoke_local(
         except subprocess.TimeoutExpired:
             completed = None
             timeout_note = (
-                "llama.cpp CPU fallback timed out; falling back to local " "Ollama."
+                "llama.cpp CPU fallback timed out; falling back to local Ollama."
             )
         backend = "llama.cpp"
 
@@ -1845,7 +1845,7 @@ def smoke_local(
     )
     if llama_cpp_failed:
         timeout_note = (
-            "llama.cpp local smoke test failed; falling back to local " "Ollama."
+            "llama.cpp local smoke test failed; falling back to local Ollama."
         )
 
     if completed is None or llama_cpp_failed:
@@ -2281,13 +2281,13 @@ def release_summary(
     table.add_row(
         "agent-task",
         str(agent_task_component["returncode"]),
-        (f"{agent_task_component['stage_count']} " "stages"),
+        f"{agent_task_component['stage_count']} stages",
     )
     table.add_row(
         "comparison",
         str(comparison_component["has_regressions"]),
         (
-            f"{comparison_component['regression_count']} " "regressions"
+            f"{comparison_component['regression_count']} regressions"
             if comparison_component["regression_count"] is not None
             else "no comparison artifact"
         ),
@@ -2686,9 +2686,7 @@ def agi_eval_smoke(
     timeout: int = typer.Option(
         120,
         "--timeout",
-        help=(
-            "Maximum runtime in seconds for dataset generation and each eval " "case."
-        ),
+        help="Maximum runtime in seconds for dataset generation and each eval case.",
     ),
 ) -> None:
     smoke_payload, return_code = _execute_agi_eval_smoke(
@@ -2814,14 +2812,12 @@ def release_evidence(
     model: str | None = typer.Option(
         None,
         "--model",
-        help=("Override the configured cloud model name for smoke and chain " "runs."),
+        help="Override the configured cloud model name for smoke and chain runs.",
     ),
     raw_final_only: bool = typer.Option(
         True,
         "--raw-final-only/--include-raw-thinking",
-        help=(
-            "Strip model thinking blocks in bundled smoke and agent-task " "outputs."
-        ),
+        help="Strip model thinking blocks in bundled smoke and agent-task outputs.",
     ),
     json_out: bool = typer.Option(
         False,
@@ -2831,7 +2827,7 @@ def release_evidence(
     timeout: int = typer.Option(
         120,
         "--timeout",
-        help=("Maximum runtime in seconds for bundled smoke and agent-task " "runs."),
+        help="Maximum runtime in seconds for bundled smoke and agent-task runs.",
     ),
 ) -> None:
     if compare_to is not None and compare_to_latest:

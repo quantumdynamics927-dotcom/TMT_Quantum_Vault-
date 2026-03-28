@@ -211,7 +211,7 @@ class RuntimeRunner:
         timeout: int,
         api_key: str,
     ) -> RunResult:
-        command = f"{self.runtime_config.ollama.cloud_host.rstrip('/')}/api/" "generate"
+        command = f"{self.runtime_config.ollama.cloud_host.rstrip('/')}/api/generate"
         try:
             response = ollama_run(
                 model=model,

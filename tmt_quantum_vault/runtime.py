@@ -44,11 +44,9 @@ class RuntimeInspector:
         model_count = self._count_ollama_models(model_list)
 
         if model_count is None:
-            detail = (
-                "Ollama executable found, but model inventory could not " "be read."
-            )
+            detail = "Ollama executable found, but model inventory could not be read."
         else:
-            detail = f"Ollama executable found with {model_count} local " "model(s)."
+            detail = f"Ollama executable found with {model_count} local model(s)."
 
         return RuntimeStatus(
             name="Ollama",
@@ -181,9 +179,7 @@ class RuntimeInspector:
             return RuntimeStatus(
                 name="Ollama Cloud",
                 status="warning",
-                detail=(
-                    "Configured cloud model does not use a cloud tag: " f"{cloud_model}"
-                ),
+                detail=f"Configured cloud model does not use a cloud tag: {cloud_model}",
                 executable=executable,
             )
 

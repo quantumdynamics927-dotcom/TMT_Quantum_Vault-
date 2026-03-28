@@ -165,9 +165,7 @@ class VaultRepository:
             checks.append(("warning", "No agent DNA files were found."))
 
         if models:
-            detail = (
-                f"Detected {len(models)} persisted model artifact(s) " "in Models/."
-            )
+            detail = f"Detected {len(models)} persisted model artifact(s) in Models/."
             if runnable_models:
                 detail += f" Runnable GGUF models: {len(runnable_models)}."
             if serialized_models:

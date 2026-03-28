@@ -487,7 +487,8 @@ def cmd_ingest(args):
     print(f"  Phi Convergent       : {record['phi_convergent']}")
     print(f"  SIGNIFICANT        : {record['is_significant']}")
     print(f"\n  Ingested: {ingested_path}")
-    print(f"  Agent feed: {AGENT_DIR / f'feed_{record["circuit"]}_{record["ingested_at"]}.json'}")
+    agent_feed = AGENT_DIR / f"feed_{record['circuit']}_{record['ingested_at']}.json"
+    print(f"  Agent feed: {agent_feed}")
 
 
 def cmd_qasm_context(args):

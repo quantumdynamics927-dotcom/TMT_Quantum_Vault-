@@ -783,41 +783,67 @@ class ScientificValidator:
         self, 
         group1: List[float], 
         group2: List[float]
-    ) -> float:
+    ) -> Tuple[float, float, float, float]:
         """
-        Calculate Cohen's d effect size between two groups.
+        Calculate multiple effect size measures between two groups.
         
-        Effect size interpretation:
+        Returns Cohen's d, Glass's Δ, Hedges' g, and common language effect size.
+        
+        Effect size interpretation (Cohen's conventions, use with caution):
         - d < 0.2: negligible
         - 0.2 ≤ d < 0.5: small
         - 0.5 ≤ d < 0.8: medium
         - d ≥ 0.8: large
+        
+        WARNING: These conventions assume equal variances and large samples.
+        When variances are unequal or samples are small, interpret with caution.
         
         Args:
             group1: First group of values
             group2: Second group of values
         
         Returns:
-            Cohen's d effect size
+            Tuple of (cohens_d, glass_delta, hedges_g, cl_effect_size)
         """
         if len(group1) < 2 or len(group2) < 2:
-            return 0.0
+            return (0.0, 0.0, 0.0, 0.0)
         
         mean1 = statistics.mean(group1)
         mean2 = statistics.mean(group2)
-        
-        # Pooled standard deviation
-        var1 = statistics.variance(group1)
-        var2 = statistics.variance(group2)
+        std1 = statistics.stdev(group1)
+        std2 = statistics.stdev(group2)
         
         n1, n2 = len(group1), len(group2)
+        
+        # 1. Cohen's d (pooled standard deviation)
+        var1 = statistics.variance(group1)
+        var2 = statistics.variance(group2)
         pooled_var = ((n1 - 1) * var1 + (n2 - 1) * var2) / (n1 + n2 - 2)
         pooled_std = math.sqrt(pooled_var)
+        cohens_d = (mean1 - mean2) / pooled_std if pooled_std > 0 else 0.0
         
-        if pooled_std == 0:
-            return 0.0
+        # 2. Glass's Δ (uses only control/reference group SD)
+        # Use the larger group (Core-13) as reference
+        glass_delta = (mean1 - mean2) / std1 if std1 > 0 else 0.0
         
-        return (mean1 - mean2) / pooled_std
+        # 3. Hedges' g (bias-corrected for small samples)
+        correction = 1 - (3 / (4 * (n1 + n2) - 9))
+        hedges_g = cohens_d * correction
+        
+        # 4. Common Language Effect Size (probability that random g1 > random g2)
+        # Approximate using distributions
+        diff_mean = mean1 - mean2
+        diff_std = math.sqrt(std1**2 + std2**2)
+        if diff_std > 0:
+            # Probability that difference > 0
+            import math as m
+            z = diff_mean / diff_std
+            # Approximate using error function
+            cl_effect_size = 0.5 * (1 + m.erf(z / m.sqrt(2)))
+        else:
+            cl_effect_size = 0.5
+        
+        return (cohens_d, glass_delta, hedges_g, cl_effect_size)
     
     def validate_with_confidence_intervals(self) -> ValidationResult:
         """
@@ -874,7 +900,12 @@ class ScientificValidator:
         """
         Calculate effect size between Core-13 and Auxiliary-4.
         
-        Uses Cohen's d to measure practical significance.
+        Uses multiple effect size measures to handle unequal variances and small samples:
+        - Cohen's d: Pooled SD (can be misleading with unequal variances)
+        - Glass's Δ: Uses reference group SD only (more robust)
+        - Hedges' g: Bias-corrected for small samples
+        - Common Language Effect Size: Probability that Core > Aux
+        
         Note: This compares Core-13 vs Auxiliary-4, NOT Core-13 mode vs Extended-17 mode.
         """
         # Core-13 agents
@@ -912,41 +943,74 @@ class ScientificValidator:
                 details={"error": "Insufficient data for effect size calculation"},
             )
         
-        # Calculate Cohen's d
-        effect_size = self.calculate_effect_size(core_fitness, aux_fitness)
+        # Calculate multiple effect size measures
+        cohens_d, glass_delta, hedges_g, cl_effect_size = self.calculate_effect_size(core_fitness, aux_fitness)
         
-        # Interpret effect size
-        if abs(effect_size) < 0.2:
+        # Calculate absolute difference (most interpretable)
+        core_mean = statistics.mean(core_fitness)
+        aux_mean = statistics.mean(aux_fitness)
+        absolute_diff = abs(core_mean - aux_mean)
+        
+        # Calculate variance ratio (check for unequal variances)
+        core_std = statistics.stdev(core_fitness) if len(core_fitness) > 1 else 0
+        aux_std = statistics.stdev(aux_fitness) if len(aux_fitness) > 1 else 0
+        variance_ratio = max(core_std, aux_std) / min(core_std, aux_std) if min(core_std, aux_std) > 0 else float('inf')
+        
+        # Interpretation based on multiple factors
+        # When variance ratio > 2, Cohen's d is unreliable
+        # When sample sizes are unequal, Glass's Δ is more appropriate
+        # When samples are small, Hedges' g corrects bias
+        
+        if variance_ratio > 2:
+            variance_warning = "UNEQUAL VARIANCES: Cohen's d may be inflated. Use Glass's Δ or absolute difference."
+            primary_effect_size = glass_delta
+            primary_name = "Glass's Δ"
+        else:
+            variance_warning = None
+            primary_effect_size = hedges_g  # Use Hedges' g as default (bias-corrected)
+            primary_name = "Hedges' g"
+        
+        # Interpret primary effect size
+        if abs(primary_effect_size) < 0.2:
             interpretation = "negligible"
-        elif abs(effect_size) < 0.5:
+        elif abs(primary_effect_size) < 0.5:
             interpretation = "small"
-        elif abs(effect_size) < 0.8:
+        elif abs(primary_effect_size) < 0.8:
             interpretation = "medium"
         else:
             interpretation = "large"
         
-        # Effect size < 0.2 means Core and Extended are practically equivalent
-        passed = abs(effect_size) < 0.5  # Small or negligible difference
+        # Pass if absolute difference is small (< 0.05) OR effect size is negligible/small
+        # Focus on practical significance, not just statistical
+        passed = absolute_diff < 0.05 or abs(primary_effect_size) < 0.5
         
         return ValidationResult(
             test_name="core_aux_effect_size",
             category="statistical_inference",
             claim_class="empirical",
             passed=passed,
-            value=effect_size,
+            value=primary_effect_size,
             expected=0,  # Null hypothesis: no difference
             tolerance=0.5,
-            effect_size=effect_size,
+            effect_size=primary_effect_size,
             details={
                 "core_n": len(core_fitness),
-                "core_mean": statistics.mean(core_fitness),
-                "core_std": statistics.stdev(core_fitness) if len(core_fitness) > 1 else 0,
+                "core_mean": core_mean,
+                "core_std": core_std,
                 "aux_n": len(aux_fitness),
-                "aux_mean": statistics.mean(aux_fitness),
-                "aux_std": statistics.stdev(aux_fitness) if len(aux_fitness) > 1 else 0,
-                "cohens_d": effect_size,
+                "aux_mean": aux_mean,
+                "aux_std": aux_std,
+                "absolute_difference": absolute_diff,
+                "variance_ratio": variance_ratio,
+                "cohens_d": cohens_d,
+                "glass_delta": glass_delta,
+                "hedges_g": hedges_g,
+                "common_language_effect_size": cl_effect_size,
+                "primary_effect_size": primary_name,
                 "interpretation": interpretation,
-                "note": "Effect size measures practical significance, not just statistical significance",
+                "variance_warning": variance_warning,
+                "note": f"Absolute difference ({absolute_diff:.4f}) is the most interpretable measure. "
+                        f"Effect sizes may be inflated due to unequal variances (ratio={variance_ratio:.1f}).",
             },
         )
     

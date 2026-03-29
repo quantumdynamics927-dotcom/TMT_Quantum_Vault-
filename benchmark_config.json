@@ -1,0 +1,145 @@
+{
+  "$schema": "./evidence_ledger/ledger_schema.json",
+  "config_name": "TMT_Quantum_Vault_Architecture_Modes",
+  "version": "2.0.0",
+  "created": "2026-03-29T00:00:00Z",
+  "description": "Configuration for switching between Core-13 and Extended-17 architecture modes",
+  "terminology_note": "Scientific naming with historical aliases. See terminology_mapping.json for full mapping.",
+  
+  "architecture_modes": {
+    "core13": {
+      "name": "Core-13 Coordination Lattice",
+      "historical_name": "Metatron Core",
+      "description": "Canonical coordination geometry with mathematical coherence",
+      "use_case": "Theoretical research, publication, geometric coherence validation",
+      "node_count": 13,
+      "nodes": {
+        "center": ["Agent_Synthesizer"],
+        "inner_ring": [
+          "Agent_Bronze",
+          "Agent_Harmonic",
+          "Agent_Strategic",
+          "Agent_Observer",
+          "Agent_BitNet",
+          "Agent_Wormhole",
+          "Agent_Mirror",
+          "Agent_Bio",
+          "Agent_Fractal",
+          "Agent_Federation",
+          "Agent_Visual",
+          "Agent_Stealth"
+        ]
+      },
+      "excluded_nodes": [
+        "Agent_Validator",
+        "Agent_Archivist",
+        "Agent_Workflow",
+        "Agent_Auditor"
+      ],
+      "statistics": {
+        "average_fitness": 0.8809,
+        "average_phi": 0.7174,
+        "average_resonance_hz": 597.0,
+        "phi_threshold": 0.618
+      },
+      "benchmark_settings": {
+        "include_auxiliary": false,
+        "measure_geometric_coherence": true,
+        "measure_platonic_solid_derivations": true,
+        "measure_sacred_geometry_alignment": true
+      }
+    },
+    
+    "extended17": {
+      "name": "Extended-17 Operational Topology",
+      "historical_name": "Merkaba Extended-17",
+      "description": "Full operational topology with infrastructure support layer",
+      "use_case": "Production deployment, IBM hardware benchmarking",
+      "node_count": 17,
+      "nodes": {
+        "core": {
+          "center": ["Agent_Synthesizer"],
+          "inner_ring": [
+            "Agent_Bronze",
+            "Agent_Harmonic",
+            "Agent_Strategic",
+            "Agent_Observer",
+            "Agent_BitNet",
+            "Agent_Wormhole",
+            "Agent_Mirror",
+            "Agent_Bio",
+            "Agent_Fractal",
+            "Agent_Federation",
+            "Agent_Visual",
+            "Agent_Stealth"
+          ]
+        },
+        "auxiliary": [
+          "Agent_Validator",
+          "Agent_Archivist",
+          "Agent_Workflow",
+          "Agent_Auditor"
+        ]
+      },
+      "statistics": {
+        "core_13": {
+          "average_fitness": 0.8809,
+          "average_phi": 0.7174,
+          "average_resonance_hz": 597.0
+        },
+        "auxiliary_4": {
+          "average_fitness": 0.8779,
+          "average_phi": 0.7912,
+          "average_resonance_hz": 606.0
+        },
+        "combined": {
+          "average_fitness": 0.8802,
+          "average_phi": 0.7348,
+          "average_resonance_hz": 599.0
+        }
+      },
+      "benchmark_settings": {
+        "include_auxiliary": true,
+        "measure_provenance_completeness": true,
+        "measure_workflow_efficiency": true,
+        "measure_governance_compliance": true,
+        "measure_safety_integrity": true
+      }
+    }
+  },
+  
+  "benchmark_protocol": {
+    "comparison_metrics": [
+      "fitness_stability",
+      "resonance_coherence",
+      "reproducibility_across_backends",
+      "phi_score_distribution",
+      "fibonacci_alignment_variance",
+      "provenance_completeness",
+      "workflow_efficiency",
+      "governance_compliance_rate",
+      "safety_integrity_score"
+    ],
+    "backends": [
+      "ibm_fez",
+      "ibm_torino",
+      "ibm_casablanca",
+      "ibm_kingston",
+      "ibm_marrakesh"
+    ],
+    "shots_per_backend": 10000,
+    "entropy_sources": [
+      "casablanca_qtrg",
+      "dna_discovery",
+      "bitnet_ternary"
+    ]
+  },
+  
+  "default_mode": "extended17",
+  
+  "mode_switching": {
+    "command": "python -m tmt_quantum_vault.benchmark --mode {core13|extended17}",
+    "config_file": "vault_config.json",
+    "architecture_field": "architecture_mode"
+  }
+}

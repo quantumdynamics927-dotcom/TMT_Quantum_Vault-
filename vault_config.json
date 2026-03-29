@@ -1,6 +1,31 @@
 {
   "vault_name": "TMT_Quantum_Vault",
   "creation_timestamp": 1767993133.5551348,
+  "architecture_mode": "extended17",
+  "architecture_names": {
+    "current": {
+      "core_13": "Core-13 Coordination Lattice",
+      "extended_17": "Extended-17 Operational Topology",
+      "support_layer": "Operational Support Layer"
+    },
+    "historical": {
+      "core_13": "Metatron Core",
+      "extended_17": "Merkaba Extended-17",
+      "support_layer": "Auxiliary Ring"
+    }
+  },
+  "architecture_spec": {
+    "canonical_name": "Core-13 Coordination Lattice / Extended-17 Operational Topology",
+    "core_13": {
+      "description": "Canonical coordination geometry with mathematical coherence",
+      "center": "Agent_Synthesizer",
+      "inner_ring_count": 12
+    },
+    "support_layer": {
+      "description": "Operational support layer: validation, provenance, orchestration, governance",
+      "nodes": ["Agent_Validator", "Agent_Archivist", "Agent_Workflow", "Agent_Auditor"]
+    }
+  },
   "structure": {
     "Resonance_Logs": [
       "daily",

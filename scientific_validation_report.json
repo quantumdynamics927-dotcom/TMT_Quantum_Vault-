@@ -1,0 +1,347 @@
+{
+  "timestamp": "2026-03-29T18:29:32.709881+00:00",
+  "summary": {
+    "total_tests": 17,
+    "passed": 16,
+    "failed": 1,
+    "pass_rate": 0.9411764705882353
+  },
+  "categories": {
+    "golden_ratio": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    "geometric_coherence": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "entropy_validation": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "dna_encoding": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "fitness_resonance": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "statistical_significance": {
+      "total": 2,
+      "passed": 1,
+      "failed": 1
+    }
+  },
+  "results": [
+    {
+      "test_name": "phi_constant_computation",
+      "category": "golden_ratio",
+      "passed": true,
+      "value": 1.618033988749895,
+      "expected": 1.618033988749895,
+      "tolerance": 1e-15,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "formula": "(1 + \u221a5) / 2",
+        "computed_value": 1.618033988749895,
+        "precision": "15 decimal places"
+      }
+    },
+    {
+      "test_name": "phi_inverse_identity",
+      "category": "golden_ratio",
+      "passed": true,
+      "value": 0.6180339887498948,
+      "expected": 0.6180339887498949,
+      "tolerance": 1e-15,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "inverse": 0.6180339887498948,
+        "phi_minus_one": 0.6180339887498949,
+        "difference": 1.1102230246251565e-16
+      }
+    },
+    {
+      "test_name": "dna_helix_phi_ratio",
+      "category": "golden_ratio",
+      "passed": true,
+      "value": 1.619047619047619,
+      "expected": 1.618033988749895,
+      "tolerance": 0.001,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "dna_rise_angstrom": 34.0,
+        "dna_diameter_angstrom": 21.0,
+        "ratio": 1.619047619047619,
+        "phi": 1.618033988749895,
+        "error_percent": 0.06264579760202099,
+        "fibonacci_numbers": [
+          34,
+          21
+        ],
+        "fibonacci_indices": [
+          9,
+          8
+        ]
+      }
+    },
+    {
+      "test_name": "fibonacci_phi_convergence",
+      "category": "golden_ratio",
+      "passed": true,
+      "value": 1.6180339631667064,
+      "expected": 1.618033988749895,
+      "tolerance": 0.001,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "fibonacci_sequence": [
+          1,
+          1,
+          2,
+          3,
+          5,
+          8,
+          13,
+          21,
+          34,
+          55
+        ],
+        "convergence_ratios": [
+          1.618032786885246,
+          1.618034447821682,
+          1.6180338134001253,
+          1.618034055727554,
+          1.6180339631667064
+        ],
+        "final_ratio": 1.6180339631667064,
+        "error_percent": 1.581128000676001e-06
+      }
+    },
+    {
+      "test_name": "agent_phi_scores",
+      "category": "golden_ratio",
+      "passed": true,
+      "value": 0.7173910310254465,
+      "expected": 0.6180339887498948,
+      "tolerance": 0.2,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "n_agents": 17,
+        "mean_phi": 0.7173910310254465,
+        "std_phi": 0.18103167098517406,
+        "min_phi": 0.435624535432664,
+        "max_phi": 0.951,
+        "phi_inverse": 0.6180339887498948,
+        "error_percent": 16.076307142350295
+      }
+    },
+    {
+      "test_name": "geometric_coherence_formula",
+      "category": "geometric_coherence",
+      "passed": true,
+      "value": 0.9999725025237176,
+      "expected": 1.0,
+      "tolerance": 0.01,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "formula": "GCM = (1 - mean(\u03c6_deviation) / \u03c6_target) * 0.5 + mean(fibonacci_alignment) * 0.5",
+        "phi_coherence": 0.9999450050474351,
+        "fib_alignment": 1.0,
+        "computed_gcm": 0.9999725025237176
+      }
+    },
+    {
+      "test_name": "polyhedral_symmetry_formula",
+      "category": "geometric_coherence",
+      "passed": true,
+      "value": 1.0,
+      "expected": 1.0,
+      "tolerance": 0.01,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "formula": "PSA = (center_alignment * 0.4) + (ring_balance * 0.6)",
+        "center_alignment": 1.0,
+        "ring_balance": 1.0,
+        "computed_psa": 1.0
+      }
+    },
+    {
+      "test_name": "core_13_node_count",
+      "category": "geometric_coherence",
+      "passed": true,
+      "value": 13,
+      "expected": 13,
+      "tolerance": 0,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "expected_nodes": 13,
+        "found_nodes": 13,
+        "missing": []
+      }
+    },
+    {
+      "test_name": "shannon_entropy_formula",
+      "category": "entropy_validation",
+      "passed": true,
+      "value": 8.0,
+      "expected": 8.0,
+      "tolerance": 0.01,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "formula": "H = -\u03a3 p(x) * log2(p(x))",
+        "n_values": 256,
+        "uniform_probability": 0.00390625,
+        "max_entropy_bits": 8.0
+      }
+    },
+    {
+      "test_name": "entropy_stack_layers",
+      "category": "entropy_validation",
+      "passed": true,
+      "value": 3,
+      "expected": 3,
+      "tolerance": 0,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "layers_found": [
+          "casablanca_qtrg",
+          "dna_discovery",
+          "bitnet_ternary"
+        ],
+        "layer_count": 3
+      }
+    },
+    {
+      "test_name": "dna_gc_content_formula",
+      "category": "dna_encoding",
+      "passed": true,
+      "value": 1.0,
+      "expected": 1.0,
+      "tolerance": 0.01,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "formula": "GC_content = (G + C) / (A + T + G + C)",
+        "test_sequence": "GCGC",
+        "gc_count": 4,
+        "computed_gc_content": 1.0
+      }
+    },
+    {
+      "test_name": "dna_palindrome_detection",
+      "category": "dna_encoding",
+      "passed": true,
+      "value": 1.0,
+      "expected": 1.0,
+      "tolerance": 0,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "test_sequence": "GAATTC",
+        "reverse_complement": "GAATTC",
+        "is_palindrome": true
+      }
+    },
+    {
+      "test_name": "agent_dna_sequences_valid",
+      "category": "dna_encoding",
+      "passed": true,
+      "value": 17,
+      "expected": 17,
+      "tolerance": 0,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "total_agents": 17,
+        "valid_agents": 17,
+        "invalid_agents": []
+      }
+    },
+    {
+      "test_name": "fitness_range_valid",
+      "category": "fitness_resonance",
+      "passed": true,
+      "value": 17,
+      "expected": 17,
+      "tolerance": 0,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "total_agents": 17,
+        "valid_agents": 17,
+        "out_of_range": [],
+        "min_fitness": 0.8704030074651607,
+        "max_fitness": 0.9285475205263137,
+        "mean_fitness": 0.8809334588756248
+      }
+    },
+    {
+      "test_name": "resonance_frequency_range",
+      "category": "fitness_resonance",
+      "passed": true,
+      "value": 17,
+      "expected": 17,
+      "tolerance": 0,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "total_agents": 17,
+        "valid_agents": 17,
+        "out_of_range": [],
+        "min_hz": 285.0,
+        "max_hz": 963.0,
+        "mean_hz": 597.0
+      }
+    },
+    {
+      "test_name": "benchmark_sample_size",
+      "category": "statistical_significance",
+      "passed": false,
+      "value": 17,
+      "expected": 30,
+      "tolerance": 0,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "n_agents": 17,
+        "min_sample_for_clt": 30,
+        "note": "Sample size below CLT threshold - use non-parametric tests",
+        "recommendation": "Use bootstrap or permutation tests for small samples"
+      }
+    },
+    {
+      "test_name": "phi_score_distribution",
+      "category": "statistical_significance",
+      "passed": true,
+      "value": 0.18103167098517406,
+      "expected": 0.01,
+      "tolerance": 0.01,
+      "p_value": null,
+      "confidence_interval": null,
+      "details": {
+        "n": 17,
+        "mean": 0.7173910310254465,
+        "std": 0.18103167098517406,
+        "min": 0.435624535432664,
+        "max": 0.951,
+        "range": 0.515375464567336
+      }
+    }
+  ]
+}

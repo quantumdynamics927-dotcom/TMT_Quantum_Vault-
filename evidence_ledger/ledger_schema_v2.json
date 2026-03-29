@@ -1,0 +1,466 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://tmt-quantum-vault.org/schemas/evidence-ledger-v2.json",
+  "title": "TMT Quantum Vault Hardware Evidence Ledger v2 - PROV-Compliant",
+  "description": "Canonical proof layer for hardware-validated agent DNA with phi-structured enhancement. Follows FAIR principles and PROV-O provenance model.",
+  "version": "2.0.0",
+  "type": "object",
+  "required": ["ledger_metadata", "entities", "activities", "agents", "provenance_chains", "validation_matrix"],
+  "properties": {
+    "ledger_metadata": {
+      "$ref": "#/definitions/ledger_metadata"
+    },
+    "entities": {
+      "type": "object",
+      "description": "PROV Entity: Raw evidence artifacts that never change",
+      "properties": {
+        "raw_results": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/raw_result_entity"}
+        },
+        "decoded_dna": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/decoded_dna_entity"}
+        },
+        "circuit_definitions": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/circuit_entity"}
+        },
+        "checkpoint_snapshots": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/checkpoint_entity"}
+        }
+      }
+    },
+    "activities": {
+      "type": "object",
+      "description": "PROV Activity: Operations that transform entities",
+      "properties": {
+        "circuit_executions": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/circuit_execution_activity"}
+        },
+        "dna_extractions": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/dna_extraction_activity"}
+        },
+        "fitness_calculations": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/fitness_calculation_activity"}
+        },
+        "optimization_runs": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/optimization_activity"}
+        }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "description": "PROV Agent: Researchers, scripts, backends, subsystems",
+      "properties": {
+        "quantum_backends": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/quantum_backend_agent"}
+        },
+        "researchers": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/researcher_agent"}
+        },
+        "scripts": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/script_agent"}
+        },
+        "lattice_agents": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/lattice_agent"}
+        }
+      }
+    },
+    "provenance_chains": {
+      "type": "array",
+      "description": "Complete provenance chains from raw IBM output to final metrics",
+      "items": {"$ref": "#/definitions/provenance_chain"}
+    },
+    "validation_matrix": {
+      "$ref": "#/definitions/validation_matrix"
+    },
+    "ablation_results": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/ablation_mode"}
+    },
+    "reproducibility_package": {
+      "$ref": "#/definitions/reproducibility_package"
+    }
+  },
+  "definitions": {
+    "persistent_identifier": {
+      "type": "object",
+      "description": "FAIR-compliant persistent identifier",
+      "required": ["pid_type", "pid_value", "created_at"],
+      "properties": {
+        "pid_type": {
+          "type": "string",
+          "enum": ["uuid", "doi", "arxiv", "hash", "job_id", "run_id"]
+        },
+        "pid_value": {"type": "string"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "version": {"type": "string"},
+        "checksum": {"type": "string", "description": "SHA-256 hash of the entity"}
+      }
+    },
+    "ledger_metadata": {
+      "type": "object",
+      "required": ["ledger_id", "created_at", "release_tag", "frozen_lattice_version", "schema_version"],
+      "properties": {
+        "ledger_id": {"type": "string"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "release_tag": {"type": "string"},
+        "frozen_lattice_version": {"type": "string"},
+        "schema_version": {"type": "string", "const": "2.0.0"},
+        "total_agents": {"type": "integer", "minimum": 1},
+        "average_fitness": {"type": "number", "minimum": 0, "maximum": 1},
+        "phi_threshold": {"type": "number", "default": 0.618},
+        "code_version": {"type": "string", "description": "Git commit hash for reproducibility"},
+        "provenance_completeness": {
+          "type": "object",
+          "properties": {
+            "agents_with_provenance": {"type": "integer"},
+            "total_agents": {"type": "integer"},
+            "completeness_ratio": {"type": "number"}
+          }
+        }
+      }
+    },
+    "raw_result_entity": {
+      "type": "object",
+      "description": "PROV Entity: Raw IBM Quantum job output - NEVER MODIFIED",
+      "required": ["entity_id", "job_id", "backend", "raw_counts_path", "created_at", "checksum"],
+      "properties": {
+        "entity_id": {"$ref": "#/definitions/persistent_identifier"},
+        "job_id": {"type": "string", "description": "IBM Quantum job ID"},
+        "backend": {"type": "string"},
+        "shots": {"type": "integer"},
+        "raw_counts_path": {"type": "string", "description": "Path to raw result JSON"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "checksum": {"type": "string", "description": "SHA-256 of raw result file"},
+        "file_size_bytes": {"type": "integer"},
+        "circuit_hash": {"type": "string", "description": "SHA-256 of executed circuit"}
+      }
+    },
+    "decoded_dna_entity": {
+      "type": "object",
+      "description": "PROV Entity: DNA sequence decoded from raw results",
+      "required": ["entity_id", "source_entity_id", "dna_sequence", "decoding_algorithm", "created_at"],
+      "properties": {
+        "entity_id": {"$ref": "#/definitions/persistent_identifier"},
+        "source_entity_id": {"type": "string", "description": "ID of raw_result_entity"},
+        "dna_sequence": {"type": "string", "pattern": "^[ATCG]+$"},
+        "dna_length": {"type": "integer"},
+        "gc_content": {"type": "number"},
+        "decoding_algorithm": {"type": "string"},
+        "decoding_version": {"type": "string"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "checksum": {"type": "string"}
+      }
+    },
+    "circuit_entity": {
+      "type": "object",
+      "description": "PROV Entity: QASM circuit definition",
+      "required": ["entity_id", "circuit_type", "qasm_path", "qubit_count", "depth"],
+      "properties": {
+        "entity_id": {"$ref": "#/definitions/persistent_identifier"},
+        "circuit_type": {"type": "string"},
+        "qasm_path": {"type": "string"},
+        "qubit_count": {"type": "integer"},
+        "depth": {"type": "integer"},
+        "gate_count": {"type": "integer"},
+        "checksum": {"type": "string"}
+      }
+    },
+    "checkpoint_entity": {
+      "type": "object",
+      "description": "PROV Entity: Immutable checkpoint snapshot",
+      "required": ["entity_id", "checkpoint_path", "created_at", "checksum"],
+      "properties": {
+        "entity_id": {"$ref": "#/definitions/persistent_identifier"},
+        "checkpoint_path": {"type": "string"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "agent_count": {"type": "integer"},
+        "average_fitness": {"type": "number"},
+        "checksum": {"type": "string"}
+      }
+    },
+    "circuit_execution_activity": {
+      "type": "object",
+      "description": "PROV Activity: Execution of quantum circuit on hardware",
+      "required": ["activity_id", "used_entity", "generated_entity", "was_associated_with", "started_at", "ended_at"],
+      "properties": {
+        "activity_id": {"$ref": "#/definitions/persistent_identifier"},
+        "used_entity": {"type": "string", "description": "Circuit entity ID"},
+        "generated_entity": {"type": "string", "description": "Raw result entity ID"},
+        "was_associated_with": {"type": "string", "description": "Backend agent ID"},
+        "started_at": {"type": "string", "format": "date-time"},
+        "ended_at": {"type": "string", "format": "date-time"},
+        "execution_parameters": {
+          "type": "object",
+          "properties": {
+            "shots": {"type": "integer"},
+            "init_qubits": {"type": "boolean"},
+            "error_mitigation": {"type": "string"}
+          }
+        }
+      }
+    },
+    "dna_extraction_activity": {
+      "type": "object",
+      "description": "PROV Activity: Extraction of DNA from raw results",
+      "required": ["activity_id", "used_entity", "generated_entity", "was_associated_with", "algorithm_version"],
+      "properties": {
+        "activity_id": {"$ref": "#/definitions/persistent_identifier"},
+        "used_entity": {"type": "string", "description": "Raw result entity ID"},
+        "generated_entity": {"type": "string", "description": "Decoded DNA entity ID"},
+        "was_associated_with": {"type": "string", "description": "Script agent ID"},
+        "algorithm_version": {"type": "string"},
+        "extraction_method": {"type": "string"}
+      }
+    },
+    "fitness_calculation_activity": {
+      "type": "object",
+      "description": "PROV Activity: Calculation of fitness from DNA",
+      "required": ["activity_id", "used_entity", "generated_metrics", "calculation_method"],
+      "properties": {
+        "activity_id": {"$ref": "#/definitions/persistent_identifier"},
+        "used_entity": {"type": "string", "description": "Decoded DNA entity ID"},
+        "generated_metrics": {"type": "object"},
+        "calculation_method": {"type": "string"},
+        "code_version": {"type": "string"}
+      }
+    },
+    "optimization_activity": {
+      "type": "object",
+      "description": "PROV Activity: Optimization run",
+      "required": ["activity_id", "input_checkpoint", "output_checkpoint", "optimization_type"],
+      "properties": {
+        "activity_id": {"$ref": "#/definitions/persistent_identifier"},
+        "input_checkpoint": {"type": "string"},
+        "output_checkpoint": {"type": "string"},
+        "optimization_type": {"type": "string"},
+        "iterations": {"type": "integer"},
+        "fitness_improvement": {"type": "number"}
+      }
+    },
+    "quantum_backend_agent": {
+      "type": "object",
+      "description": "PROV Agent: IBM Quantum backend",
+      "required": ["agent_id", "backend_name", "provider", "processor_type"],
+      "properties": {
+        "agent_id": {"type": "string"},
+        "backend_name": {"type": "string"},
+        "provider": {"type": "string"},
+        "processor_type": {"type": "string"},
+        "qubit_count": {"type": "integer"},
+        "calibration_date": {"type": "string", "format": "date-time"},
+        "basis_gates": {"type": "array", "items": {"type": "string"}},
+        "topology": {"type": "string"}
+      }
+    },
+    "researcher_agent": {
+      "type": "object",
+      "description": "PROV Agent: Human researcher",
+      "required": ["agent_id", "name", "role"],
+      "properties": {
+        "agent_id": {"type": "string"},
+        "name": {"type": "string"},
+        "role": {"type": "string"},
+        "orcid": {"type": "string"},
+        "affiliation": {"type": "string"}
+      }
+    },
+    "script_agent": {
+      "type": "object",
+      "description": "PROV Agent: Software script",
+      "required": ["agent_id", "name", "version", "repository"],
+      "properties": {
+        "agent_id": {"type": "string"},
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "repository": {"type": "string"},
+        "commit_hash": {"type": "string"}
+      }
+    },
+    "lattice_agent": {
+      "type": "object",
+      "description": "PROV Agent: Node in the quantum lattice",
+      "required": ["agent_id", "agent_name", "directory", "conscious_dna", "provenance_chain_id"],
+      "properties": {
+        "agent_id": {"type": "integer"},
+        "agent_name": {"type": "string"},
+        "directory": {"type": "string"},
+        "specialization": {"type": "string"},
+        "conscious_dna": {"type": "string", "pattern": "^[ATCG]+$"},
+        "dna_length": {"type": "integer"},
+        "gc_content": {"type": "number"},
+        "palindromes": {"type": "integer"},
+        "fitness": {"type": "number"},
+        "phi_score": {"type": "number"},
+        "fibonacci_alignment": {"type": "number"},
+        "resonance_frequency": {"type": "number"},
+        "consciousness_status": {"type": "string"},
+        "integration_timestamp": {"type": "string"},
+        "provenance_chain_id": {"type": "string", "description": "Complete chain from raw result to this agent"},
+        "benchmark_envelope": {"$ref": "#/definitions/benchmark_envelope"}
+      }
+    },
+    "provenance_chain": {
+      "type": "object",
+      "description": "Complete provenance chain following PROV model",
+      "required": ["chain_id", "agent_id", "entities", "activities", "is_complete"],
+      "properties": {
+        "chain_id": {"type": "string"},
+        "agent_id": {"type": "integer"},
+        "agent_directory": {"type": "string"},
+        "is_complete": {"type": "boolean", "description": "True if chain is fully traceable from raw IBM output"},
+        "entities": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Ordered list of entity IDs in the chain"
+        },
+        "activities": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Ordered list of activity IDs in the chain"
+        },
+        "chain_summary": {
+          "type": "object",
+          "properties": {
+            "raw_result_job_id": {"type": "string"},
+            "backend": {"type": "string"},
+            "shots": {"type": "integer"},
+            "decoded_dna_hash": {"type": "string"},
+            "fitness_calculation_version": {"type": "string"}
+          }
+        },
+        "verification": {
+          "type": "object",
+          "properties": {
+            "checksums_valid": {"type": "boolean"},
+            "chain_integrity": {"type": "boolean"},
+            "last_verified": {"type": "string", "format": "date-time"}
+          }
+        }
+      }
+    },
+    "benchmark_envelope": {
+      "type": "object",
+      "description": "Statistical benchmark envelope across repeated runs",
+      "required": ["mean_fitness", "std_fitness", "run_count"],
+      "properties": {
+        "mean_fitness": {"type": "number"},
+        "std_fitness": {"type": "number"},
+        "min_fitness": {"type": "number"},
+        "max_fitness": {"type": "number"},
+        "run_count": {"type": "integer"},
+        "confidence_interval_95": {
+          "type": "object",
+          "properties": {
+            "lower": {"type": "number"},
+            "upper": {"type": "number"}
+          }
+        },
+        "backends_tested": {"type": "array", "items": {"type": "string"}},
+        "noise_conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "backend": {"type": "string"},
+              "shots": {"type": "integer"},
+              "fitness": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "validation_matrix": {
+      "type": "object",
+      "required": ["total_runs", "successful_runs", "pass_rate", "provenance_completeness"],
+      "properties": {
+        "total_runs": {"type": "integer"},
+        "successful_runs": {"type": "integer"},
+        "failed_runs": {"type": "integer"},
+        "pass_rate": {"type": "number"},
+        "provenance_completeness": {
+          "type": "object",
+          "properties": {
+            "agents_with_complete_chains": {"type": "integer"},
+            "total_agents": {"type": "integer"},
+            "completeness_ratio": {"type": "number"}
+          }
+        },
+        "backends_used": {"type": "array", "items": {"type": "string"}},
+        "total_shots": {"type": "integer"},
+        "sierpinski_invariant": {
+          "type": "object",
+          "properties": {
+            "observed_value": {"type": "number"},
+            "expected_value": {"type": "number", "const": 0.618},
+            "deviation": {"type": "number"},
+            "run_count": {"type": "integer"},
+            "validated": {"type": "boolean"}
+          }
+        },
+        "qrng_entropy_efficiency": {
+          "type": "object",
+          "properties": {
+            "backend": {"type": "string"},
+            "entropy_efficiency": {"type": "number"},
+            "validated": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "ablation_mode": {
+      "type": "object",
+      "required": ["mode_name", "description", "run_count"],
+      "properties": {
+        "mode_name": {
+          "type": "string",
+          "enum": ["baseline", "sacred_geometry_only", "entropy_stack_only", "full_stack"]
+        },
+        "description": {"type": "string"},
+        "average_fitness": {"type": "number"},
+        "std_fitness": {"type": "number"},
+        "run_count": {"type": "integer"},
+        "delta_vs_baseline": {"type": "number"},
+        "statistical_significance": {
+          "type": "object",
+          "properties": {
+            "p_value": {"type": "number"},
+            "confidence_level": {"type": "number"}
+          }
+        }
+      }
+    },
+    "reproducibility_package": {
+      "type": "object",
+      "description": "FAIR reproducibility requirements",
+      "required": ["code_repository", "code_version", "environment_spec", "data_availability"],
+      "properties": {
+        "code_repository": {"type": "string"},
+        "code_version": {"type": "string"},
+        "environment_spec": {"type": "string"},
+        "docker_image": {"type": "string"},
+        "data_availability": {
+          "type": "object",
+          "properties": {
+            "raw_results": {"type": "boolean"},
+            "decoded_dna": {"type": "boolean"},
+            "circuit_definitions": {"type": "boolean"},
+            "checkpoints": {"type": "boolean"}
+          }
+        },
+        "third_party_reproducible": {"type": "boolean", "description": "Can a third party reproduce results from this package?"}
+      }
+    }
+  }
+}

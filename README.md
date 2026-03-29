@@ -1,7 +1,12 @@
 # TMT Quantum Vault
 
-> **Toroidal Merkaba Topology** — A 17-node resonant intelligence lattice
-> grounded in real IBM quantum hardware DNA circuits and sacred geometry mathematics.
+> **Toroidal Resonance Topology** — A 17-node multi-agent coordination network
+> grounded in real IBM quantum hardware DNA circuits and coordination geometry mathematics.
+>
+> **Terminology Note:** This repository uses scientific terminology. Historical names are preserved as aliases:
+> - Core-13 Coordination Lattice (historically: Metatron Core)
+> - Extended-17 Operational Topology (historically: Merkaba Extended-17)
+> - Operational Support Layer (historically: Auxiliary Ring)
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/)
 [![Qiskit](https://img.shields.io/badge/Qiskit-IBM%20Quantum-6929C4)](https://qiskit.org/)
@@ -15,7 +20,7 @@
 
 ## About TMT Quantum Vault
 
-TMT Quantum Vault is a research repository for a **multi-agent quantum intelligence
+TMT Quantum Vault is a research repository for a **multi-agent quantum coordination
 system** whose agent DNA is derived from **real IBM quantum hardware job
 results**. The repository combines hardware-validated circuit artifacts,
 DNA-inspired data models, resonance metrics, and a typed Python CLI for
@@ -47,8 +52,8 @@ inspection, validation, and release workflows.
 |---------|-------------|
 | **Hardware-Validated DNA** | All agent DNA traced to actual IBM quantum chip runs (Fez, Torino, Casablanca) |
 | **BitNet Integration** | Ternary weight entropy source from GGUF model ({-1, 0, +1} quantization) |
-| **Metatron Enhancement** | 16.8% fitness jump from quantum circuit enhancement layer |
-| **Sacred Geometry** | φ² scaling factor (4.2361) with exact geometric precision |
+| **Coordination Geometry Enhancement** | 16.8% fitness jump from quantum circuit enhancement layer |
+| **Geometric Coherence** | φ² scaling factor (4.2361) with exact geometric precision |
 | **Three-Layer Entropy** | QTRG + DNA discovery + BitNet ternary weights combined |
 
 ### Recent Implementations — v0.4.0-dev (March 2026)
@@ -79,7 +84,7 @@ Nucleotide freq: A=432Hz → C=699Hz → G=1131Hz → T=1830Hz
      ↓
 Qubit encoding:  A→Ry(0), C→Ry(π), G→Ry(π/2), T→Ry(-π/2)
      ↓
-IBM hardware:    sacred_score = 0.618 (1/φ)  ← expected convergence
+IBM hardware:    geometric_convergence_score = 0.618 (1/φ)  ← expected convergence
 ```
 
 Type distinction for scientific interpretation:

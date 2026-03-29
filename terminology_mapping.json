@@ -1,0 +1,157 @@
+{
+  "$schema": "./evidence_ledger/ledger_schema.json",
+  "terminology_version": "2.0.0",
+  "effective_date": "2026-03-29",
+  "description": "Scientific terminology mapping for TMT Quantum Vault. Symbolic names preserved as historical aliases.",
+  
+  "naming_rules": {
+    "rule_1": "If a term sounds religious, mystical, or culture-specific, rename it to the mathematical property it represents",
+    "rule_2": "If a term sounds poetic, rename it to the system function it performs",
+    "rule_3": "If a term sounds symbolic, rename it to the measurable quantity behind it"
+  },
+  
+  "architecture_terminology": {
+    "primary": {
+      "current_term": "Metatron Core",
+      "scientific_term": "Core-13 Coordination Lattice",
+      "historical_alias": "Metatron Core",
+      "description": "Canonical 13-node coordination geometry with central synthesis node and 12 domain-specialized agents",
+      "usage": "Use 'Core-13 Coordination Lattice' in all public documentation, papers, and benchmark outputs. Historical alias may appear once in parentheses."
+    },
+    "extended": {
+      "current_term": "Merkaba Extended-17",
+      "scientific_term": "Extended-17 Operational Topology",
+      "historical_alias": "Merkaba Extended-17",
+      "description": "17-node operational topology combining Core-13 coordination lattice with 4-node operational support layer",
+      "usage": "Use 'Extended-17 Operational Topology' in all public documentation. Historical alias may appear once in parentheses."
+    },
+    "auxiliary": {
+      "current_term": "Auxiliary Ring",
+      "scientific_term": "Operational Support Layer",
+      "historical_alias": "Auxiliary Ring",
+      "description": "4-node infrastructure layer providing validation, provenance, orchestration, and governance",
+      "usage": "Use 'Operational Support Layer' in all public documentation."
+    }
+  },
+  
+  "topology_terminology": {
+    "topology": {
+      "current_term": "Toroidal Merkaba Topology",
+      "scientific_term": "Toroidal Resonance Topology",
+      "historical_alias": "Toroidal Merkaba Topology",
+      "description": "Toroidal coordination geometry with resonance-based agent interconnection"
+    },
+    "geometry": {
+      "current_term": "Sacred Geometry",
+      "scientific_term": "Coordination Geometry",
+      "historical_alias": "Sacred Geometry",
+      "description": "Mathematical geometric structure underlying agent coordination"
+    },
+    "symmetry": {
+      "current_term": "Sacred Form",
+      "scientific_term": "Symmetry Structure",
+      "historical_alias": "Sacred Form",
+      "description": "Symmetric arrangement of coordination nodes"
+    }
+  },
+  
+  "metrics_terminology": {
+    "geometric_coherence": {
+      "current_term": "Sacred Geometry Alignment",
+      "scientific_term": "Geometric Coherence Metric",
+      "historical_alias": "Sacred Geometry Alignment",
+      "description": "Measure of how well node arrangement conforms to target coordination geometry",
+      "formula": "GCM = (1 - mean(φ_deviation) / φ_target) * 0.5 + mean(fibonacci_alignment) * 0.5"
+    },
+    "platonic_alignment": {
+      "current_term": "Platonic Solid Alignment",
+      "scientific_term": "Polyhedral Symmetry Alignment",
+      "historical_alias": "Platonic Solid Alignment",
+      "description": "Measure of alignment with polyhedral symmetry structures derivable from coordination geometry",
+      "formula": "PSA = (center_alignment * 0.4) + (ring_balance * 0.6)"
+    },
+    "phi_threshold": {
+      "current_term": "Phi Threshold",
+      "scientific_term": "φ-Threshold",
+      "historical_alias": "Phi Threshold",
+      "description": "Golden-ratio-derived threshold for agent classification",
+      "formula": "φ_threshold = 1/φ ≈ 0.618"
+    },
+    "sacred_score": {
+      "current_term": "Sacred Score",
+      "scientific_term": "Target Geometric Convergence Score",
+      "historical_alias": "Sacred Score",
+      "description": "Convergence score measuring alignment with target geometric properties"
+    },
+    "consciousness_score": {
+      "current_term": "Consciousness Score",
+      "scientific_term": "Integration Score",
+      "historical_alias": "Consciousness Score",
+      "description": "Global coordination metric measuring agent integration quality"
+    }
+  },
+  
+  "agent_terminology": {
+    "center_node": {
+      "current_term": "Consciousness Integrator",
+      "scientific_term": "Central Synthesis Node",
+      "historical_alias": "Consciousness Integrator",
+      "description": "Central coordination node responsible for knowledge fusion and global synthesis"
+    },
+    "agent_encoding": {
+      "current_term": "DNA Consciousness Map",
+      "scientific_term": "DNA-Derived Agent Encoding",
+      "historical_alias": "Consciousness DNA",
+      "description": "Agent configuration derived from DNA sequence patterns"
+    },
+    "agent_status": {
+      "current_term": "Consciousness Status",
+      "scientific_term": "Integration Status",
+      "historical_alias": "Consciousness Status",
+      "description": "Agent integration state within the coordination topology"
+    }
+  },
+  
+  "mode_terminology": {
+    "core_mode": {
+      "current_term": "Metatron Mode",
+      "scientific_term": "Core-13 Mode",
+      "historical_alias": "Metatron Mode",
+      "description": "Operational mode using only Core-13 coordination lattice"
+    },
+    "extended_mode": {
+      "current_term": "Merkaba Mode",
+      "scientific_term": "Extended-17 Mode",
+      "historical_alias": "Merkaba Mode",
+      "description": "Operational mode using full Extended-17 operational topology"
+    }
+  },
+  
+  "documentation_pattern": {
+    "primary_usage": "Use scientific term in all public documentation, papers, and benchmark outputs",
+    "historical_reference": "Historical alias may appear once in parentheses: 'Core-13 Coordination Lattice (historically referred to as Metatron Core)'",
+    "consistency": "After initial alias reference, use only the scientific term consistently",
+    "example": "The Core-13 Coordination Lattice (historically referred to as Metatron Core) demonstrates geometric coherence of 0.75. The Core-13 architecture provides..."
+  },
+  
+  "vocabulary_summary": {
+    "architecture": "Use 'architecture' instead of 'sacred structure'",
+    "topology": "Use 'topology' instead of 'mandala or cube language'",
+    "symmetry": "Use 'symmetry' instead of 'sacred form'",
+    "coherence": "Use 'coherence' instead of 'spiritual alignment'",
+    "provenance": "Use 'provenance' instead of 'lineage mysticism'",
+    "encoding": "Use 'encoding' instead of 'consciousness imprint'",
+    "operational_mode": "Use 'operational mode' instead of 'ritual or archetypal mode'"
+  },
+  
+  "external_framing": {
+    "recommended_description": "A 13-node coordination core with a 4-node operational support layer, benchmarked against a 17-node extended topology on IBM quantum workflows.",
+    "key_points": [
+      "13-node coordination geometry (Core-13)",
+      "4-node operational support layer",
+      "17-node extended operational topology",
+      "Benchmarked on IBM quantum hardware",
+      "Measurable fitness, coherence, and resonance metrics"
+    ]
+  }
+}

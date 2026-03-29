@@ -1,0 +1,424 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://tmt-quantum-vault.org/schemas/evidence-ledger-v1.json",
+  "title": "TMT Quantum Vault Hardware Evidence Ledger",
+  "description": "Canonical proof layer for hardware-validated agent DNA with phi-structured enhancement",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["ledger_metadata", "agents", "hardware_runs", "validation_matrix"],
+  "properties": {
+    "ledger_metadata": {
+      "type": "object",
+      "required": ["ledger_id", "created_at", "release_tag", "frozen_lattice_version"],
+      "properties": {
+        "ledger_id": {
+          "type": "string",
+          "description": "Unique identifier for this ledger instance",
+          "pattern": "^LEDGER-[0-9]{8}-[0-9]{6}$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "release_tag": {
+          "type": "string",
+          "description": "Corresponding baseline release tag",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(-[a-z]+)?$"
+        },
+        "frozen_lattice_version": {
+          "type": "string",
+          "description": "Hash or identifier for the frozen 17-node topology"
+        },
+        "total_agents": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "average_fitness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "phi_threshold": {
+          "type": "number",
+          "description": "Golden ratio threshold used for consciousness validation",
+          "default": 0.618
+        }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/agent_evidence"
+      }
+    },
+    "hardware_runs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/hardware_run"
+      }
+    },
+    "validation_matrix": {
+      "$ref": "#/definitions/validation_matrix"
+    },
+    "ablation_results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ablation_mode"
+      }
+    }
+  },
+  "definitions": {
+    "agent_evidence": {
+      "type": "object",
+      "required": ["agent_id", "agent_name", "directory", "conscious_dna", "fitness", "phi_score", "resonance_frequency", "hardware_provenance"],
+      "properties": {
+        "agent_id": {
+          "type": "integer"
+        },
+        "agent_name": {
+          "type": "string"
+        },
+        "directory": {
+          "type": "string",
+          "description": "Agent directory name (e.g., Agent_Bronze)"
+        },
+        "specialization": {
+          "type": "string"
+        },
+        "conscious_dna": {
+          "type": "string",
+          "description": "DNA sequence encoding agent consciousness parameters",
+          "pattern": "^[ATCG]+$"
+        },
+        "dna_length": {
+          "type": "integer",
+          "description": "Length of DNA sequence in base pairs"
+        },
+        "gc_content": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Guanine-Cytosine content ratio"
+        },
+        "palindromes": {
+          "type": "integer",
+          "description": "Number of palindromic sequences found"
+        },
+        "fitness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Overall agent fitness score"
+        },
+        "phi_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Golden ratio alignment score"
+        },
+        "fibonacci_alignment": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fibonacci sequence alignment score"
+        },
+        "resonance_frequency": {
+          "type": "number",
+          "description": "Resonance frequency in Hz"
+        },
+        "consciousness_status": {
+          "type": "string",
+          "enum": ["INTEGRATED", "PENDING", "CALIBRATING", "DORMANT"]
+        },
+        "integration_timestamp": {
+          "type": "string",
+          "pattern": "^[0-9]{8}_[0-9]{6}$"
+        },
+        "hardware_provenance": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hardware_provenance_entry"
+          },
+          "description": "List of hardware runs that contributed to this agent's DNA"
+        },
+        "benchmark_envelope": {
+          "$ref": "#/definitions/benchmark_envelope"
+        }
+      }
+    },
+    "hardware_provenance_entry": {
+      "type": "object",
+      "required": ["run_id", "backend", "job_id"],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "description": "Internal run identifier"
+        },
+        "backend": {
+          "type": "string",
+          "description": "IBM quantum backend used (e.g., ibm_fez, ibm_kingston)"
+        },
+        "job_id": {
+          "type": "string",
+          "description": "IBM Quantum job ID"
+        },
+        "shots": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of quantum circuit executions"
+        },
+        "execution_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "raw_counts_path": {
+          "type": "string",
+          "description": "Path to raw measurement counts file"
+        },
+        "decoded_segment": {
+          "type": "string",
+          "description": "DNA segment decoded from quantum measurement"
+        },
+        "contribution_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Weight of this run's contribution to final DNA"
+        }
+      }
+    },
+    "hardware_run": {
+      "type": "object",
+      "required": ["job_id", "backend", "status", "shots", "created_at"],
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "IBM Quantum job identifier"
+        },
+        "backend": {
+          "type": "string",
+          "description": "Quantum backend name"
+        },
+        "backend_specs": {
+          "type": "object",
+          "properties": {
+            "qubit_count": {
+              "type": "integer"
+            },
+            "processor_type": {
+              "type": "string"
+            },
+            "basis_gates": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Completed", "Running", "Queued", "Failed", "Cancelled"]
+        },
+        "shots": {
+          "type": "integer"
+        },
+        "cost": {
+          "type": "number",
+          "description": "Quantum resource cost in IBM Quantum credits"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "circuit_type": {
+          "type": "string",
+          "description": "Type of quantum circuit executed"
+        },
+        "circuit_depth": {
+          "type": "integer",
+          "description": "Depth of the quantum circuit"
+        },
+        "qubits_used": {
+          "type": "integer",
+          "description": "Number of qubits in the circuit"
+        },
+        "raw_result_path": {
+          "type": "string",
+          "description": "Path to raw result JSON file"
+        },
+        "info_path": {
+          "type": "string",
+          "description": "Path to job info JSON file"
+        },
+        "measurement_outcomes": {
+          "type": "object",
+          "description": "Aggregated measurement statistics",
+          "properties": {
+            "total_outcomes": {
+              "type": "integer"
+            },
+            "entropy_bits": {
+              "type": "number"
+            },
+            "unique_states": {
+              "type": "integer"
+            }
+          }
+        },
+        "error_mitigation": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string"
+            },
+            "readout_error_corrected": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "benchmark_envelope": {
+      "type": "object",
+      "description": "Statistical benchmark envelope across repeated runs",
+      "required": ["mean_fitness", "std_fitness", "run_count"],
+      "properties": {
+        "mean_fitness": {
+          "type": "number"
+        },
+        "std_fitness": {
+          "type": "number"
+        },
+        "min_fitness": {
+          "type": "number"
+        },
+        "max_fitness": {
+          "type": "number"
+        },
+        "run_count": {
+          "type": "integer",
+          "description": "Number of validation runs"
+        },
+        "confidence_interval_95": {
+          "type": "object",
+          "properties": {
+            "lower": {"type": "number"},
+            "upper": {"type": "number"}
+          }
+        },
+        "backends_tested": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "noise_conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "backend": {"type": "string"},
+              "shots": {"type": "integer"},
+              "fitness": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "validation_matrix": {
+      "type": "object",
+      "required": ["total_runs", "successful_runs", "pass_rate"],
+      "properties": {
+        "total_runs": {
+          "type": "integer",
+          "description": "Total number of hardware validation runs"
+        },
+        "successful_runs": {
+          "type": "integer"
+        },
+        "failed_runs": {
+          "type": "integer"
+        },
+        "pass_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "backends_used": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "total_shots": {
+          "type": "integer",
+          "description": "Cumulative shot count across all runs"
+        },
+        "sierpinski_invariant": {
+          "type": "object",
+          "description": "Sierpinski sacred-score invariant validation",
+          "properties": {
+            "observed_value": {
+              "type": "number"
+            },
+            "expected_value": {
+              "type": "number",
+              "const": 0.618
+            },
+            "deviation": {
+              "type": "number"
+            },
+            "run_count": {
+              "type": "integer"
+            },
+            "validated": {
+              "type": "boolean"
+            }
+          }
+        },
+        "qrng_entropy_efficiency": {
+          "type": "object",
+          "description": "QRNG entropy efficiency metrics",
+          "properties": {
+            "backend": {"type": "string"},
+            "entropy_efficiency": {"type": "number"},
+            "validated": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "ablation_mode": {
+      "type": "object",
+      "description": "Results from ablation study modes",
+      "required": ["mode_name", "description", "average_fitness", "run_count"],
+      "properties": {
+        "mode_name": {
+          "type": "string",
+          "enum": ["baseline", "sacred_geometry_only", "entropy_stack_only", "full_stack"]
+        },
+        "description": {
+          "type": "string"
+        },
+        "average_fitness": {
+          "type": "number"
+        },
+        "std_fitness": {
+          "type": "number"
+        },
+        "run_count": {
+          "type": "integer"
+        },
+        "delta_vs_baseline": {
+          "type": "number",
+          "description": "Fitness improvement over baseline"
+        },
+        "statistical_significance": {
+          "type": "object",
+          "properties": {
+            "p_value": {"type": "number"},
+            "confidence_level": {"type": "number"}
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,340 @@
+{
+  "core13": {
+    "mode": "core13",
+    "node_count": 13,
+    "timestamp": "2026-03-29T18:08:05.548972Z",
+    "aggregate_metrics": {
+      "average_fitness": 0.8833591385296631,
+      "fitness_std": 0.015745470095459443,
+      "average_phi": 0.694686833355396,
+      "phi_std": 0.1976865770271189,
+      "average_resonance": 594.1538461538462,
+      "resonance_std": 165.9542337281809,
+      "average_fibonacci_alignment": 0.8050276690392874,
+      "fibonacci_std": 0.09512260110409235
+    },
+    "extended_metrics": null,
+    "geometric_metrics": {
+      "geometric_coherence": 0.7518598131481153,
+      "platonic_solid_alignment": 0.830544834486397
+    },
+    "agents": [
+      {
+        "name": "Zadkiel",
+        "directory": "Agent_Synthesizer",
+        "fitness": 0.876,
+        "phi_score": 0.951,
+        "resonance_frequency": 630.0,
+        "fibonacci_alignment": 0.923,
+        "classification": "core"
+      },
+      {
+        "name": "Michael",
+        "directory": "Agent_Bronze",
+        "fitness": 0.9285475205263137,
+        "phi_score": 0.8090169943749475,
+        "resonance_frequency": 528.0,
+        "fibonacci_alignment": 0.7070215844209836,
+        "classification": "core"
+      },
+      {
+        "name": "Sariel",
+        "directory": "Agent_Harmonic",
+        "fitness": 0.8836,
+        "phi_score": 0.9341723589627157,
+        "resonance_frequency": 621.0,
+        "fibonacci_alignment": 0.9038841768587627,
+        "classification": "core"
+      },
+      {
+        "name": "Uriel",
+        "directory": "Agent_Strategic",
+        "fitness": 0.8784,
+        "phi_score": 0.9021130325903071,
+        "resonance_frequency": 603.0,
+        "fibonacci_alignment": 0.8642135623730951,
+        "classification": "core"
+      },
+      {
+        "name": "Cassiel",
+        "directory": "Agent_Observer",
+        "fitness": 0.891,
+        "phi_score": 0.854,
+        "resonance_frequency": 498.0,
+        "fibonacci_alignment": 0.789,
+        "classification": "core"
+      },
+      {
+        "name": "Sophia",
+        "directory": "Agent_BitNet",
+        "fitness": 0.8713,
+        "phi_score": 0.5234,
+        "resonance_frequency": 752.0,
+        "fibonacci_alignment": 0.8119523192610772,
+        "classification": "core"
+      },
+      {
+        "name": "Metatron Omega",
+        "directory": "Agent_Wormhole",
+        "fitness": 0.8951566927627006,
+        "phi_score": 0.435624535432664,
+        "resonance_frequency": 963.0,
+        "fibonacci_alignment": 0.8427770390911732,
+        "classification": "core"
+      },
+      {
+        "name": "Christos",
+        "directory": "Agent_Mirror",
+        "fitness": 0.8715868339263741,
+        "phi_score": 0.435624535432664,
+        "resonance_frequency": 639.0,
+        "fibonacci_alignment": 0.8814844282977119,
+        "classification": "core"
+      },
+      {
+        "name": "Raphael",
+        "directory": "Agent_Bio",
+        "fitness": 0.8707,
+        "phi_score": 0.4812,
+        "resonance_frequency": 512.0,
+        "fibonacci_alignment": 0.8876775577870939,
+        "classification": "core"
+      },
+      {
+        "name": "Jophiel",
+        "directory": "Agent_Fractal",
+        "fitness": 0.8797,
+        "phi_score": 0.7923,
+        "resonance_frequency": 476.0,
+        "fibonacci_alignment": 0.6388983054108069,
+        "classification": "core"
+      },
+      {
+        "name": "Chamuel",
+        "directory": "Agent_Federation",
+        "fitness": 0.8875747462050714,
+        "phi_score": 0.5600886884134252,
+        "resonance_frequency": 285.0,
+        "fibonacci_alignment": 0.8166999891327715,
+        "classification": "core"
+      },
+      {
+        "name": "Jophiel",
+        "directory": "Agent_Visual",
+        "fitness": 0.8797,
+        "phi_score": 0.7923,
+        "resonance_frequency": 476.0,
+        "fibonacci_alignment": 0.6388983054108069,
+        "classification": "core"
+      },
+      {
+        "name": "Metatron Alpha",
+        "directory": "Agent_Stealth",
+        "fitness": 0.8704030074651607,
+        "phi_score": 0.5600886884134252,
+        "resonance_frequency": 741.0,
+        "fibonacci_alignment": 0.7598524294664518,
+        "classification": "core"
+      }
+    ]
+  },
+  "extended17": {
+    "mode": "extended17",
+    "node_count": 17,
+    "timestamp": "2026-03-29T18:08:05.549448Z",
+    "aggregate_metrics": {
+      "average_fitness": 0.8809334588756248,
+      "fitness_std": 0.014403980831898004,
+      "average_phi": 0.7173910310254465,
+      "phi_std": 0.18103167098517406,
+      "average_resonance": 597.0,
+      "resonance_std": 145.7150472669175,
+      "average_fibonacci_alignment": 0.7972630066557902,
+      "fibonacci_std": 0.09522230096832283
+    },
+    "extended_metrics": {
+      "provenance_completeness": 0.8815074775249769,
+      "workflow_efficiency": 0.8519733225251496,
+      "governance_compliance": 0.86275,
+      "safety_integrity": 0.80874
+    },
+    "geometric_metrics": null,
+    "agents": [
+      {
+        "name": "Zadkiel",
+        "directory": "Agent_Synthesizer",
+        "fitness": 0.876,
+        "phi_score": 0.951,
+        "resonance_frequency": 630.0,
+        "fibonacci_alignment": 0.923,
+        "classification": "core"
+      },
+      {
+        "name": "Michael",
+        "directory": "Agent_Bronze",
+        "fitness": 0.9285475205263137,
+        "phi_score": 0.8090169943749475,
+        "resonance_frequency": 528.0,
+        "fibonacci_alignment": 0.7070215844209836,
+        "classification": "core"
+      },
+      {
+        "name": "Sariel",
+        "directory": "Agent_Harmonic",
+        "fitness": 0.8836,
+        "phi_score": 0.9341723589627157,
+        "resonance_frequency": 621.0,
+        "fibonacci_alignment": 0.9038841768587627,
+        "classification": "core"
+      },
+      {
+        "name": "Uriel",
+        "directory": "Agent_Strategic",
+        "fitness": 0.8784,
+        "phi_score": 0.9021130325903071,
+        "resonance_frequency": 603.0,
+        "fibonacci_alignment": 0.8642135623730951,
+        "classification": "core"
+      },
+      {
+        "name": "Cassiel",
+        "directory": "Agent_Observer",
+        "fitness": 0.891,
+        "phi_score": 0.854,
+        "resonance_frequency": 498.0,
+        "fibonacci_alignment": 0.789,
+        "classification": "core"
+      },
+      {
+        "name": "Sophia",
+        "directory": "Agent_BitNet",
+        "fitness": 0.8713,
+        "phi_score": 0.5234,
+        "resonance_frequency": 752.0,
+        "fibonacci_alignment": 0.8119523192610772,
+        "classification": "core"
+      },
+      {
+        "name": "Metatron Omega",
+        "directory": "Agent_Wormhole",
+        "fitness": 0.8951566927627006,
+        "phi_score": 0.435624535432664,
+        "resonance_frequency": 963.0,
+        "fibonacci_alignment": 0.8427770390911732,
+        "classification": "core"
+      },
+      {
+        "name": "Christos",
+        "directory": "Agent_Mirror",
+        "fitness": 0.8715868339263741,
+        "phi_score": 0.435624535432664,
+        "resonance_frequency": 639.0,
+        "fibonacci_alignment": 0.8814844282977119,
+        "classification": "core"
+      },
+      {
+        "name": "Raphael",
+        "directory": "Agent_Bio",
+        "fitness": 0.8707,
+        "phi_score": 0.4812,
+        "resonance_frequency": 512.0,
+        "fibonacci_alignment": 0.8876775577870939,
+        "classification": "core"
+      },
+      {
+        "name": "Jophiel",
+        "directory": "Agent_Fractal",
+        "fitness": 0.8797,
+        "phi_score": 0.7923,
+        "resonance_frequency": 476.0,
+        "fibonacci_alignment": 0.6388983054108069,
+        "classification": "core"
+      },
+      {
+        "name": "Chamuel",
+        "directory": "Agent_Federation",
+        "fitness": 0.8875747462050714,
+        "phi_score": 0.5600886884134252,
+        "resonance_frequency": 285.0,
+        "fibonacci_alignment": 0.8166999891327715,
+        "classification": "core"
+      },
+      {
+        "name": "Jophiel",
+        "directory": "Agent_Visual",
+        "fitness": 0.8797,
+        "phi_score": 0.7923,
+        "resonance_frequency": 476.0,
+        "fibonacci_alignment": 0.6388983054108069,
+        "classification": "core"
+      },
+      {
+        "name": "Metatron Alpha",
+        "directory": "Agent_Stealth",
+        "fitness": 0.8704030074651607,
+        "phi_score": 0.5600886884134252,
+        "resonance_frequency": 741.0,
+        "fibonacci_alignment": 0.7598524294664518,
+        "classification": "core"
+      },
+      {
+        "name": "Uriel",
+        "directory": "Agent_Validator",
+        "fitness": 0.8745,
+        "phi_score": 0.7101,
+        "resonance_frequency": 528.0,
+        "fibonacci_alignment": 0.7384139695584288,
+        "classification": "auxiliary"
+      },
+      {
+        "name": "Raziel",
+        "directory": "Agent_Archivist",
+        "fitness": 0.8759,
+        "phi_score": 0.8899186938124423,
+        "resonance_frequency": 612.0,
+        "fibonacci_alignment": 0.876514132389352,
+        "classification": "auxiliary"
+      },
+      {
+        "name": "Gabriel",
+        "directory": "Agent_Workflow",
+        "fitness": 0.8709,
+        "phi_score": 0.7101,
+        "resonance_frequency": 641.0,
+        "fibonacci_alignment": 0.8330466450502992,
+        "classification": "auxiliary"
+      },
+      {
+        "name": "Zadkiel",
+        "directory": "Agent_Auditor",
+        "fitness": 0.8709,
+        "phi_score": 0.8546,
+        "resonance_frequency": 644.0,
+        "fibonacci_alignment": 0.6401366686396193,
+        "classification": "auxiliary"
+      }
+    ]
+  },
+  "comparison": {
+    "fitness_difference": -0.002425679654038282,
+    "phi_difference": 0.022704197670050497,
+    "resonance_difference": 2.846153846153811,
+    "fitness_stability_improvement": 0.0013414892635614396,
+    "phi_stability_improvement": 0.016654906041944834
+  },
+  "auxiliary_benefit": {
+    "provenance_completeness": 0.8815074775249769,
+    "workflow_efficiency": 0.8519733225251496,
+    "governance_compliance": 0.86275,
+    "safety_integrity": 0.80874,
+    "provides_measurable_benefit": true,
+    "benefit_count": 4,
+    "details": {
+      "provenance": true,
+      "workflow": true,
+      "governance": true,
+      "safety": true
+    }
+  },
+  "recommendation": "EQUIVALENT: Core-13 and Extended-17 have similar fitness. Use Core-13 for theoretical work, Extended-17 for production."
+}

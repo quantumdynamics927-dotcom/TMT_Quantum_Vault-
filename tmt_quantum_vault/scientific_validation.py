@@ -961,6 +961,12 @@ class ScientificValidator:
         # When sample sizes are unequal, Glass's Δ is more appropriate
         # When samples are small, Hedges' g corrects bias
         
+        # PRACTICAL-EQUIVALENCE THRESHOLD: 0.05 fitness units
+        # This threshold was predeclared based on domain knowledge that
+        # differences < 0.05 in fitness are practically negligible.
+        # See: validation_spec.md for threshold justification.
+        PRACTICAL_EQUIVALENCE_THRESHOLD = 0.05
+        
         if variance_ratio > 2:
             variance_warning = "UNEQUAL VARIANCES: Cohen's d may be inflated. Use Glass's Δ or absolute difference."
             primary_effect_size = glass_delta
@@ -970,7 +976,7 @@ class ScientificValidator:
             primary_effect_size = hedges_g  # Use Hedges' g as default (bias-corrected)
             primary_name = "Hedges' g"
         
-        # Interpret primary effect size
+        # Interpret primary effect size (secondary diagnostic)
         if abs(primary_effect_size) < 0.2:
             interpretation = "negligible"
         elif abs(primary_effect_size) < 0.5:
@@ -980,18 +986,33 @@ class ScientificValidator:
         else:
             interpretation = "large"
         
-        # Pass if absolute difference is small (< 0.05) OR effect size is negligible/small
-        # Focus on practical significance, not just statistical
-        passed = absolute_diff < 0.05 or abs(primary_effect_size) < 0.5
+        # PRIMARY CRITERION: Absolute difference (most interpretable)
+        # SECONDARY CRITERIA: Standardized effect sizes (diagnostic)
+        # Pass if absolute difference is below practical-equivalence threshold
+        passed = absolute_diff < PRACTICAL_EQUIVALENCE_THRESHOLD
+        
+        # Construct precise interpretation
+        if absolute_diff < PRACTICAL_EQUIVALENCE_THRESHOLD:
+            practical_interpretation = (
+                f"The raw fitness difference is small ({absolute_diff:.4f}), "
+                f"below the practical-equivalence threshold of {PRACTICAL_EQUIVALENCE_THRESHOLD}. "
+                f"Standardized effect sizes are sensitive to unequal variances and small group sizes."
+            )
+        else:
+            practical_interpretation = (
+                f"The raw fitness difference ({absolute_diff:.4f}) exceeds the practical-equivalence "
+                f"threshold of {PRACTICAL_EQUIVALENCE_THRESHOLD}. "
+                f"Standardized effect sizes may be inflated due to unequal variances (ratio={variance_ratio:.1f})."
+            )
         
         return ValidationResult(
             test_name="core_aux_effect_size",
             category="statistical_inference",
             claim_class="empirical",
             passed=passed,
-            value=primary_effect_size,
+            value=absolute_diff,  # Primary metric: absolute difference
             expected=0,  # Null hypothesis: no difference
-            tolerance=0.5,
+            tolerance=PRACTICAL_EQUIVALENCE_THRESHOLD,
             effect_size=primary_effect_size,
             details={
                 "core_n": len(core_fitness),
@@ -1001,16 +1022,19 @@ class ScientificValidator:
                 "aux_mean": aux_mean,
                 "aux_std": aux_std,
                 "absolute_difference": absolute_diff,
+                "practical_equivalence_threshold": PRACTICAL_EQUIVALENCE_THRESHOLD,
                 "variance_ratio": variance_ratio,
                 "cohens_d": cohens_d,
                 "glass_delta": glass_delta,
                 "hedges_g": hedges_g,
                 "common_language_effect_size": cl_effect_size,
-                "primary_effect_size": primary_name,
+                "primary_metric": "absolute_difference",
+                "secondary_metric": primary_name,
                 "interpretation": interpretation,
                 "variance_warning": variance_warning,
-                "note": f"Absolute difference ({absolute_diff:.4f}) is the most interpretable measure. "
-                        f"Effect sizes may be inflated due to unequal variances (ratio={variance_ratio:.1f}).",
+                "practical_interpretation": practical_interpretation,
+                "note": "Absolute difference is the primary operational metric. "
+                        "Standardized effect sizes are secondary diagnostic measures.",
             },
         )
     

@@ -1,10 +1,28 @@
 {
-  "timestamp": "2026-03-29T18:29:32.709881+00:00",
+  "timestamp": "2026-03-29T22:32:51.085635+00:00",
+  "version": "0.2",
+  "disclaimer": "This framework validates mathematical and implementation consistency. It does NOT prove empirical superiority or generalization across hardware conditions.",
+  "claim_classes": {
+    "mathematical": "Formulas, identities, geometric metrics, encoding definitions",
+    "implementation": "Schema conformity, deterministic transformations, range checks",
+    "empirical": "Performance, stability, reproducibility (requires additional work)"
+  },
+  "statistical_test_types": {
+    "sample_adequacy": "Checks for sufficient sample size for statistical inference",
+    "uncertainty_estimation": "Bootstrap confidence intervals, dispersion metrics",
+    "comparative_effect_size": "Cohen's d between groups, practical significance",
+    "null_model_tests": "Permutation tests, shuffled baselines, random topology"
+  },
   "summary": {
-    "total_tests": 17,
-    "passed": 16,
+    "total_tests": 20,
+    "passed": 19,
     "failed": 1,
-    "pass_rate": 0.9411764705882353
+    "pass_rate": 0.95,
+    "claim_classes": {
+      "mathematical": 6,
+      "implementation": 12,
+      "empirical": 2
+    }
   },
   "categories": {
     "golden_ratio": {
@@ -32,9 +50,9 @@
       "passed": 2,
       "failed": 0
     },
-    "statistical_significance": {
-      "total": 2,
-      "passed": 1,
+    "statistical_inference": {
+      "total": 5,
+      "passed": 4,
       "failed": 1
     }
   },
@@ -42,12 +60,16 @@
     {
       "test_name": "phi_constant_computation",
       "category": "golden_ratio",
+      "claim_class": "mathematical",
       "passed": true,
       "value": 1.618033988749895,
       "expected": 1.618033988749895,
       "tolerance": 1e-15,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "formula": "(1 + \u221a5) / 2",
         "computed_value": 1.618033988749895,
@@ -57,12 +79,16 @@
     {
       "test_name": "phi_inverse_identity",
       "category": "golden_ratio",
+      "claim_class": "mathematical",
       "passed": true,
       "value": 0.6180339887498948,
       "expected": 0.6180339887498949,
       "tolerance": 1e-15,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "inverse": 0.6180339887498948,
         "phi_minus_one": 0.6180339887498949,
@@ -72,12 +98,16 @@
     {
       "test_name": "dna_helix_phi_ratio",
       "category": "golden_ratio",
+      "claim_class": "mathematical",
       "passed": true,
       "value": 1.619047619047619,
       "expected": 1.618033988749895,
       "tolerance": 0.001,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "dna_rise_angstrom": 34.0,
         "dna_diameter_angstrom": 21.0,
@@ -97,12 +127,16 @@
     {
       "test_name": "fibonacci_phi_convergence",
       "category": "golden_ratio",
+      "claim_class": "mathematical",
       "passed": true,
       "value": 1.6180339631667064,
       "expected": 1.618033988749895,
       "tolerance": 0.001,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "fibonacci_sequence": [
           1,
@@ -130,12 +164,16 @@
     {
       "test_name": "agent_phi_scores",
       "category": "golden_ratio",
+      "claim_class": "implementation",
       "passed": true,
       "value": 0.7173910310254465,
       "expected": 0.6180339887498948,
       "tolerance": 0.2,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "n_agents": 17,
         "mean_phi": 0.7173910310254465,
@@ -149,12 +187,16 @@
     {
       "test_name": "geometric_coherence_formula",
       "category": "geometric_coherence",
+      "claim_class": "mathematical",
       "passed": true,
       "value": 0.9999725025237176,
       "expected": 1.0,
       "tolerance": 0.01,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "formula": "GCM = (1 - mean(\u03c6_deviation) / \u03c6_target) * 0.5 + mean(fibonacci_alignment) * 0.5",
         "phi_coherence": 0.9999450050474351,
@@ -165,12 +207,16 @@
     {
       "test_name": "polyhedral_symmetry_formula",
       "category": "geometric_coherence",
+      "claim_class": "mathematical",
       "passed": true,
       "value": 1.0,
       "expected": 1.0,
       "tolerance": 0.01,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "formula": "PSA = (center_alignment * 0.4) + (ring_balance * 0.6)",
         "center_alignment": 1.0,
@@ -181,12 +227,16 @@
     {
       "test_name": "core_13_node_count",
       "category": "geometric_coherence",
+      "claim_class": "implementation",
       "passed": true,
       "value": 13,
       "expected": 13,
       "tolerance": 0,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "expected_nodes": 13,
         "found_nodes": 13,
@@ -196,12 +246,16 @@
     {
       "test_name": "shannon_entropy_formula",
       "category": "entropy_validation",
+      "claim_class": "implementation",
       "passed": true,
       "value": 8.0,
       "expected": 8.0,
       "tolerance": 0.01,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "formula": "H = -\u03a3 p(x) * log2(p(x))",
         "n_values": 256,
@@ -212,12 +266,16 @@
     {
       "test_name": "entropy_stack_layers",
       "category": "entropy_validation",
+      "claim_class": "implementation",
       "passed": true,
       "value": 3,
       "expected": 3,
       "tolerance": 0,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "layers_found": [
           "casablanca_qtrg",
@@ -230,12 +288,16 @@
     {
       "test_name": "dna_gc_content_formula",
       "category": "dna_encoding",
+      "claim_class": "implementation",
       "passed": true,
       "value": 1.0,
       "expected": 1.0,
       "tolerance": 0.01,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "formula": "GC_content = (G + C) / (A + T + G + C)",
         "test_sequence": "GCGC",
@@ -246,12 +308,16 @@
     {
       "test_name": "dna_palindrome_detection",
       "category": "dna_encoding",
+      "claim_class": "implementation",
       "passed": true,
       "value": 1.0,
       "expected": 1.0,
       "tolerance": 0,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "test_sequence": "GAATTC",
         "reverse_complement": "GAATTC",
@@ -261,12 +327,16 @@
     {
       "test_name": "agent_dna_sequences_valid",
       "category": "dna_encoding",
+      "claim_class": "implementation",
       "passed": true,
       "value": 17,
       "expected": 17,
       "tolerance": 0,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "total_agents": 17,
         "valid_agents": 17,
@@ -276,12 +346,16 @@
     {
       "test_name": "fitness_range_valid",
       "category": "fitness_resonance",
+      "claim_class": "implementation",
       "passed": true,
       "value": 17,
       "expected": 17,
       "tolerance": 0,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "total_agents": 17,
         "valid_agents": 17,
@@ -294,12 +368,16 @@
     {
       "test_name": "resonance_frequency_range",
       "category": "fitness_resonance",
+      "claim_class": "implementation",
       "passed": true,
       "value": 17,
       "expected": 17,
       "tolerance": 0,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "total_agents": 17,
         "valid_agents": 17,
@@ -311,13 +389,17 @@
     },
     {
       "test_name": "benchmark_sample_size",
-      "category": "statistical_significance",
+      "category": "statistical_inference",
+      "claim_class": "implementation",
       "passed": false,
       "value": 17,
       "expected": 30,
       "tolerance": 0,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "n_agents": 17,
         "min_sample_for_clt": 30,
@@ -326,21 +408,122 @@
       }
     },
     {
-      "test_name": "phi_score_distribution",
-      "category": "statistical_significance",
+      "test_name": "fitness_confidence_interval",
+      "category": "statistical_inference",
+      "claim_class": "implementation",
+      "passed": true,
+      "value": 0.8809334588756248,
+      "expected": 0.88,
+      "tolerance": 0.1,
+      "p_value": null,
+      "confidence_interval": [
+        0.8752863291212805,
+        0.888378987119454
+      ],
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
+      "details": {
+        "n": 17,
+        "mean": 0.8809334588756248,
+        "std": 0.014403980831898004,
+        "ci_95_lower": 0.8752863291212805,
+        "ci_95_upper": 0.888378987119454,
+        "method": "bootstrap",
+        "n_bootstrap": 10000
+      }
+    },
+    {
+      "test_name": "phi_dispersion_check",
+      "category": "statistical_inference",
+      "claim_class": "implementation",
       "passed": true,
       "value": 0.18103167098517406,
       "expected": 0.01,
       "tolerance": 0.01,
       "p_value": null,
       "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": null,
+      "provenance_reference": null,
       "details": {
         "n": 17,
         "mean": 0.7173910310254465,
         "std": 0.18103167098517406,
+        "variance": 0.032772465899684314,
+        "coefficient_of_variation": 0.2523472738799165,
         "min": 0.435624535432664,
         "max": 0.951,
-        "range": 0.515375464567336
+        "range": 0.515375464567336,
+        "interpretation": "Distribution has meaningful dispersion",
+        "pass_condition": "std > min_threshold (distribution is not degenerate)"
+      }
+    },
+    {
+      "test_name": "core_aux_effect_size",
+      "category": "statistical_inference",
+      "claim_class": "empirical",
+      "passed": true,
+      "value": 0.010309138529663087,
+      "expected": 0,
+      "tolerance": 0.05,
+      "p_value": null,
+      "confidence_interval": null,
+      "effect_size": 0.6547367888771994,
+      "null_model_comparison": null,
+      "provenance_reference": null,
+      "details": {
+        "core_n": 13,
+        "core_mean": 0.8833591385296631,
+        "core_std": 0.015745470095459443,
+        "aux_n": 4,
+        "aux_mean": 0.87305,
+        "aux_std": 0.00254754784057141,
+        "absolute_difference": 0.010309138529663087,
+        "practical_equivalence_threshold": 0.05,
+        "variance_ratio": 6.180637648762571,
+        "cohens_d": 0.7296343478482438,
+        "glass_delta": 0.6547367888771994,
+        "hedges_g": 0.6925342962627399,
+        "common_language_effect_size": 0.7409677072117502,
+        "primary_metric": "absolute_difference",
+        "secondary_metric": "Glass's \u0394",
+        "interpretation": "medium",
+        "variance_warning": "UNEQUAL VARIANCES: Cohen's d may be inflated. Use Glass's \u0394 or absolute difference.",
+        "practical_interpretation": "The raw fitness difference is small (0.0103), below the practical-equivalence threshold of 0.05. Standardized effect sizes are sensitive to unequal variances and small group sizes.",
+        "note": "Absolute difference is the primary operational metric. Standardized effect sizes are secondary diagnostic measures."
+      }
+    },
+    {
+      "test_name": "architecture_vs_null_baseline",
+      "category": "statistical_inference",
+      "claim_class": "empirical",
+      "passed": true,
+      "value": 0.702478009139149,
+      "expected": 0.6946042362355813,
+      "tolerance": 0.1,
+      "p_value": 0.024,
+      "confidence_interval": null,
+      "effect_size": null,
+      "null_model_comparison": {
+        "null_mean_coherence": 0.6946042362355813,
+        "null_std_coherence": 0.004119664905695726,
+        "actual_coherence": 0.702478009139149,
+        "z_score": 1.911265378084921,
+        "p_value": 0.024,
+        "n_permutations": 1000,
+        "method": "permutation_test_on_weighted_coherence",
+        "interpretation": "Architecture assignment significantly better than random (p < 0.05)"
+      },
+      "provenance_reference": null,
+      "details": {
+        "n_agents": 13,
+        "actual_coherence": 0.702478009139149,
+        "null_mean_coherence": 0.6946042362355813,
+        "null_std_coherence": 0.004119664905695726,
+        "z_score": 1.911265378084921,
+        "p_value": 0.024,
+        "note": "Tests whether position-weighted coherence is higher than random shuffle"
       }
     }
   ]

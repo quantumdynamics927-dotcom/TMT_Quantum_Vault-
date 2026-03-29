@@ -252,8 +252,8 @@ class TestStatisticalSignificance:
         assert result.details["n_agents"] == 17
         assert "recommendation" in result.details
     
-    def test_phi_score_distribution(self, tmp_path: Path) -> None:
-        """Test φ-score distribution analysis."""
+    def test_phi_dispersion_check(self, tmp_path: Path) -> None:
+        """Test φ-score dispersion check (distribution has meaningful variance)."""
         # Create mock agents with varied phi scores
         for i, phi in enumerate([0.5, 0.6, 0.7, 0.8, 0.9]):
             agent_dir = tmp_path / f"Agent_{i}"
@@ -266,7 +266,7 @@ class TestStatisticalSignificance:
             }))
         
         validator = ScientificValidator(tmp_path)
-        result = validator.validate_phi_score_distribution()
+        result = validator.validate_phi_dispersion_check()
         
         assert result.passed
         assert result.details["std"] > 0
@@ -280,6 +280,7 @@ class TestValidationResult:
         result = ValidationResult(
             test_name="test",
             category="test_category",
+            claim_class="mathematical",
             passed=True,
             value=1.0,
             expected=1.0,
@@ -288,6 +289,7 @@ class TestValidationResult:
         
         assert result.test_name == "test"
         assert result.category == "test_category"
+        assert result.claim_class == "mathematical"
         assert result.passed
         assert result.value == 1.0
     
@@ -296,6 +298,7 @@ class TestValidationResult:
         result = ValidationResult(
             test_name="test",
             category="test_category",
+            claim_class="implementation",
             passed=True,
             value=1.0,
             expected=1.0,
@@ -316,8 +319,8 @@ class TestValidationReport:
     def test_validation_report_creation(self) -> None:
         """Test creating a validation report."""
         results = [
-            ValidationResult("test1", "cat1", True, 1.0, 1.0, 0.01),
-            ValidationResult("test2", "cat1", False, 0.5, 1.0, 0.01),
+            ValidationResult("test1", "cat1", "mathematical", True, 1.0, 1.0, 0.01),
+            ValidationResult("test2", "cat1", "implementation", False, 0.5, 1.0, 0.01),
         ]
         
         report = ValidationReport(
@@ -326,6 +329,7 @@ class TestValidationReport:
             passed=1,
             failed=1,
             categories={"cat1": {"total": 2, "passed": 1, "failed": 1}},
+            claim_classes={"mathematical": 1, "implementation": 1},
             results=results,
         )
         
@@ -336,7 +340,7 @@ class TestValidationReport:
     def test_validation_report_to_dict(self) -> None:
         """Test converting report to dictionary."""
         results = [
-            ValidationResult("test1", "cat1", True, 1.0, 1.0, 0.01),
+            ValidationResult("test1", "cat1", "mathematical", True, 1.0, 1.0, 0.01),
         ]
         
         report = ValidationReport(
@@ -345,6 +349,7 @@ class TestValidationReport:
             passed=1,
             failed=0,
             categories={"cat1": {"total": 1, "passed": 1, "failed": 0}},
+            claim_classes={"mathematical": 1},
             results=results,
         )
         

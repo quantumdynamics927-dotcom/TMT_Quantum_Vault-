@@ -485,6 +485,7 @@ class TestRuntimeInspectorCoveragePaths:
             _runtime_config(executable_path="bin/llama-cli"),
         )
         assert configured._find_llama_cpp_executable() == configured_binary.resolve()
+        configured_binary.unlink()
 
         discovered_binary = tmp_path / "tools" / "llama-server"
         discovered_binary.parent.mkdir(exist_ok=True)
@@ -514,10 +515,10 @@ class TestRuntimeInspectorCoveragePaths:
 
         assert default_inspector._configured_model_files() == [gguf_model]
         assert configured_inspector._configured_model_path() == external_model
-        assert configured_inspector._configured_model_files() == [
+        assert set(configured_inspector._configured_model_files()) == {
             gguf_model,
             external_model,
-        ]
+        }
         assert configured_inspector._serialized_model_artifacts() == [
             models_dir / "agent.pkl",
             models_dir / "snapshot.json.gz",

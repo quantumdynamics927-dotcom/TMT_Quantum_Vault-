@@ -10,6 +10,7 @@ build/
 dist/
 .mypy_cache/
 .pytest_cache/
+.coverage
 __pycache__/
 *.pyc
 .claude/

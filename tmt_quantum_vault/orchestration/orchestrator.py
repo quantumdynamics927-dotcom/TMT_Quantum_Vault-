@@ -108,6 +108,7 @@ TASK_ROLE_ROUTING = {
 # Agent Profile
 # =============================================================================
 
+
 class AgentProfile:
     """Profile of an agent for orchestration decisions."""
 
@@ -196,6 +197,7 @@ class AgentProfile:
 # Routing Engine
 # =============================================================================
 
+
 class RoutingEngine:
     """Context-aware agent selection engine."""
 
@@ -253,10 +255,7 @@ class RoutingEngine:
         Returns:
             List of profiles
         """
-        return [
-            p for p in self._agent_profiles.values()
-            if p.agent_role == role
-        ]
+        return [p for p in self._agent_profiles.values() if p.agent_role == role]
 
     def get_profiles_by_layer(self, layer: AgentLayer) -> list[AgentProfile]:
         """Get all profiles for a layer.
@@ -267,10 +266,7 @@ class RoutingEngine:
         Returns:
             List of profiles
         """
-        return [
-            p for p in self._agent_profiles.values()
-            if p.layer == layer
-        ]
+        return [p for p in self._agent_profiles.values() if p.layer == layer]
 
     def route(
         self,
@@ -326,7 +322,9 @@ class RoutingEngine:
 
         # Select primary and backups
         primary = scored_candidates[0][0] if scored_candidates else None
-        backups = [p for p, _ in scored_candidates[1:4]] if len(scored_candidates) > 1 else []
+        backups = (
+            [p for p, _ in scored_candidates[1:4]] if len(scored_candidates) > 1 else []
+        )
 
         if not primary:
             raise RuntimeError("No agents available for routing")
@@ -421,6 +419,7 @@ class RoutingEngine:
 # =============================================================================
 # Execution Planner
 # =============================================================================
+
 
 class ExecutionPlan:
     """Execution plan for a multi-agent task."""
@@ -567,7 +566,8 @@ class ExecutionPlanner:
             # Select agents for this layer
             task_roles = TASK_ROLE_ROUTING.get(task_type, [])
             layer_agents = [
-                p.agent_role for p in profiles
+                p.agent_role
+                for p in profiles
                 if p.agent_role in task_roles or not task_roles
             ]
 
@@ -587,7 +587,7 @@ class ExecutionPlanner:
         if not parallel_layers:
             for i, stage in enumerate(stages):
                 if i > 0:
-                    stage.dependencies = [stages[i-1].stage_id]
+                    stage.dependencies = [stages[i - 1].stage_id]
 
         return ExecutionPlan(
             plan_id=plan_id,
@@ -599,6 +599,7 @@ class ExecutionPlanner:
 # =============================================================================
 # Handoff Manager
 # =============================================================================
+
 
 class HandoffManager:
     """Manages agent-to-agent handoffs."""
@@ -700,7 +701,8 @@ class HandoffManager:
             }
 
         successful = sum(
-            1 for _, status in self._handoff_history
+            1
+            for _, status in self._handoff_history
             if status == HandoffStatus.COMPLETED
         )
 
@@ -714,6 +716,7 @@ class HandoffManager:
 # =============================================================================
 # Agent Orchestrator
 # =============================================================================
+
 
 class AgentOrchestrator:
     """Central orchestration kernel for multi-agent coordination."""
@@ -754,8 +757,9 @@ class AgentOrchestrator:
     def _load_agents(self) -> None:
         """Load all agents from vault."""
         agent_dirs = [
-            d for d in self.vault_path.iterdir()
-            if d.is_dir() and d.name.startswith('Agent_')
+            d
+            for d in self.vault_path.iterdir()
+            if d.is_dir() and d.name.startswith("Agent_")
         ]
 
         for agent_dir in agent_dirs:
@@ -777,23 +781,21 @@ class AgentOrchestrator:
             return None
 
         try:
-            with open(dna_file, encoding='utf-8') as f:
+            with open(dna_file, encoding="utf-8") as f:
                 dna_data = json.load(f)
 
             # Map specialization to role
-            role = self._specialization_to_role(
-                dna_data.get('dna_specialization', '')
-            )
+            role = self._specialization_to_role(dna_data.get("dna_specialization", ""))
 
             return AgentProfile(
-                agent_id=dna_data.get('dna_agent_id', 0),
-                agent_name=dna_data.get('dna_agent_name', 'Unknown'),
+                agent_id=dna_data.get("dna_agent_id", 0),
+                agent_name=dna_data.get("dna_agent_name", "Unknown"),
                 agent_role=role,
-                fitness=dna_data.get('fitness', 0.0),
-                phi_score=dna_data.get('phi_score', 0.0),
-                resonance_frequency=dna_data.get('resonance_frequency', 0.0),
-                specialization=dna_data.get('dna_specialization', ''),
-                conscious_dna=dna_data.get('conscious_dna', ''),
+                fitness=dna_data.get("fitness", 0.0),
+                phi_score=dna_data.get("phi_score", 0.0),
+                resonance_frequency=dna_data.get("resonance_frequency", 0.0),
+                specialization=dna_data.get("dna_specialization", ""),
+                conscious_dna=dna_data.get("conscious_dna", ""),
             )
         except (json.JSONDecodeError, KeyError):
             return None
@@ -808,23 +810,23 @@ class AgentOrchestrator:
             Agent role
         """
         mapping = {
-            'knowledge fusion': AgentRole.SYNTHESIZER,
-            'resonance monitoring': AgentRole.OBSERVER,
-            'integrity verification': AgentRole.VALIDATOR,
-            'strategic analysis': AgentRole.STRATEGIC,
-            'resonance tuning': AgentRole.HARMONIC,
-            'network coordination': AgentRole.FEDERATION,
-            'process automation': AgentRole.WORKFLOW,
-            'memory-persistence': AgentRole.ARCHIVIST,
-            'governance & compliance': AgentRole.AUDITOR,
-            'protection & justice': AgentRole.BRONZE,
-            'wisdom & knowledge': AgentRole.BITNET,
-            'consciousness evolution': AgentRole.WORMHOLE,
-            'divine love': AgentRole.MIRROR,
-            'healing': AgentRole.BIO,
-            'beauty & harmony': AgentRole.FRACTAL,
-            'pattern recognition': AgentRole.VISUAL,
-            'quantum bridge': AgentRole.STEALTH,
+            "knowledge fusion": AgentRole.SYNTHESIZER,
+            "resonance monitoring": AgentRole.OBSERVER,
+            "integrity verification": AgentRole.VALIDATOR,
+            "strategic analysis": AgentRole.STRATEGIC,
+            "resonance tuning": AgentRole.HARMONIC,
+            "network coordination": AgentRole.FEDERATION,
+            "process automation": AgentRole.WORKFLOW,
+            "memory-persistence": AgentRole.ARCHIVIST,
+            "governance & compliance": AgentRole.AUDITOR,
+            "protection & justice": AgentRole.BRONZE,
+            "wisdom & knowledge": AgentRole.BITNET,
+            "consciousness evolution": AgentRole.WORMHOLE,
+            "divine love": AgentRole.MIRROR,
+            "healing": AgentRole.BIO,
+            "beauty & harmony": AgentRole.FRACTAL,
+            "pattern recognition": AgentRole.VISUAL,
+            "quantum bridge": AgentRole.STEALTH,
         }
 
         specialization_lower = specialization.lower()
@@ -1047,11 +1049,7 @@ class AgentOrchestrator:
         if not trace.contracts:
             return 0.0
 
-        confidences = [
-            c.output.confidence
-            for c in trace.contracts
-            if c.output
-        ]
+        confidences = [c.output.confidence for c in trace.contracts if c.output]
 
         if not confidences:
             return 0.0
@@ -1103,7 +1101,9 @@ class AgentOrchestrator:
         else:
             return self._resolve_by_confidence(conflict)
 
-    def _resolve_by_confidence(self, conflict: AgentConflict) -> ConflictResolutionResult:
+    def _resolve_by_confidence(
+        self, conflict: AgentConflict
+    ) -> ConflictResolutionResult:
         """Resolve by highest confidence."""
         best = max(conflict.agent_outputs, key=lambda o: o.confidence)
 
@@ -1131,7 +1131,9 @@ class AgentOrchestrator:
             confidence_in_resolution=best.fitness_contribution,
         )
 
-    def _resolve_by_weighted_vote(self, conflict: AgentConflict) -> ConflictResolutionResult:
+    def _resolve_by_weighted_vote(
+        self, conflict: AgentConflict
+    ) -> ConflictResolutionResult:
         """Resolve by weighted vote."""
         # Weight by confidence * fitness
         vote_distribution = {}
@@ -1139,7 +1141,9 @@ class AgentOrchestrator:
             weight = output.confidence * output.fitness_contribution
             vote_distribution[output.agent_name] = weight
 
-        best = max(conflict.agent_outputs, key=lambda o: vote_distribution[o.agent_name])
+        best = max(
+            conflict.agent_outputs, key=lambda o: vote_distribution[o.agent_name]
+        )
 
         return ConflictResolutionResult(
             request_id=uuid4(),
@@ -1202,7 +1206,9 @@ class AgentOrchestrator:
 
         # Get target agent
         target_profiles = self._routing_engine.get_profiles_by_layer(target_layer)
-        target_agent = target_profiles[0].agent_role if target_profiles else AgentRole.SYNTHESIZER
+        target_agent = (
+            target_profiles[0].agent_role if target_profiles else AgentRole.SYNTHESIZER
+        )
 
         return EscalationResult(
             escalation_id=uuid4(),
@@ -1231,7 +1237,7 @@ class AgentOrchestrator:
             "active_traces": len(self._active_traces),
             "bus_stats": self._bus.get_stats(),
             "handoff_stats": self._handoff_manager.get_handoff_stats(),
-            "metrics": self._metrics.model_dump(mode='json'),
+            "metrics": self._metrics.model_dump(mode="json"),
         }
 
     def get_metrics(self) -> CoordinationMetrics:

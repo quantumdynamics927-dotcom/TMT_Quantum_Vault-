@@ -109,7 +109,7 @@ class OrchestrationBenchmark:
 
         results["completed_at"] = datetime.utcnow().isoformat()
         results["duration_seconds"] = end_time - start_time
-        results["metrics"] = metrics.model_dump(mode='json')
+        results["metrics"] = metrics.model_dump(mode="json")
         results["summary"] = self._create_summary(metrics, results)
 
         # Export results
@@ -147,16 +147,22 @@ class OrchestrationBenchmark:
                 trace = self.orchestrator.execute(
                     task_type=task_type,
                     objective=f"Benchmark {task_type} iteration {i+1}",
-                    context={"benchmark": True, "iteration": i+1},
+                    context={"benchmark": True, "iteration": i + 1},
                 )
 
                 # Record results
-                results["traces"].append({
-                    "trace_id": str(trace.trace_id),
-                    "status": trace.final_status.value if trace.final_status else "unknown",
-                    "confidence": trace.final_confidence,
-                    "duration_ms": trace.total_duration_ms,
-                })
+                results["traces"].append(
+                    {
+                        "trace_id": str(trace.trace_id),
+                        "status": (
+                            trace.final_status.value
+                            if trace.final_status
+                            else "unknown"
+                        ),
+                        "confidence": trace.final_confidence,
+                        "duration_ms": trace.total_duration_ms,
+                    }
+                )
 
                 # Update collector
                 self.collector.record_trace(trace)
@@ -172,22 +178,30 @@ class OrchestrationBenchmark:
 
             except Exception as e:
                 results["failed"] += 1
-                results["traces"].append({
-                    "trace_id": None,
-                    "status": "error",
-                    "error": str(e),
-                })
+                results["traces"].append(
+                    {
+                        "trace_id": None,
+                        "status": "error",
+                        "error": str(e),
+                    }
+                )
 
         # Calculate statistics
         if results["latencies_ms"]:
-            results["avg_latency_ms"] = sum(results["latencies_ms"]) / len(results["latencies_ms"])
+            results["avg_latency_ms"] = sum(results["latencies_ms"]) / len(
+                results["latencies_ms"]
+            )
             results["min_latency_ms"] = min(results["latencies_ms"])
             results["max_latency_ms"] = max(results["latencies_ms"])
 
         if results["confidences"]:
-            results["avg_confidence"] = sum(results["confidences"]) / len(results["confidences"])
+            results["avg_confidence"] = sum(results["confidences"]) / len(
+                results["confidences"]
+            )
 
-        results["success_rate"] = results["successful"] / iterations if iterations > 0 else 0.0
+        results["success_rate"] = (
+            results["successful"] / iterations if iterations > 0 else 0.0
+        )
 
         return results
 
@@ -207,20 +221,18 @@ class OrchestrationBenchmark:
         """
         # Calculate overall success rate
         total_successful = sum(
-            r.get("successful", 0)
-            for r in results.get("task_results", {}).values()
+            r.get("successful", 0) for r in results.get("task_results", {}).values()
         )
         total_failed = sum(
-            r.get("failed", 0)
-            for r in results.get("task_results", {}).values()
+            r.get("failed", 0) for r in results.get("task_results", {}).values()
         )
         total_tasks = total_successful + total_failed
 
         # Determine pass/fail
         passed = (
-            metrics.coordination_quality_score >= 0.8 and
-            metrics.success_rate >= 0.95 and
-            metrics.agreement_rate >= 0.85
+            metrics.coordination_quality_score >= 0.8
+            and metrics.success_rate >= 0.95
+            and metrics.agreement_rate >= 0.85
         )
 
         return {
@@ -231,7 +243,9 @@ class OrchestrationBenchmark:
             "total_tasks": total_tasks,
             "successful_tasks": total_successful,
             "failed_tasks": total_failed,
-            "overall_success_rate": total_successful / total_tasks if total_tasks > 0 else 0.0,
+            "overall_success_rate": (
+                total_successful / total_tasks if total_tasks > 0 else 0.0
+            ),
             "recommendations": self.analyzer._generate_recommendations(
                 metrics,
                 self.analyzer.identify_bottlenecks(),
@@ -248,7 +262,7 @@ class OrchestrationBenchmark:
 
         # Export full results
         results_path = self.output_dir / f"orchestration_benchmark_{timestamp}.json"
-        with open(results_path, 'w', encoding='utf-8') as f:
+        with open(results_path, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, default=str)
 
         # Export metrics in benchmark format
@@ -277,7 +291,9 @@ class BenchmarkIntegration:
             benchmark_output_dir: Output directory for benchmarks
         """
         self.vault_path = Path(vault_path)
-        self.benchmark_output_dir = benchmark_output_dir or self.vault_path / "benchmark_results"
+        self.benchmark_output_dir = (
+            benchmark_output_dir or self.vault_path / "benchmark_results"
+        )
 
         # Create orchestrator with default policy
         self.policy = RoutingPolicy(

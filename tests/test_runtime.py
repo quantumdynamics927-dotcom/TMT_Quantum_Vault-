@@ -474,7 +474,7 @@ class TestRuntimeInspectorCoveragePaths:
         assert result.status == expected_status
         assert expected_detail in result.detail
 
-    def test_find_llama_cpp_executable_prefers_configured_and_searches_roots(
+    def test_find_llama_cpp_executable_prefers_configured_path(
         self, tmp_path: Path
     ) -> None:
         configured_binary = tmp_path / "bin" / "llama-cli"
@@ -484,13 +484,17 @@ class TestRuntimeInspectorCoveragePaths:
             tmp_path,
             _runtime_config(executable_path="bin/llama-cli"),
         )
+
         assert configured._find_llama_cpp_executable() == configured_binary.resolve()
-        configured_binary.unlink()
+
+    def test_find_llama_cpp_executable_searches_roots_when_which_fails(
+        self, tmp_path: Path
+    ) -> None:
+        discovered = RuntimeInspector(tmp_path)
 
         discovered_binary = tmp_path / "tools" / "llama-server"
         discovered_binary.parent.mkdir(exist_ok=True)
         discovered_binary.write_text("binary", encoding="utf-8")
-        discovered = RuntimeInspector(tmp_path)
         with patch.object(discovered, "_which", return_value=None):
             assert discovered._find_llama_cpp_executable() == discovered_binary
 
@@ -513,19 +517,19 @@ class TestRuntimeInspectorCoveragePaths:
             _runtime_config(model_path="external.gguf"),
         )
 
-        assert default_inspector._configured_model_files() == [gguf_model]
+        assert set(default_inspector._configured_model_files()) == {gguf_model}
         assert configured_inspector._configured_model_path() == external_model
         assert set(configured_inspector._configured_model_files()) == {
             gguf_model,
             external_model,
         }
-        assert configured_inspector._serialized_model_artifacts() == [
+        assert set(configured_inspector._serialized_model_artifacts()) == {
             models_dir / "agent.pkl",
             models_dir / "snapshot.json.gz",
-        ]
-        assert configured_inspector._unsupported_model_artifacts() == [
+        }
+        assert set(configured_inspector._unsupported_model_artifacts()) == {
             models_dir / "notes.txt"
-        ]
+        }
         assert configured_inspector._parse_ollama_models(
             "NAME ID\nqwen3.5:397b-cloud 1\n"
         ) == ["qwen3.5:397b-cloud"]

@@ -13,12 +13,22 @@ Key Components:
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+# =============================================================================
+# Helper Functions
+# =============================================================================
+
+def utcnow() -> datetime:
+    """Return timezone-aware UTC datetime."""
+    return datetime.now(UTC)
+
 
 # =============================================================================
 # Constants
@@ -37,10 +47,8 @@ DEFAULT_ESCALATION_THRESHOLD = 0.5
 # Enums
 # =============================================================================
 
-
 class AgentLayer(StrEnum):
     """Hierarchical layer assignment for agents."""
-
     INPUT = "input"
     PROCESSING = "processing"
     INTEGRATION = "integration"
@@ -49,7 +57,6 @@ class AgentLayer(StrEnum):
 
 class AgentRole(StrEnum):
     """Functional role classification for routing decisions."""
-
     SYNTHESIZER = "synthesizer"
     OBSERVER = "observer"
     VALIDATOR = "validator"
@@ -71,7 +78,6 @@ class AgentRole(StrEnum):
 
 class MessagePriority(StrEnum):
     """Priority levels for inter-agent messages."""
-
     LOW = "low"
     NORMAL = "normal"
     HIGH = "high"
@@ -80,7 +86,6 @@ class MessagePriority(StrEnum):
 
 class HandoffStatus(StrEnum):
     """Status of agent handoff operations."""
-
     PENDING = "pending"
     ACCEPTED = "accepted"
     REJECTED = "rejected"
@@ -91,7 +96,6 @@ class HandoffStatus(StrEnum):
 
 class ConflictResolutionStrategy(StrEnum):
     """Strategies for resolving agent output conflicts."""
-
     WEIGHTED_VOTE = "weighted_vote"
     HIGHEST_CONFIDENCE = "highest_confidence"
     HIGHEST_FITNESS = "highest_fitness"
@@ -102,7 +106,6 @@ class ConflictResolutionStrategy(StrEnum):
 
 class EscalationReason(StrEnum):
     """Reasons for escalating decisions up the coordination hierarchy."""
-
     LOW_CONFIDENCE = "low_confidence"
     CONFLICT = "conflict"
     TIMEOUT = "timeout"
@@ -114,7 +117,6 @@ class EscalationReason(StrEnum):
 # =============================================================================
 # Agent Contract Schema
 # =============================================================================
-
 
 class AgentInputSchema(BaseModel):
     """Input schema for agent invocation."""
@@ -161,7 +163,7 @@ class AgentOutputSchema(BaseModel):
 
     # Metadata
     processing_time_ms: float = Field(default=0.0, ge=0.0)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=utcnow)
 
     # Handoff
     handoff: HandoffDirective | None = None
@@ -192,7 +194,7 @@ class AgentContract(BaseModel):
     output: AgentOutputSchema | None = None
 
     # Contract lifecycle
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=utcnow)
     completed_at: datetime | None = None
 
     # Trace
@@ -213,7 +215,6 @@ class AgentContract(BaseModel):
 # =============================================================================
 # Inter-Agent Messaging
 # =============================================================================
-
 
 class AgentMessage(BaseModel):
     """Message for inter-agent communication."""
@@ -236,7 +237,7 @@ class AgentMessage(BaseModel):
         "query",
         "broadcast",
         "escalation",
-        "delegation",
+        "delegation"
     ]
     payload: dict[str, Any] = Field(default_factory=dict)
 
@@ -248,7 +249,7 @@ class AgentMessage(BaseModel):
 
     # Trace
     trace_id: UUID = Field(default_factory=uuid4)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=utcnow)
     ttl_seconds: float = Field(default=300.0, ge=1.0)
 
 
@@ -278,7 +279,6 @@ class AgentChannelStats(BaseModel):
 # Routing and Decision
 # =============================================================================
 
-
 class RoutingDecision(BaseModel):
     """Decision about which agent(s) should handle a task."""
 
@@ -306,7 +306,7 @@ class RoutingDecision(BaseModel):
     alternative_routes_considered: int = Field(default=0)
 
     # Timestamps
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=utcnow)
 
 
 class RoutingPolicy(BaseModel):
@@ -327,7 +327,7 @@ class RoutingPolicy(BaseModel):
             AgentLayer.INPUT,
             AgentLayer.PROCESSING,
             AgentLayer.INTEGRATION,
-            AgentLayer.OUTPUT,
+            AgentLayer.OUTPUT
         ]
     )
 
@@ -349,7 +349,6 @@ class RoutingPolicy(BaseModel):
 # =============================================================================
 # Coordination Metrics
 # =============================================================================
-
 
 class CoordinationMetrics(BaseModel):
     """Measurable coordination quality indicators."""
@@ -397,7 +396,7 @@ class CoordinationMetrics(BaseModel):
     # Agent name -> utilization percentage
 
     # Timestamps
-    measured_at: datetime = Field(default_factory=datetime.utcnow)
+    measured_at: datetime = Field(default_factory=utcnow)
 
     @property
     def success_rate(self) -> float:
@@ -415,17 +414,17 @@ class CoordinationMetrics(BaseModel):
             "recovery_success": 0.15,
             "resonance_correlation": 0.20,
             "phi_alignment": 0.15,
-            "success_rate": 0.10,
+            "success_rate": 0.10
         }
 
         return (
-            weights["agreement"] * self.agreement_rate
-            + weights["delegation_success"] * self.delegation_success_rate
-            + weights["recovery_success"] * self.recovery_success_rate
-            + weights["resonance_correlation"]
-            * max(0, self.resonance_fitness_correlation)
-            + weights["phi_alignment"] * self.phi_alignment_rate
-            + weights["success_rate"] * self.success_rate
+            weights["agreement"] * self.agreement_rate +
+            weights["delegation_success"] * self.delegation_success_rate +
+            weights["recovery_success"] * self.recovery_success_rate +
+            weights["resonance_correlation"] *
+            max(0, self.resonance_fitness_correlation) +
+            weights["phi_alignment"] * self.phi_alignment_rate +
+            weights["success_rate"] * self.success_rate
         )
 
 
@@ -451,7 +450,7 @@ class CoordinationTrace(BaseModel):
     metrics: CoordinationMetrics | None = None
 
     # Timestamps
-    started_at: datetime = Field(default_factory=datetime.utcnow)
+    started_at: datetime = Field(default_factory=utcnow)
     completed_at: datetime | None = None
 
     def add_decision(self, decision: RoutingDecision) -> None:
@@ -466,17 +465,16 @@ class CoordinationTrace(BaseModel):
     def finalize(self, status: HandoffStatus, confidence: float) -> None:
         self.final_status = status
         self.final_confidence = confidence
-        self.completed_at = datetime.utcnow()
+        self.completed_at = datetime.now(UTC)
         if self.started_at:
             self.total_duration_ms = (
-                self.completed_at - self.started_at
-            ).total_seconds() * 1000
+                (self.completed_at - self.started_at).total_seconds() * 1000
+            )
 
 
 # =============================================================================
 # Conflict Resolution
 # =============================================================================
-
 
 class AgentConflict(BaseModel):
     """Represents a conflict between agent outputs."""
@@ -495,7 +493,7 @@ class AgentConflict(BaseModel):
         "confidence_divergence",
         "resonance_interference",
         "policy_violation",
-        "timeout_conflict",
+        "timeout_conflict"
     ]
     severity: Literal["low", "medium", "high", "critical"]
 
@@ -505,12 +503,15 @@ class AgentConflict(BaseModel):
     resolution_reason: str | None = None
 
     # Timestamps
-    detected_at: datetime = Field(default_factory=datetime.utcnow)
+    detected_at: datetime = Field(default_factory=utcnow)
     resolved_at: datetime | None = None
 
     @property
     def is_resolved(self) -> bool:
-        return self.resolution_result is not None and self.resolved_at is not None
+        return (
+            self.resolution_result is not None and
+            self.resolved_at is not None
+        )
 
     @property
     def resolution_time_ms(self) -> float:
@@ -534,7 +535,9 @@ class ConflictResolutionRequest(BaseModel):
     # Constraints
     max_resolution_time_ms: float = Field(default=5000.0)
     require_consensus: bool = Field(default=False)
-    min_confidence_threshold: float = Field(default=DEFAULT_CONFIDENCE_THRESHOLD)
+    min_confidence_threshold: float = Field(
+        default=DEFAULT_CONFIDENCE_THRESHOLD
+    )
 
 
 class ConflictResolutionResult(BaseModel):
@@ -559,13 +562,12 @@ class ConflictResolutionResult(BaseModel):
     # Agent name -> vote weight
 
     # Timestamp
-    resolved_at: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=utcnow)
 
 
 # =============================================================================
 # Escalation
 # =============================================================================
-
 
 class EscalationRequest(BaseModel):
     """Request to escalate a decision up the hierarchy."""
@@ -589,7 +591,7 @@ class EscalationRequest(BaseModel):
     context_data: dict[str, Any] = Field(default_factory=dict)
 
     # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=utcnow)
     resolved_at: datetime | None = None
 
 
@@ -611,4 +613,4 @@ class EscalationResult(BaseModel):
     action_required: str | None = None
 
     # Timestamps
-    resolved_at: datetime = Field(default_factory=datetime.utcnow)
+    resolved_at: datetime = Field(default_factory=utcnow)

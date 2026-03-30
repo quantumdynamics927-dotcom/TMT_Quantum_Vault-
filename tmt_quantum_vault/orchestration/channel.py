@@ -15,7 +15,7 @@ from __future__ import annotations
 import threading
 from collections import defaultdict
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -123,7 +123,7 @@ class MessageQueue:
     def _is_expired(self, message: AgentMessage) -> bool:
         """Check if message has expired."""
         expiry = message.timestamp + timedelta(seconds=message.ttl_seconds)
-        return datetime.utcnow() > expiry
+        return datetime.now(UTC) > expiry
 
     def _compare_priority(self, a: AgentMessage, b: AgentMessage) -> int:
         """Compare message priorities.
@@ -210,9 +210,8 @@ class AgentChannel:
             priority=priority,
             requires_response=requires_response,
             response_deadline=(
-                datetime.utcnow() + timedelta(seconds=response_deadline_seconds)
-                if response_deadline_seconds
-                else None
+                datetime.now(UTC) + timedelta(seconds=response_deadline_seconds)
+                if response_deadline_seconds else None
             ),
             trace_id=trace_id or uuid4(),
             correlation_id=correlation_id,
@@ -366,11 +365,11 @@ class AgentChannel:
             n = self._stats.messages_received
             if n > 0:
                 self._stats.average_confidence = (
-                    self._stats.average_confidence * (n - 1) + confidence
-                ) / n
+                    (self._stats.average_confidence * (n - 1) + confidence) / n
+                )
                 self._stats.average_resonance = (
-                    self._stats.average_resonance * (n - 1) + resonance
-                ) / n
+                    (self._stats.average_resonance * (n - 1) + resonance) / n
+                )
                 self._stats.average_response_time_ms = (
                     self._stats.total_processing_time_ms / n
                 )
@@ -379,15 +378,17 @@ class AgentChannel:
             total = self._stats.messages_received
             if total > 0:
                 self._stats.success_rate = (
-                    self._stats.success_rate * (total - 1) + 1.0
-                ) / total
+                    (self._stats.success_rate * (total - 1) + 1.0) / total
+                )
 
     def record_error(self) -> None:
         """Record processing error."""
         with self._lock:
             total = self._stats.messages_received
             if total > 0:
-                self._stats.error_rate = (self._stats.error_rate * (total - 1)) / total
+                self._stats.error_rate = (
+                    (self._stats.error_rate * (total - 1)) / total
+                )
 
     # =========================================================================
     # Pending Responses
@@ -403,7 +404,7 @@ class AgentChannel:
         with self._lock:
             expired_ids = []
             for msg_id, msg in self._pending_responses.items():
-                if msg.response_deadline and datetime.utcnow() > msg.response_deadline:
+                if msg.response_deadline and datetime.now(UTC) > msg.response_deadline:
                     timed_out.append(msg)
                     expired_ids.append(msg_id)
 
@@ -481,7 +482,11 @@ class ChannelRegistry:
         """
         with self._lock:
             agent_ids = self._role_index.get(role, [])
-            return [self._channels[aid] for aid in agent_ids if aid in self._channels]
+            return [
+                self._channels[aid]
+                for aid in agent_ids
+                if aid in self._channels
+            ]
 
     def get_all(self) -> list[AgentChannel]:
         """Get all registered channels.
@@ -553,12 +558,9 @@ class ChannelRegistry:
             "total_messages_sent": sum(s.messages_sent for s in all_stats),
             "total_messages_received": sum(s.messages_received for s in all_stats),
             "total_pending": sum(s.messages_pending for s in all_stats),
-            "average_success_rate": sum(s.success_rate for s in all_stats)
-            / len(all_stats),
-            "average_confidence": sum(s.average_confidence for s in all_stats)
-            / len(all_stats),
-            "average_resonance": sum(s.average_resonance for s in all_stats)
-            / len(all_stats),
+            "average_success_rate": sum(s.success_rate for s in all_stats) / len(all_stats),
+            "average_confidence": sum(s.average_confidence for s in all_stats) / len(all_stats),
+            "average_resonance": sum(s.average_resonance for s in all_stats) / len(all_stats),
         }
 
 
@@ -598,7 +600,7 @@ class AgentBus:
         with self._lock:
             self._message_log.append(message)
             if len(self._message_log) > self._max_log_size:
-                self._message_log = self._message_log[-self._max_log_size :]
+                self._message_log = self._message_log[-self._max_log_size:]
 
         # Route message
         if message.recipient_agent:

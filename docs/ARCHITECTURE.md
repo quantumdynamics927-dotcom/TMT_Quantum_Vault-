@@ -361,6 +361,184 @@ The agent system draws entropy from three sources:
 
 ---
 
+## Orchestration Module
+
+The `tmt_quantum_vault.orchestration` module provides the core infrastructure for
+multi-agent coordination, enabling traceable decision paths, conflict resolution,
+and benchmarkable coordination quality.
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         AgentOrchestrator                                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
+│  │ Routing     │  │ Execution   │  │ Handoff     │  │ Conflict    │    │
+│  │ Engine      │  │ Planner     │  │ Manager     │  │ Resolver    │    │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘    │
+│                                                                          │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │                      Agent Communication Bus                       │   │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐                 │   │
+│  │  │ Channel    │  │ Channel    │  │ Channel    │  ...            │   │
+│  │  │ Registry   │  │ (Agent 1)  │  │ (Agent N)  │                 │   │
+│  │  └────────────┘  └────────────┘  └────────────┘                 │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │                    Metrics Collection Layer                        │   │
+│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐     │   │
+│  │  │ Coordination   │  │ Coordination   │  │ Metrics        │     │   │
+│  │  │ Metrics        │  │ Analyzer       │  │ Exporter       │     │   │
+│  │  │ Collector      │  │                │  │                │     │   │
+│  │  └────────────────┘  └────────────────┘  └────────────────┘     │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Key Components
+
+#### 1. AgentOrchestrator
+Central coordination kernel that manages:
+- Agent registration and profile loading
+- Task routing and execution
+- Trace management and metrics collection
+
+```python
+from tmt_quantum_vault.orchestration import AgentOrchestrator
+
+orchestrator = AgentOrchestrator(vault_path=Path("."))
+trace = orchestrator.execute(
+    task_type="validation",
+    objective="Validate system integrity",
+)
+```
+
+#### 2. RoutingEngine
+Context-aware agent selection based on:
+- **Fitness factor** (0.30 weight): Agent fitness score
+- **Role match** (0.25 weight): Task-role alignment
+- **Load balance** (0.20 weight): Current agent availability
+- **Φ-alignment** (0.15 weight): Golden ratio resonance
+- **Resonance** (0.10 weight): Frequency alignment
+
+#### 3. ExecutionPlanner
+Plans parallel/sequential execution across layers:
+- **Input Layer**: Bio, Fractal, Visual agents
+- **Processing Layer**: Strategic, BitNet, Harmonic, Wormhole agents
+- **Integration Layer**: Synthesizer, Observer, Federation, Mirror agents
+- **Output Layer**: Bronze, Workflow, Stealth, Validator, Archivist, Auditor agents
+
+#### 4. HandoffManager
+Manages agent-to-agent handoffs with:
+- Priority-based message queuing
+- TTL-based message expiration
+- Handoff status tracking
+
+#### 5. Conflict Resolution
+Multiple resolution strategies:
+- `WEIGHTED_VOTE`: Weighted by confidence × fitness
+- `HIGHEST_CONFIDENCE`: Select highest confidence output
+- `HIGHEST_FITNESS`: Select highest fitness contribution
+- `CONSENSUS`: Require multi-agent agreement
+- `ARBITRATOR`: Delegate to arbitrator agent
+- `PHI_ALIGNMENT`: Select best φ-alignment
+
+### Agent Contracts
+
+Formal input/output schemas for agent invocations:
+
+```python
+from tmt_quantum_vault.orchestration import (
+    AgentContract,
+    AgentInputSchema,
+    AgentOutputSchema,
+)
+
+# Input contract
+input_schema = AgentInputSchema(
+    task_type="synthesis",
+    objective="Synthesize multi-source data",
+    context={"sources": ["bio", "fractal"]},
+    preferred_agents=[AgentRole.SYNTHESIZER],
+    timeout_seconds=60.0,
+)
+
+# Output contract
+output_schema = AgentOutputSchema(
+    task_id=input_schema.task_id,
+    agent_id=1,
+    agent_name="Zadkiel",
+    agent_role=AgentRole.SYNTHESIZER,
+    summary="Synthesis complete",
+    confidence=0.92,
+    resonance_score=0.87,
+    status=HandoffStatus.COMPLETED,
+)
+```
+
+### Coordination Metrics
+
+Measurable coordination quality indicators:
+
+| Metric | Description | Target |
+|--------|-------------|--------|
+| `agreement_rate` | Agent output agreement | ≥ 0.80 |
+| `delegation_success_rate` | Handoff success rate | ≥ 0.85 |
+| `recovery_success_rate` | Failure recovery rate | ≥ 0.70 |
+| `phi_alignment_rate` | Φ-aligned decisions | ≥ 0.618 |
+| `success_rate` | Task completion rate | ≥ 0.90 |
+
+### Benchmark Matrix
+
+Three-layer evaluation framework:
+
+| Layer | Focus | Metrics |
+|-------|-------|---------|
+| **Model** | Raw reasoning | HELM, MMLU-Pro style |
+| **Agent** | Tool-using behavior | τ-bench style |
+| **System** | Full orchestration | TMT-native |
+
+Benchmark categories:
+- **ROUTING**: Agent selection accuracy
+- **DELEGATION**: Handoff correctness
+- **CONFLICT**: Contradiction resolution
+- **MEMORY**: Archive/persistence flow
+- **CONSENSUS**: Multi-agent agreement
+- **RECOVERY**: Failure recovery
+- **RESONANCE**: Φ-alignment behavior
+
+```python
+from tmt_quantum_vault.orchestration import (
+    TMTBenchmarkMatrix,
+    BenchmarkRunner,
+)
+
+matrix = TMTBenchmarkMatrix(vault_path=Path("."))
+runner = BenchmarkRunner(matrix)
+results = runner.run_all(execution_mode=ExecutionMode.SIMULATION)
+```
+
+### Task Routing
+
+Task types map to agent roles:
+
+| Task Type | Primary Agents | Layer |
+|-----------|---------------|-------|
+| `validation` | Validator, Auditor | Output |
+| `synthesis` | Synthesizer, Federation | Integration |
+| `analysis` | Strategic, Observer | Processing/Integration |
+| `monitoring` | Observer, Harmonic | Integration/Processing |
+| `coordination` | Federation, Workflow | Integration/Output |
+| `archival` | Archivist, Auditor | Output |
+| `protection` | Bronze, Stealth | Output |
+| `processing` | BitNet, Harmonic | Processing |
+| `visualization` | Visual, Fractal | Input |
+| `biological` | Bio, Mirror | Input/Integration |
+| `strategic` | Strategic, Wormhole | Processing |
+
+---
+
 ## See Also
 
 - [README.md](README.md) — Project overview

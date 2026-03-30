@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -81,7 +81,7 @@ class OrchestrationBenchmark:
 
         results = {
             "benchmark_id": str(benchmark_id),
-            "started_at": datetime.utcnow().isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
             "configuration": {
                 "task_types": task_types,
                 "iterations": iterations,
@@ -107,7 +107,7 @@ class OrchestrationBenchmark:
         end_time = time.time()
         metrics = self.collector.get_metrics()
 
-        results["completed_at"] = datetime.utcnow().isoformat()
+        results["completed_at"] = datetime.now(UTC).isoformat()
         results["duration_seconds"] = end_time - start_time
         results["metrics"] = metrics.model_dump(mode="json")
         results["summary"] = self._create_summary(metrics, results)
@@ -258,7 +258,7 @@ class OrchestrationBenchmark:
         Args:
             results: Results to export
         """
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
 
         # Export full results
         results_path = self.output_dir / f"orchestration_benchmark_{timestamp}.json"

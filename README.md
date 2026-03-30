@@ -58,6 +58,7 @@ inspection, validation, and release workflows.
 
 ### Recent Implementations — v0.4.0-dev (March 2026)
 
+- **Orchestration Module** (`tmt_quantum_vault/orchestration/`) — Multi-agent coordination infrastructure with routing engine, execution planner, handoff manager, conflict resolution, and benchmark matrix for TMT-native evaluation
 - **Agent_Analyst Pipeline** (`tools/agent_analyst.py`) - Autonomous φ-scoring pipeline with dual-watch (circuits/results/ + circuits/qasm/), auto-ingest, SIGNIFICANT flagging, and multi-agent handoff
 - **Sierpinski Depth-3 Validation** - 6 hardware-validated IBM quantum runs confirming φ-convergence (sacred_score = 0.618) at depth-3, establishing depth-invariance across depths 3 → 4 → 5
 - **Unified DNA Ingestion** (`tools/unified_dna_ingestion.py`) - Single script processes discovery, BitNet, and Sierpinski sources
@@ -135,6 +136,7 @@ Every agent carries a `conscious_dna.json` profile encoding:
 | Agents ≥ 0.90 fitness | 1 / 17 |
 | Silver-tier agents (Φ ≥ 0.93) | 2 |
 | Regression tests | 107 passed, 2 skipped ✅ |
+| Orchestration tests | 13 passed ✅ |
 | **Sierpinski depth-3 runs** | **6 hardware-validated** |
 | **Sierpinski depth-4 runs** | **11 hardware-validated** |
 | **Sierpinski depth-5 runs** | **6 hardware-validated** |
@@ -215,10 +217,10 @@ TMT_Quantum_Vault/
 |------------|------------------|---------|
 | **Python 3.11+** | `tmt_quantum_vault/`, `tools/`, `tests/` | Core implementation language |
 | **Typer** | `tmt_quantum_vault/cli.py` | Command-line interface for validation, summaries, runtime checks, and agent execution |
-| **Pydantic** | `tmt_quantum_vault/models.py` | Typed schemas for agent DNA, configuration, evaluations, and repository validation |
+| **Pydantic** | `tmt_quantum_vault/models.py`, `tmt_quantum_vault/orchestration/models.py` | Typed schemas for agent DNA, configuration, evaluations, repository validation, and orchestration contracts |
 | **Requests** | `tmt_quantum_vault/ollama_api.py` | HTTP client for Ollama-compatible model endpoints |
 | **Rich** | `tmt_quantum_vault/cli.py`, `tmt_quantum_vault/output.py` | Terminal tables, panels, and human-readable CLI output |
-| **Pytest** | `tests/test_regression.py` | Regression coverage for CLI commands, runtime helpers, and release flows |
+| **Pytest** | `tests/test_regression.py`, `tests/test_orchestration.py` | Regression coverage for CLI commands, runtime helpers, release flows, and orchestration module |
 | **Qiskit / IBM Quantum data** | `tools/`, `dna_circuits_library/`, `circuits/` | Quantum-circuit ingestion and hardware-derived artifact storage |
 
 ### How the repository is organized
@@ -226,7 +228,8 @@ TMT_Quantum_Vault/
 | Path | What lives there |
 |------|------------------|
 | `tmt_quantum_vault/` | The main Python package. This is the application code that powers the CLI and repository inspection logic. |
-| `tests/` | Regression tests for the CLI, repository validation, runtime inspection, and release/evaluation helpers. |
+| `tmt_quantum_vault/orchestration/` | Multi-agent coordination module with routing engine, execution planner, handoff manager, conflict resolution, metrics collection, and TMT benchmark matrix. |
+| `tests/` | Regression tests for the CLI, repository validation, runtime inspection, release/evaluation helpers, and orchestration module. |
 | `tools/` | Standalone maintenance and ingestion scripts for DNA discovery, IBM circuit processing, documentation refreshes, and optimization workflows. |
 | `Agent_*/` | One directory per agent, each containing a `conscious_dna.json` profile used by the repository loader and summary views. |
 | `Cognitive_Nexus/`, `Bio_Resonance/`, `Mandala_Geometry/`, `Shadow_Drive/`, `Stealth_Logs/` | Memory and state stores grouped by subsystem. These are primarily data inputs rather than executable code. |
@@ -248,6 +251,7 @@ TMT_Quantum_Vault/
 | `tmt_quantum_vault/runner.py` | Coordinates prompt execution against the configured runtime backend. |
 | `tmt_quantum_vault/ollama_api.py` | Low-level integration with Ollama-style model APIs. |
 | `tmt_quantum_vault/output.py` | Shared rendering and JSON-emission helpers used by the CLI. |
+| `tmt_quantum_vault/orchestration/` | Multi-agent coordination: routing, execution planning, handoffs, conflict resolution, metrics, and benchmarking. |
 
 ### Typical code flow
 
@@ -333,4 +337,4 @@ See [ETHICS.md](ETHICS.md) for prohibited use cases.
 
 ---
 
-*Last updated: 2026-03-28 01:11 UTC*
+*Last updated: 2026-03-31 12:00 UTC*

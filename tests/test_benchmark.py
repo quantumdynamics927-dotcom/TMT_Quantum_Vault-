@@ -501,6 +501,7 @@ class TestArchitectureBenchmarkCoveragePaths:
     )
     def test_generate_recommendation_thresholds(
         self,
+        tmp_path: Path,
         fitness_diff: float,
         benefit_count: int,
         expected: str,
@@ -511,7 +512,7 @@ class TestArchitectureBenchmarkCoveragePaths:
             agents=[],
             timestamp="2026-03-30T00:00:00Z",
         )
-        runner = ArchitectureBenchmarkRunner(Path("."))
+        runner = ArchitectureBenchmarkRunner(tmp_path)
 
         recommendation = runner._generate_recommendation(
             benchmark,

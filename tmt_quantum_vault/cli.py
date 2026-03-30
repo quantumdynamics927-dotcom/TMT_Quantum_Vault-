@@ -1983,10 +1983,6 @@ def smoke_cloud(
         raise typer.Exit(code=return_code)
 
 
-if __name__ == "__main__":
-    app()
-
-
 @app.command("eval")
 def eval_command(
     root: Path = typer.Option(
@@ -2983,6 +2979,650 @@ def release_evidence(
 
     if cast(int, manifest["returncode"]) != 0:
         raise typer.Exit(code=cast(int, manifest["returncode"]))
+
+
+# =============================================================================
+# Orchestration Commands
+# =============================================================================
+
+
+@app.command("orch-status")
+def orchestration_status(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Show orchestration system status and agent profiles."""
+    from .orchestration import AgentOrchestrator, RoutingPolicy
+
+    policy = RoutingPolicy(policy_name="cli_default")
+    orchestrator = AgentOrchestrator(vault_path=root, policy=policy)
+    status = orchestrator.get_status()
+
+    if json_out:
+        typer.echo(emit_json_document(status))
+        return
+
+    console.print(
+        Panel.fit(
+            (
+                f"Vault: {status['vault_path']}\n"
+                f"Policy: {status['policy']}\n"
+                f"Agents: {status['agents_registered']}\n"
+                f"Active traces: {status['active_traces']}"
+            ),
+            title="Orchestration Status",
+        )
+    )
+
+    # Agent profiles table
+    profiles = orchestrator.get_agent_profiles()
+    if profiles:
+        table = Table(box=box.SIMPLE_HEAVY, title="Agent Profiles")
+        table.add_column("ID")
+        table.add_column("Name")
+        table.add_column("Role")
+        table.add_column("Layer")
+        table.add_column("Fitness")
+        table.add_column("Availability")
+        for profile in profiles[:10]:  # Show first 10
+            table.add_row(
+                str(profile["agent_id"]),
+                profile["agent_name"],
+                profile["agent_role"],
+                profile["layer"],
+                f"{profile['fitness']:.3f}",
+                f"{profile['availability']:.2f}",
+            )
+        console.print(table)
+
+    # Metrics summary
+    metrics = status.get("metrics", {})
+    if metrics:
+        metrics_table = Table(box=box.SIMPLE_HEAVY, title="Coordination Metrics")
+        metrics_table.add_column("Metric")
+        metrics_table.add_column("Value")
+        metrics_table.add_row("Tasks Completed", str(metrics.get("tasks_completed", 0)))
+        metrics_table.add_row("Tasks Failed", str(metrics.get("tasks_failed", 0)))
+        metrics_table.add_row(
+            "Success Rate",
+            f"{metrics.get('success_rate', 0):.2%}",
+        )
+        metrics_table.add_row(
+            "Agreement Rate",
+            f"{metrics.get('agreement_rate', 0):.2%}",
+        )
+        console.print(metrics_table)
+
+
+@app.command("orch-execute")
+def orchestration_execute(
+    task_type: str = typer.Argument(
+        ...,
+        help="Type of task to execute (validation, synthesis, analysis, etc.).",
+    ),
+    objective: str = typer.Argument(
+        ...,
+        help="Task objective description.",
+    ),
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+    record_path: Path | None = typer.Option(
+        None,
+        "--record-path",
+        help="Write a structured JSON record to the specified path.",
+    ),
+) -> None:
+    """Execute a task through the orchestration system."""
+    from .orchestration import AgentOrchestrator, RoutingPolicy
+
+    policy = RoutingPolicy(policy_name="cli_execute")
+    orchestrator = AgentOrchestrator(vault_path=root, policy=policy)
+
+    # Execute task
+    trace = orchestrator.execute(
+        task_type=task_type,
+        objective=objective,
+    )
+
+    # Build result payload
+    result = {
+        "trace_id": str(trace.trace_id),
+        "session_id": str(trace.session_id),
+        "status": trace.final_status.value if trace.final_status else "unknown",
+        "confidence": trace.final_confidence,
+        "duration_ms": trace.total_duration_ms,
+        "decisions": [
+            {
+                "decision_id": str(d.decision_id),
+                "primary_agent": d.primary_agent.value,
+                "layer": d.layer.value,
+                "confidence": d.decision_confidence,
+            }
+            for d in trace.decisions
+        ],
+        "contracts": [
+            {
+                "contract_id": str(c.contract_id),
+                "task_type": c.input.task_type,
+                "status": c.output.status.value if c.output else "pending",
+            }
+            for c in trace.contracts
+        ],
+    }
+
+    _write_record(
+        root=root,
+        record_path=record_path,
+        record_type="orchestration-execute",
+        payload=result,
+    )
+
+    if json_out:
+        typer.echo(emit_json_document(result))
+        if trace.final_status and trace.final_status.value != "completed":
+            raise typer.Exit(code=1)
+        return
+
+    console.print(
+        Panel.fit(
+            (
+                f"Trace: {trace.trace_id}\n"
+                f"Status: {trace.final_status.value if trace.final_status else 'unknown'}\n"
+                f"Confidence: {trace.final_confidence:.3f}\n"
+                f"Duration: {trace.total_duration_ms:.1f}ms"
+            ),
+            title="Orchestration Execute",
+        )
+    )
+
+    # Decisions table
+    if trace.decisions:
+        decisions_table = Table(box=box.SIMPLE_HEAVY, title="Routing Decisions")
+        decisions_table.add_column("Agent")
+        decisions_table.add_column("Layer")
+        decisions_table.add_column("Confidence")
+        for d in trace.decisions:
+            decisions_table.add_row(
+                d.primary_agent.value,
+                d.layer.value,
+                f"{d.decision_confidence:.3f}",
+            )
+        console.print(decisions_table)
+
+    if trace.final_status and trace.final_status.value != "completed":
+        raise typer.Exit(code=1)
+
+
+@app.command("orch-benchmark")
+def orchestration_benchmark(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    iterations: int = typer.Option(
+        10,
+        "--iterations",
+        help="Number of iterations per task type.",
+    ),
+    output_dir: Path | None = typer.Option(
+        None,
+        "--output-dir",
+        help="Output directory for benchmark results.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Run orchestration benchmark suite."""
+    from .orchestration import BenchmarkIntegration
+
+    integration = BenchmarkIntegration(
+        vault_path=root,
+        benchmark_output_dir=output_dir,
+    )
+
+    results = integration.run_full_benchmark(iterations_per_task=iterations)
+
+    if json_out:
+        typer.echo(emit_json_document(results))
+        return
+
+    # Summary panel
+    summary = results.get("summary", {})
+    console.print(
+        Panel.fit(
+            (
+                f"Passed: {summary.get('passed', False)}\n"
+                f"Coordination Quality: {summary.get('coordination_quality_score', 0):.3f}\n"
+                f"Success Rate: {summary.get('success_rate', 0):.2%}\n"
+                f"Agreement Rate: {summary.get('agreement_rate', 0):.2%}\n"
+                f"Total Tasks: {summary.get('total_tasks', 0)}"
+            ),
+            title="Orchestration Benchmark",
+        )
+    )
+
+    # Task results table
+    task_results = results.get("task_results", {})
+    if task_results:
+        table = Table(box=box.SIMPLE_HEAVY, title="Task Type Results")
+        table.add_column("Task Type")
+        table.add_column("Success")
+        table.add_column("Failed")
+        table.add_column("Avg Latency")
+        table.add_column("Avg Confidence")
+        for task_type, task_data in task_results.items():
+            table.add_row(
+                task_type,
+                str(task_data.get("successful", 0)),
+                str(task_data.get("failed", 0)),
+                f"{task_data.get('avg_latency_ms', 0):.1f}ms",
+                f"{task_data.get('avg_confidence', 0):.3f}",
+            )
+        console.print(table)
+
+    # Recommendations
+    recommendations = summary.get("recommendations", [])
+    if recommendations:
+        console.print(Panel("\n".join(recommendations), title="Recommendations"))
+
+    if not summary.get("passed", False):
+        raise typer.Exit(code=1)
+
+
+@app.command("orch-report")
+def orchestration_report(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    output_dir: Path | None = typer.Option(
+        None,
+        "--output-dir",
+        help="Output directory for the report.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Generate coordination analysis report."""
+    from .orchestration import BenchmarkIntegration
+
+    integration = BenchmarkIntegration(
+        vault_path=root,
+        benchmark_output_dir=output_dir,
+    )
+
+    report = integration.generate_coordination_report()
+
+    if json_out:
+        typer.echo(emit_json_document(report))
+        return
+
+    # Metrics panel
+    metrics = report.get("metrics", {})
+    console.print(
+        Panel.fit(
+            (
+                f"Quality Score: {metrics.get('coordination_quality_score', 0):.3f}\n"
+                f"Agreement Rate: {metrics.get('agreement_rate', 0):.2%}\n"
+                f"Delegation Success: {metrics.get('delegation_success_rate', 0):.2%}\n"
+                f"Recovery Success: {metrics.get('recovery_success_rate', 0):.2%}\n"
+                f"Phi Alignment: {metrics.get('phi_alignment_rate', 0):.2%}"
+            ),
+            title="Coordination Metrics",
+        )
+    )
+
+    # Bottlenecks
+    bottlenecks = report.get("bottlenecks", [])
+    if bottlenecks:
+        bottleneck_table = Table(box=box.SIMPLE_HEAVY, title="Bottlenecks")
+        bottleneck_table.add_column("Type")
+        bottleneck_table.add_column("Value")
+        bottleneck_table.add_column("Threshold")
+        for b in bottlenecks:
+            bottleneck_table.add_row(
+                b.get("type", "unknown"),
+                f"{b.get('value', 0):.2f}",
+                f"{b.get('threshold', 0):.2f}",
+            )
+        console.print(bottleneck_table)
+
+    # Recommendations
+    recommendations = report.get("recommendations", [])
+    if recommendations:
+        console.print(Panel("\n".join(recommendations), title="Recommendations"))
+
+
+@app.command("orch-agents")
+def orchestration_agents(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    layer: str | None = typer.Option(
+        None,
+        "--layer",
+        help="Filter agents by layer (input, processing, integration, output).",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """List all registered agents and their profiles."""
+    from .orchestration import AgentOrchestrator, RoutingPolicy
+
+    policy = RoutingPolicy(policy_name="cli_agents")
+    orchestrator = AgentOrchestrator(vault_path=root, policy=policy)
+    profiles = orchestrator.get_agent_profiles()
+
+    # Filter by layer if specified
+    if layer:
+        profiles = [p for p in profiles if p["layer"] == layer.lower()]
+
+    if json_out:
+        typer.echo(emit_json_document({"agents": profiles}))
+        return
+
+    table = Table(box=box.SIMPLE_HEAVY, title="Registered Agents")
+    table.add_column("ID")
+    table.add_column("Name")
+    table.add_column("Role")
+    table.add_column("Layer")
+    table.add_column("Fitness")
+    table.add_column("Phi Score")
+    table.add_column("Availability")
+
+    for profile in sorted(profiles, key=lambda p: p["agent_id"]):
+        table.add_row(
+            str(profile["agent_id"]),
+            profile["agent_name"],
+            profile["agent_role"],
+            profile["layer"],
+            f"{profile['fitness']:.3f}",
+            f"{profile['phi_score']:.4f}",
+            f"{profile['availability']:.2f}",
+        )
+
+    console.print(table)
+
+
+@app.command("orch-matrix")
+def orchestration_matrix(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    category: str | None = typer.Option(
+        None,
+        "--category",
+        help="Filter by category (routing, delegation, conflict, memory, consensus, recovery, resonance, ablation).",
+    ),
+    layer: str | None = typer.Option(
+        None,
+        "--layer",
+        help="Filter by layer (model, agent, system).",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Show TMT Benchmark Matrix tasks."""
+    from .orchestration import TMTBenchmarkMatrix, BenchmarkCategory, BenchmarkLayer
+
+    matrix = TMTBenchmarkMatrix(vault_path=root)
+
+    # Filter tasks
+    tasks = matrix.tasks
+    if category:
+        try:
+            cat = BenchmarkCategory(category.lower())
+            tasks = [t for t in tasks if t.category == cat]
+        except ValueError:
+            pass
+    if layer:
+        try:
+            lay = BenchmarkLayer(layer.lower())
+            tasks = [t for t in tasks if t.layer == lay]
+        except ValueError:
+            pass
+
+    if json_out:
+        typer.echo(emit_json_document({
+            "total_tasks": len(matrix.tasks),
+            "filtered_tasks": len(tasks),
+            "tasks": [
+                {
+                    "task_id": t.task_id,
+                    "category": t.category.value,
+                    "layer": t.layer.value,
+                    "description": t.description,
+                    "expected_agents": t.expected_agents,
+                    "expected_layers": t.expected_layers,
+                }
+                for t in tasks
+            ],
+        }))
+        return
+
+    # Summary panel
+    console.print(Panel.fit(
+        f"Total Tasks: {len(matrix.tasks)}\n"
+        f"Categories: {len(BenchmarkCategory)}\n"
+        f"Layers: {len(BenchmarkLayer)}",
+        title="TMT Benchmark Matrix",
+    ))
+
+    # Tasks table
+    table = Table(box=box.SIMPLE_HEAVY, title="Benchmark Tasks")
+    table.add_column("ID")
+    table.add_column("Category")
+    table.add_column("Layer")
+    table.add_column("Description")
+    table.add_column("Expected Agents")
+
+    for task in tasks:
+        table.add_row(
+            task.task_id,
+            task.category.value,
+            task.layer.value,
+            task.description[:50] + "..." if len(task.description) > 50 else task.description,
+            ", ".join(task.expected_agents[:3]) + ("..." if len(task.expected_agents) > 3 else ""),
+        )
+
+    console.print(table)
+
+
+@app.command("orch-run-matrix")
+def orchestration_run_matrix(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    task_ids: str | None = typer.Option(
+        None,
+        "--tasks",
+        help="Comma-separated task IDs to run (runs all if not specified).",
+    ),
+    output_dir: Path | None = typer.Option(
+        None,
+        "--output-dir",
+        help="Output directory for benchmark results.",
+    ),
+    mode: str = typer.Option(
+        "simulation",
+        "--mode",
+        help="Execution mode: 'simulation' (orchestration validation only) or 'live' (full execution).",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Run TMT Benchmark Matrix tasks with explicit simulation/live semantics."""
+    from .orchestration import (
+        TMTBenchmarkMatrix,
+        BenchmarkRunner,
+        BaselineType,
+        AgentOrchestrator,
+        RoutingPolicy,
+        ExecutionMode,
+    )
+
+    # Parse execution mode
+    execution_mode = ExecutionMode.SIMULATION if mode.lower() == "simulation" else ExecutionMode.LIVE
+
+    # Parse task IDs
+    task_id_list = None
+    if task_ids:
+        task_id_list = [t.strip() for t in task_ids.split(",")]
+
+    # Initialize
+    matrix = TMTBenchmarkMatrix(vault_path=root)
+    runner = BenchmarkRunner(matrix, output_dir, execution_mode=execution_mode)
+    policy = RoutingPolicy(policy_name="benchmark_matrix")
+    orchestrator = AgentOrchestrator(vault_path=root, policy=policy)
+
+    # Run benchmark
+    results = runner.run_baseline(
+        BaselineType.FULL_ORCHESTRATION, orchestrator, task_id_list
+    )
+
+    # Save results
+    output_path = runner.save_results()
+
+    if json_out:
+        typer.echo(emit_json_document({
+            "results": results,
+            "output_path": str(output_path),
+        }))
+        return
+
+    # Summary panel with three separate scores
+    console.print(Panel.fit(
+        f"Schema Version: {results.get('schema_version', 'unknown')}\n"
+        f"Execution Mode: {results['execution_mode']}\n"
+        f"Total Tasks: {results['total_tasks']}\n\n"
+        f"[bold]Three Scores:[/bold]\n"
+        f"  Orchestration Score: {results['orchestration_score']:.3f}\n"
+        f"  Task Completion Score: {results['task_completion_score']:.3f}\n"
+        f"  Output Quality Score: {results['output_quality_score']:.3f}\n\n"
+        f"[bold]Expected Targets Hit:[/bold]\n"
+        f"  Agents Hit Rate: {results.get('expected_agents_hit_rate', 0):.1%}\n"
+        f"  Layers Hit Rate: {results.get('expected_layers_hit_rate', 0):.1%}\n\n"
+        f"[bold]Structural Status:[/bold]\n"
+        f"  Passed: {results['structural_passed']}\n"
+        f"  Partial: {results['structural_partial']}\n"
+        f"  Failed: {results['structural_failed']}\n\n"
+        f"[bold]Execution Status:[/bold]\n"
+        f"  Completed: {results['execution_completed']}\n"
+        f"  Simulation Only: {results['execution_simulation_only']}\n"
+        f"  Failed: {results['execution_failed']}\n\n"
+        f"Avg Duration: {results['average_duration_ms']:.1f}ms\n"
+        f"Avg Confidence: {results['average_confidence']:.3f}\n"
+        f"Output: {output_path}",
+        title="TMT Benchmark Matrix Results",
+    ))
+
+    # Results table with new status fields
+    table = Table(box=box.SIMPLE_HEAVY, title="Task Results")
+    table.add_column("Task ID")
+    table.add_column("Structural")
+    table.add_column("Execution")
+    table.add_column("Orch")
+    table.add_column("Task")
+    table.add_column("Quality")
+    table.add_column("Agents Hit")
+    table.add_column("Layers Hit")
+    table.add_column("Duration")
+
+    for r in results.get("results", []):
+        # Color-code structural status
+        structural = r["structural_status"]
+        if structural == "passed":
+            structural_str = "[green]PASSED[/green]"
+        elif structural == "partial":
+            structural_str = "[yellow]PARTIAL[/yellow]"
+        else:
+            structural_str = "[red]FAILED[/red]"
+
+        # Color-code execution status
+        execution = r["execution_status"]
+        if execution == "completed":
+            execution_str = "[green]COMPLETED[/green]"
+        elif execution == "simulation_only":
+            execution_str = "[blue]SIM[/blue]"
+        else:
+            execution_str = "[red]FAIL[/red]"
+
+        # Color-code expected targets hit
+        agents_hit = "[green]✓[/green]" if r.get("expected_agents_hit") else "[red]✗[/red]"
+        layers_hit = "[green]✓[/green]" if r.get("expected_layers_hit") else "[red]✗[/red]"
+
+        table.add_row(
+            r["task_id"],
+            structural_str,
+            execution_str,
+            f"{r['orchestration_score']:.2f}",
+            f"{r['task_completion_score']:.2f}",
+            f"{r['output_quality_score']:.2f}",
+            agents_hit,
+            layers_hit,
+            f"{r['duration_ms']:.0f}ms",
+        )
+
+    console.print(table)
+
+    # Show failure reasons if any
+    failures = [r for r in results.get("results", []) if r.get("failure_reason")]
+    if failures:
+        failure_table = Table(box=box.SIMPLE_HEAVY, title="Failure Details")
+        failure_table.add_column("Task ID")
+        failure_table.add_column("Reason")
+        failure_table.add_column("Details")
+        for f in failures:
+            failure_table.add_row(
+                f["task_id"],
+                f.get("failure_reason", "unknown"),
+                (f.get("failure_reason_details") or "")[:60],
+            )
+        console.print(failure_table)
+
+    # Exit with error if orchestration score is too low
+    if results["orchestration_score"] < 0.5:
+        console.print("[red]Orchestration score below threshold (0.5)[/red]")
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

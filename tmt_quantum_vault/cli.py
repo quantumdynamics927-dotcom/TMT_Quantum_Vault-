@@ -3417,30 +3417,36 @@ def orchestration_matrix(
             pass
 
     if json_out:
-        typer.echo(emit_json_document({
-            "total_tasks": len(matrix.tasks),
-            "filtered_tasks": len(tasks),
-            "tasks": [
+        typer.echo(
+            emit_json_document(
                 {
-                    "task_id": t.task_id,
-                    "category": t.category.value,
-                    "layer": t.layer.value,
-                    "description": t.description,
-                    "expected_agents": t.expected_agents,
-                    "expected_layers": t.expected_layers,
+                    "total_tasks": len(matrix.tasks),
+                    "filtered_tasks": len(tasks),
+                    "tasks": [
+                        {
+                            "task_id": t.task_id,
+                            "category": t.category.value,
+                            "layer": t.layer.value,
+                            "description": t.description,
+                            "expected_agents": t.expected_agents,
+                            "expected_layers": t.expected_layers,
+                        }
+                        for t in tasks
+                    ],
                 }
-                for t in tasks
-            ],
-        }))
+            )
+        )
         return
 
     # Summary panel
-    console.print(Panel.fit(
-        f"Total Tasks: {len(matrix.tasks)}\n"
-        f"Categories: {len(BenchmarkCategory)}\n"
-        f"Layers: {len(BenchmarkLayer)}",
-        title="TMT Benchmark Matrix",
-    ))
+    console.print(
+        Panel.fit(
+            f"Total Tasks: {len(matrix.tasks)}\n"
+            f"Categories: {len(BenchmarkCategory)}\n"
+            f"Layers: {len(BenchmarkLayer)}",
+            title="TMT Benchmark Matrix",
+        )
+    )
 
     # Tasks table
     table = Table(box=box.SIMPLE_HEAVY, title="Benchmark Tasks")
@@ -3455,8 +3461,13 @@ def orchestration_matrix(
             task.task_id,
             task.category.value,
             task.layer.value,
-            task.description[:50] + "..." if len(task.description) > 50 else task.description,
-            ", ".join(task.expected_agents[:3]) + ("..." if len(task.expected_agents) > 3 else ""),
+            (
+                task.description[:50] + "..."
+                if len(task.description) > 50
+                else task.description
+            ),
+            ", ".join(task.expected_agents[:3])
+            + ("..." if len(task.expected_agents) > 3 else ""),
         )
 
     console.print(table)
@@ -3501,7 +3512,9 @@ def orchestration_run_matrix(
     )
 
     # Parse execution mode
-    execution_mode = ExecutionMode.SIMULATION if mode.lower() == "simulation" else ExecutionMode.LIVE
+    execution_mode = (
+        ExecutionMode.SIMULATION if mode.lower() == "simulation" else ExecutionMode.LIVE
+    )
 
     # Parse task IDs
     task_id_list = None
@@ -3523,37 +3536,43 @@ def orchestration_run_matrix(
     output_path = runner.save_results()
 
     if json_out:
-        typer.echo(emit_json_document({
-            "results": results,
-            "output_path": str(output_path),
-        }))
+        typer.echo(
+            emit_json_document(
+                {
+                    "results": results,
+                    "output_path": str(output_path),
+                }
+            )
+        )
         return
 
     # Summary panel with three separate scores
-    console.print(Panel.fit(
-        f"Schema Version: {results.get('schema_version', 'unknown')}\n"
-        f"Execution Mode: {results['execution_mode']}\n"
-        f"Total Tasks: {results['total_tasks']}\n\n"
-        f"[bold]Three Scores:[/bold]\n"
-        f"  Orchestration Score: {results['orchestration_score']:.3f}\n"
-        f"  Task Completion Score: {results['task_completion_score']:.3f}\n"
-        f"  Output Quality Score: {results['output_quality_score']:.3f}\n\n"
-        f"[bold]Expected Targets Hit:[/bold]\n"
-        f"  Agents Hit Rate: {results.get('expected_agents_hit_rate', 0):.1%}\n"
-        f"  Layers Hit Rate: {results.get('expected_layers_hit_rate', 0):.1%}\n\n"
-        f"[bold]Structural Status:[/bold]\n"
-        f"  Passed: {results['structural_passed']}\n"
-        f"  Partial: {results['structural_partial']}\n"
-        f"  Failed: {results['structural_failed']}\n\n"
-        f"[bold]Execution Status:[/bold]\n"
-        f"  Completed: {results['execution_completed']}\n"
-        f"  Simulation Only: {results['execution_simulation_only']}\n"
-        f"  Failed: {results['execution_failed']}\n\n"
-        f"Avg Duration: {results['average_duration_ms']:.1f}ms\n"
-        f"Avg Confidence: {results['average_confidence']:.3f}\n"
-        f"Output: {output_path}",
-        title="TMT Benchmark Matrix Results",
-    ))
+    console.print(
+        Panel.fit(
+            f"Schema Version: {results.get('schema_version', 'unknown')}\n"
+            f"Execution Mode: {results['execution_mode']}\n"
+            f"Total Tasks: {results['total_tasks']}\n\n"
+            f"[bold]Three Scores:[/bold]\n"
+            f"  Orchestration Score: {results['orchestration_score']:.3f}\n"
+            f"  Task Completion Score: {results['task_completion_score']:.3f}\n"
+            f"  Output Quality Score: {results['output_quality_score']:.3f}\n\n"
+            f"[bold]Expected Targets Hit:[/bold]\n"
+            f"  Agents Hit Rate: {results.get('expected_agents_hit_rate', 0):.1%}\n"
+            f"  Layers Hit Rate: {results.get('expected_layers_hit_rate', 0):.1%}\n\n"
+            f"[bold]Structural Status:[/bold]\n"
+            f"  Passed: {results['structural_passed']}\n"
+            f"  Partial: {results['structural_partial']}\n"
+            f"  Failed: {results['structural_failed']}\n\n"
+            f"[bold]Execution Status:[/bold]\n"
+            f"  Completed: {results['execution_completed']}\n"
+            f"  Simulation Only: {results['execution_simulation_only']}\n"
+            f"  Failed: {results['execution_failed']}\n\n"
+            f"Avg Duration: {results['average_duration_ms']:.1f}ms\n"
+            f"Avg Confidence: {results['average_confidence']:.3f}\n"
+            f"Output: {output_path}",
+            title="TMT Benchmark Matrix Results",
+        )
+    )
 
     # Results table with new status fields
     table = Table(box=box.SIMPLE_HEAVY, title="Task Results")
@@ -3587,8 +3606,12 @@ def orchestration_run_matrix(
             execution_str = "[red]FAIL[/red]"
 
         # Color-code expected targets hit
-        agents_hit = "[green]✓[/green]" if r.get("expected_agents_hit") else "[red]✗[/red]"
-        layers_hit = "[green]✓[/green]" if r.get("expected_layers_hit") else "[red]✗[/red]"
+        agents_hit = (
+            "[green]✓[/green]" if r.get("expected_agents_hit") else "[red]✗[/red]"
+        )
+        layers_hit = (
+            "[green]✓[/green]" if r.get("expected_layers_hit") else "[red]✗[/red]"
+        )
 
         table.add_row(
             r["task_id"],

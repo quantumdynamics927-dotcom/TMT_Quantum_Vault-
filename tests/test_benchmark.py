@@ -536,6 +536,7 @@ class TestArchitectureBenchmarkCoveragePaths:
             main()
 
         assert json.loads(output_path.read_text(encoding="utf-8")) == {"result": "ok"}
+        mock_runner.assert_called_once_with(Path("."))
         mock_print.assert_called_once_with(f"Results written to {output_path}")
 
     def test_main_prints_mode_specific_results(self, tmp_path: Path) -> None:

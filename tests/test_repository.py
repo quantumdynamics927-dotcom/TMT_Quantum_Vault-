@@ -548,6 +548,8 @@ class TestVaultRepositoryCoveragePaths:
         assert missing.error == "File not found"
         assert not invalid.valid
         assert invalid.model_name == "VaultConfig"
+        assert invalid.error is not None
+        assert "vault_name" in invalid.error
 
     def test_validate_optimization_log_handles_missing_and_invalid_files(
         self, tmp_path: Path

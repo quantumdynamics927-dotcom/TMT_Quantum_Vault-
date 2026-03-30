@@ -7,7 +7,7 @@ name = "tmt-quantum-vault"
 version = "0.4.0"
 description = "Toroidal Merkaba Topology - A 17-node resonant intelligence lattice grounded in real IBM quantum hardware DNA circuits and sacred geometry mathematics"
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = "GPL-3.0-only"
 authors = [
     {name = "TMT Quantum Vault Team"}
 ]
@@ -29,7 +29,6 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",

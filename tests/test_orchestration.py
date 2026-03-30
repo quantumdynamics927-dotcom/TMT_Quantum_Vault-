@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
@@ -110,7 +110,7 @@ def make_trace(
         final_status=final_status,
         final_confidence=final_confidence,
         total_duration_ms=total_duration_ms,
-        completed_at=datetime.utcnow(),
+        completed_at=datetime(2025, 1, 1, tzinfo=UTC),
     )
 
 
@@ -143,9 +143,7 @@ def make_metrics(
     )
 
 
-def test_channel_registry_aggregate_stats_reports_empty_and_non_empty_channels() -> (
-    None
-):
+def test_channel_registry_aggregate_stats() -> None:
     registry = ChannelRegistry()
     assert registry.get_aggregate_stats()["total_agents"] == 0
 
@@ -363,9 +361,7 @@ class DummyOrchestrator:
         return outcome
 
 
-def test_orchestration_benchmark_task_type_and_summary_cover_success_failure_paths(
-    tmp_path: Path,
-) -> None:
+def test_orchestration_benchmark_task_execution(tmp_path: Path) -> None:
     orchestrator = DummyOrchestrator(
         [
             make_trace(
@@ -496,6 +492,7 @@ def test_benchmark_runner_helpers_cover_failure_and_resonance_paths(
 
 def test_benchmark_runner_compare_baselines_reports_improvements(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     runner = BenchmarkRunner(TMTBenchmarkMatrix(tmp_path), output_dir=tmp_path)
 
@@ -518,7 +515,7 @@ def test_benchmark_runner_compare_baselines_reports_improvements(
             }
         )
 
-    runner.run_baseline = fake_run_baseline  # type: ignore[method-assign]
+    monkeypatch.setattr(runner, "run_baseline", fake_run_baseline)
 
     comparison = runner.compare_baselines(orchestrator=object())
 

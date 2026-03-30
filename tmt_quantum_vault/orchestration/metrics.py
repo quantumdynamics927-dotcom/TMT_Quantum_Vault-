@@ -16,10 +16,9 @@ import json
 import threading
 import time
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-from uuid import UUID
 
 from .models import (
     AgentContract,
@@ -34,43 +33,43 @@ from .models import (
 
 class MetricsWindow:
     """Sliding window for metrics aggregation."""
-    
+
     def __init__(self, window_seconds: float = 60.0):
         """Initialize metrics window.
-        
+
         Args:
             window_seconds: Window duration in seconds
         """
         self.window_seconds = window_seconds
         self._data: list[tuple[float, Any]] = []
         self._lock = threading.Lock()
-    
+
     def add(self, value: Any) -> None:
         """Add value to window.
-        
+
         Args:
             value: Value to add
         """
         with self._lock:
             self._data.append((time.time(), value))
             self._prune()
-    
+
     def get_all(self) -> list[Any]:
         """Get all values in window.
-        
+
         Returns:
             List of values
         """
         with self._lock:
             self._prune()
             return [v for _, v in self._data]
-    
+
     def count(self) -> int:
         """Get count of values in window."""
         with self._lock:
             self._prune()
             return len(self._data)
-    
+
     def _prune(self) -> None:
         """Remove expired values."""
         cutoff = time.time() - self.window_seconds
@@ -79,21 +78,21 @@ class MetricsWindow:
 
 class CoordinationMetricsCollector:
     """Collects and aggregates coordination metrics."""
-    
+
     def __init__(
         self,
         window_seconds: float = 60.0,
         history_file: Path | None = None,
     ):
         """Initialize metrics collector.
-        
+
         Args:
             window_seconds: Aggregation window in seconds
             history_file: Optional file for persisting metrics
         """
         self.window_seconds = window_seconds
         self.history_file = history_file
-        
+
         # Sliding windows for different metrics
         self._agreement_window = MetricsWindow(window_seconds)
         self._contradiction_window = MetricsWindow(window_seconds)
@@ -101,52 +100,52 @@ class CoordinationMetricsCollector:
         self._recovery_window = MetricsWindow(window_seconds)
         self._resonance_window = MetricsWindow(window_seconds)
         self._task_window = MetricsWindow(window_seconds)
-        
+
         # Counters
         self._total_tasks = 0
         self._completed_tasks = 0
         self._failed_tasks = 0
-        
+
         # Agent utilization tracking
         self._agent_activations: dict[str, int] = defaultdict(int)
         self._agent_processing_time: dict[str, float] = defaultdict(float)
-        
+
         # History
         self._metrics_history: list[CoordinationMetrics] = []
         self._lock = threading.Lock()
-    
+
     # =========================================================================
     # Recording Methods
     # =========================================================================
-    
+
     def record_contract_completion(self, contract: AgentContract) -> None:
         """Record contract completion.
-        
+
         Args:
             contract: Completed contract
         """
         if not contract.output:
             return
-        
+
         output = contract.output
-        
+
         # Record confidence as agreement indicator
         self._agreement_window.add(output.confidence)
-        
+
         # Record resonance
         self._resonance_window.add(output.resonance_score)
-        
+
         # Record task completion
         self._task_window.add({
             "success": output.status == HandoffStatus.COMPLETED,
             "duration_ms": contract.duration_ms,
             "agent": output.agent_name,
         })
-        
+
         # Update agent utilization
         self._agent_activations[output.agent_name] += 1
         self._agent_processing_time[output.agent_name] += output.processing_time_ms
-        
+
         # Update counters
         with self._lock:
             self._total_tasks += 1
@@ -154,7 +153,7 @@ class CoordinationMetricsCollector:
                 self._completed_tasks += 1
             else:
                 self._failed_tasks += 1
-    
+
     def record_delegation(
         self,
         from_agent: AgentRole,
@@ -163,7 +162,7 @@ class CoordinationMetricsCollector:
         depth: int = 1,
     ) -> None:
         """Record a delegation event.
-        
+
         Args:
             from_agent: Source agent
             to_agent: Target agent
@@ -176,14 +175,14 @@ class CoordinationMetricsCollector:
             "success": success,
             "depth": depth,
         })
-    
+
     def record_recovery(
         self,
         success: bool,
         recovery_time_ms: float,
     ) -> None:
         """Record a recovery attempt.
-        
+
         Args:
             success: Whether recovery succeeded
             recovery_time_ms: Recovery time in milliseconds
@@ -192,14 +191,14 @@ class CoordinationMetricsCollector:
             "success": success,
             "time_ms": recovery_time_ms,
         })
-    
+
     def record_contradiction(
         self,
         outputs: list[AgentOutputSchema],
         resolved: bool,
     ) -> None:
         """Record a contradiction between outputs.
-        
+
         Args:
             outputs: Conflicting outputs
             resolved: Whether contradiction was resolved
@@ -209,10 +208,10 @@ class CoordinationMetricsCollector:
             "resolved": resolved,
             "confidence_delta": max(o.confidence for o in outputs) - min(o.confidence for o in outputs),
         })
-    
+
     def record_conflict_resolution(self, result: ConflictResolutionResult) -> None:
         """Record conflict resolution result.
-        
+
         Args:
             result: Conflict resolution result
         """
@@ -221,17 +220,17 @@ class CoordinationMetricsCollector:
             "confidence": result.confidence_in_resolution,
             "time_ms": result.resolution_time_ms,
         })
-    
+
     def record_trace(self, trace: CoordinationTrace) -> None:
         """Record complete coordination trace.
-        
+
         Args:
             trace: Coordination trace
         """
         # Record all contracts
         for contract in trace.contracts:
             self.record_contract_completion(contract)
-        
+
         # Record final status
         if trace.final_status:
             success = trace.final_status == HandoffStatus.COMPLETED
@@ -240,27 +239,27 @@ class CoordinationMetricsCollector:
                 "duration_ms": trace.total_duration_ms,
                 "trace_id": str(trace.trace_id),
             })
-    
+
     # =========================================================================
     # Aggregation Methods
     # =========================================================================
-    
+
     def get_metrics(self) -> CoordinationMetrics:
         """Get current coordination metrics.
-        
+
         Returns:
             Coordination metrics
         """
         # Calculate agreement rate
         agreements = self._agreement_window.get_all()
         agreement_rate = sum(agreements) / len(agreements) if agreements else 0.0
-        
+
         # Calculate contradiction rate
         contradictions = self._contradiction_window.get_all()
         contradiction_count = len(contradictions)
         total_outputs = len(agreements) + contradiction_count
         contradiction_rate = contradiction_count / total_outputs if total_outputs > 0 else 0.0
-        
+
         # Calculate delegation metrics
         delegations = self._delegation_window.get_all()
         successful_delegations = sum(1 for d in delegations if d.get("success", False))
@@ -269,7 +268,7 @@ class CoordinationMetricsCollector:
             sum(d.get("depth", 1) for d in delegations) / len(delegations)
             if delegations else 0.0
         )
-        
+
         # Calculate recovery metrics
         recoveries = self._recovery_window.get_all()
         successful_recoveries = sum(1 for r in recoveries if r.get("success", False))
@@ -278,36 +277,36 @@ class CoordinationMetricsCollector:
             sum(r.get("time_ms", 0) for r in recoveries) / len(recoveries)
             if recoveries else 0.0
         )
-        
+
         # Calculate resonance correlation
         resonances = self._resonance_window.get_all()
         tasks = self._task_window.get_all()
-        
+
         resonance_fitness_correlation = 0.0
         if resonances and tasks:
             # Simple correlation approximation
             avg_resonance = sum(resonances) / len(resonances)
             success_rate = sum(1 for t in tasks if t.get("success", False)) / len(tasks)
             resonance_fitness_correlation = avg_resonance * success_rate
-        
+
         # Calculate phi alignment rate
         phi_aligned = sum(1 for r in resonances if r >= 0.618)  # PHI_INVERSE
         phi_alignment_rate = phi_aligned / len(resonances) if resonances else 0.0
-        
+
         # Calculate agent utilization
         total_activations = sum(self._agent_activations.values())
         agent_utilization = {}
         if total_activations > 0:
             for agent, activations in self._agent_activations.items():
                 agent_utilization[agent] = activations / total_activations
-        
+
         # Calculate task metrics
         successful_tasks = sum(1 for t in tasks if t.get("success", False))
         avg_task_duration = (
             sum(t.get("duration_ms", 0) for t in tasks) / len(tasks)
             if tasks else 0.0
         )
-        
+
         return CoordinationMetrics(
             measurement_window_seconds=self.window_seconds,
             agreement_rate=agreement_rate,
@@ -326,15 +325,15 @@ class CoordinationMetricsCollector:
             average_task_duration_ms=avg_task_duration,
             agent_utilization=agent_utilization,
         )
-    
+
     def get_summary(self) -> dict[str, Any]:
         """Get metrics summary.
-        
+
         Returns:
             Metrics summary dictionary
         """
         metrics = self.get_metrics()
-        
+
         return {
             "coordination_quality_score": metrics.coordination_quality_score,
             "agreement_rate": metrics.agreement_rate,
@@ -349,21 +348,21 @@ class CoordinationMetricsCollector:
             "agent_count": len(self._agent_activations),
             "measurement_window_seconds": self.window_seconds,
         }
-    
+
     # =========================================================================
     # Persistence
     # =========================================================================
-    
+
     def save_metrics(self) -> None:
         """Save current metrics to history file."""
         if not self.history_file:
             return
-        
+
         metrics = self.get_metrics()
-        
+
         with self._lock:
             self._metrics_history.append(metrics)
-        
+
         # Write to file
         try:
             self.history_file.parent.mkdir(parents=True, exist_ok=True)
@@ -375,20 +374,20 @@ class CoordinationMetricsCollector:
                 }, f, indent=2, default=str)
         except (OSError, json.JSONEncodeError):
             pass
-    
+
     def load_history(self) -> list[CoordinationMetrics]:
         """Load metrics history from file.
-        
+
         Returns:
             List of historical metrics
         """
         if not self.history_file or not self.history_file.exists():
             return []
-        
+
         try:
-            with open(self.history_file, 'r', encoding='utf-8') as f:
+            with open(self.history_file, encoding='utf-8') as f:
                 data = json.load(f)
-            
+
             return [
                 CoordinationMetrics(**m)
                 for m in data.get("history", [])
@@ -399,35 +398,35 @@ class CoordinationMetricsCollector:
 
 class CoordinationAnalyzer:
     """Analyzes coordination patterns and trends."""
-    
+
     def __init__(self, collector: CoordinationMetricsCollector):
         """Initialize analyzer.
-        
+
         Args:
             collector: Metrics collector
         """
         self.collector = collector
-    
+
     def analyze_trends(self, history: list[CoordinationMetrics]) -> dict[str, Any]:
         """Analyze trends in coordination metrics.
-        
+
         Args:
             history: Historical metrics
-            
+
         Returns:
             Trend analysis
         """
         if len(history) < 2:
             return {"trend": "insufficient_data"}
-        
+
         # Calculate trends
         recent = history[-5:] if len(history) >= 5 else history
         older = history[:-5] if len(history) > 5 else history[:-1]
-        
+
         def avg(metrics_list: list[CoordinationMetrics], attr: str) -> float:
             values = [getattr(m, attr) for m in metrics_list]
             return sum(values) / len(values) if values else 0.0
-        
+
         trends = {
             "agreement_rate": {
                 "recent": avg(recent, "agreement_rate"),
@@ -445,22 +444,22 @@ class CoordinationAnalyzer:
                 "direction": "improving" if avg(recent, "success_rate") > avg(older, "success_rate") else "declining",
             },
         }
-        
+
         return {
             "trend": "available",
             "trends": trends,
             "data_points": len(history),
         }
-    
+
     def identify_bottlenecks(self) -> list[dict[str, Any]]:
         """Identify coordination bottlenecks.
-        
+
         Returns:
             List of bottlenecks
         """
         bottlenecks = []
         metrics = self.collector.get_metrics()
-        
+
         # Check for high contradiction rate
         if metrics.contradiction_rate > 0.2:
             bottlenecks.append({
@@ -469,7 +468,7 @@ class CoordinationAnalyzer:
                 "threshold": 0.2,
                 "recommendation": "Review agent output alignment and consensus protocols",
             })
-        
+
         # Check for low delegation success
         if metrics.delegation_count > 0 and metrics.delegation_success_rate < 0.8:
             bottlenecks.append({
@@ -478,7 +477,7 @@ class CoordinationAnalyzer:
                 "threshold": 0.8,
                 "recommendation": "Review handoff protocols and agent capabilities",
             })
-        
+
         # Check for low recovery success
         if metrics.recovery_attempts > 0 and metrics.recovery_success_rate < 0.7:
             bottlenecks.append({
@@ -487,7 +486,7 @@ class CoordinationAnalyzer:
                 "threshold": 0.7,
                 "recommendation": "Review error handling and fallback mechanisms",
             })
-        
+
         # Check for agent utilization imbalance
         if metrics.agent_utilization:
             max_util = max(metrics.agent_utilization.values())
@@ -500,12 +499,12 @@ class CoordinationAnalyzer:
                     "ratio": min_util / max_util,
                     "recommendation": "Review routing policies for better load distribution",
                 })
-        
+
         return bottlenecks
-    
+
     def generate_report(self) -> dict[str, Any]:
         """Generate comprehensive coordination report.
-        
+
         Returns:
             Coordination report
         """
@@ -513,7 +512,7 @@ class CoordinationAnalyzer:
         bottlenecks = self.identify_bottlenecks()
         history = self.collector.load_history()
         trends = self.analyze_trends(history)
-        
+
         return {
             "generated_at": datetime.utcnow().isoformat(),
             "metrics": metrics.model_dump(),
@@ -522,107 +521,107 @@ class CoordinationAnalyzer:
             "bottlenecks": bottlenecks,
             "recommendations": self._generate_recommendations(metrics, bottlenecks),
         }
-    
+
     def _generate_recommendations(
         self,
         metrics: CoordinationMetrics,
         bottlenecks: list[dict[str, Any]],
     ) -> list[str]:
         """Generate recommendations based on metrics.
-        
+
         Args:
             metrics: Current metrics
             bottlenecks: Identified bottlenecks
-            
+
         Returns:
             List of recommendations
         """
         recommendations = []
-        
+
         # Based on coordination quality
         if metrics.coordination_quality_score < 0.7:
             recommendations.append(
                 "Coordination quality is below target. Consider reviewing "
                 "agent role assignments and routing policies."
             )
-        
+
         # Based on agreement rate
         if metrics.agreement_rate < 0.8:
             recommendations.append(
                 "Agent agreement rate is low. Consider implementing "
                 "consensus protocols or adjusting confidence thresholds."
             )
-        
+
         # Based on phi alignment
         if metrics.phi_alignment_rate < 0.6:
             recommendations.append(
                 "Phi alignment rate is below optimal. Consider tuning "
                 "resonance thresholds or agent selection criteria."
             )
-        
+
         # Based on bottlenecks
         for bottleneck in bottlenecks:
             if "recommendation" in bottleneck:
                 recommendations.append(bottleneck["recommendation"])
-        
+
         if not recommendations:
             recommendations.append(
                 "Coordination metrics are within acceptable ranges. "
                 "Continue monitoring for trends."
             )
-        
+
         return recommendations
 
 
 class MetricsExporter:
     """Exports coordination metrics for benchmarking."""
-    
+
     def __init__(self, output_dir: Path):
         """Initialize exporter.
-        
+
         Args:
             output_dir: Output directory for exports
         """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     def export_json(
         self,
         metrics: CoordinationMetrics,
         filename: str = "coordination_metrics.json",
     ) -> Path:
         """Export metrics to JSON file.
-        
+
         Args:
             metrics: Metrics to export
             filename: Output filename
-            
+
         Returns:
             Path to exported file
         """
         output_path = self.output_dir / filename
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(metrics.model_dump(), f, indent=2, default=str)
-        
+
         return output_path
-    
+
     def export_benchmark_format(
         self,
         metrics: CoordinationMetrics,
         filename: str = "coordination_benchmark.json",
     ) -> Path:
         """Export metrics in benchmark-compatible format.
-        
+
         Args:
             metrics: Metrics to export
             filename: Output filename
-            
+
         Returns:
             Path to exported file
         """
         output_path = self.output_dir / filename
-        
+
         benchmark_data = {
             "benchmark_type": "coordination",
             "timestamp": datetime.utcnow().isoformat(),
@@ -677,31 +676,31 @@ class MetricsExporter:
             },
             "raw_metrics": metrics.model_dump(),
         }
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(benchmark_data, f, indent=2, default=str)
-        
+
         return output_path
-    
+
     def export_trace(
         self,
         trace: CoordinationTrace,
         filename: str | None = None,
     ) -> Path:
         """Export coordination trace.
-        
+
         Args:
             trace: Trace to export
             filename: Output filename (auto-generated if None)
-            
+
         Returns:
             Path to exported file
         """
         if filename is None:
             filename = f"trace_{trace.trace_id}.json"
-        
+
         output_path = self.output_dir / filename
-        
+
         trace_data = {
             "trace_id": str(trace.trace_id),
             "session_id": str(trace.session_id),
@@ -733,8 +732,8 @@ class MetricsExporter:
             ],
             "metrics": trace.metrics.model_dump() if trace.metrics else None,
         }
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(trace_data, f, indent=2, default=str)
-        
+
         return output_path

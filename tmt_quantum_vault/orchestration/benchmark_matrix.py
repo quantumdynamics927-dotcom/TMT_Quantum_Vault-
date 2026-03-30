@@ -21,11 +21,10 @@ import json
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import Any, Literal
-from uuid import UUID, uuid4
-
+from typing import Any
+from uuid import UUID
 
 # =============================================================================
 # Benchmark Types
@@ -35,20 +34,20 @@ from uuid import UUID, uuid4
 BENCHMARK_SCHEMA_VERSION = "1.0.0"
 
 
-class BenchmarkLayer(str, Enum):
+class BenchmarkLayer(StrEnum):
     """Layers of benchmark evaluation."""
     MODEL = "model"           # Raw model reasoning
     AGENT = "agent"           # Tool-using agent behavior
     SYSTEM = "system"         # Full multi-agent orchestration
 
 
-class ExecutionMode(str, Enum):
+class ExecutionMode(StrEnum):
     """Execution mode for benchmark runs."""
     SIMULATION = "simulation"  # Orchestration validation only (no LLM)
     LIVE = "live"              # Full execution with LLM backend
 
 
-class StructuralStatus(str, Enum):
+class StructuralStatus(StrEnum):
     """Status of orchestration structure (control plane)."""
     PASSED = "passed"          # All structural checks passed
     FAILED = "failed"          # Structural failure
@@ -56,7 +55,7 @@ class StructuralStatus(str, Enum):
     SKIPPED = "skipped"         # Structural checks not applicable
 
 
-class ExecutionStatus(str, Enum):
+class ExecutionStatus(StrEnum):
     """Status of task execution (intelligence plane)."""
     COMPLETED = "completed"     # Task completed successfully
     FAILED = "failed"           # Task execution failed
@@ -64,7 +63,7 @@ class ExecutionStatus(str, Enum):
     SIMULATION_ONLY = "simulation_only"  # No live execution attempted
 
 
-class FailureReason(str, Enum):
+class FailureReason(StrEnum):
     """Machine-readable failure reasons."""
     SIMULATION_ONLY = "simulation_only"     # No live backend connected
     ROUTING_MISMATCH = "routing_mismatch"   # Wrong agent selected
@@ -79,7 +78,7 @@ class FailureReason(str, Enum):
     UNKNOWN = "unknown"                     # Unknown failure
 
 
-class BenchmarkCategory(str, Enum):
+class BenchmarkCategory(StrEnum):
     """Categories of benchmark tasks."""
     ROUTING = "routing"               # Agent selection accuracy
     DELEGATION = "delegation"         # Handoff correctness
@@ -91,7 +90,7 @@ class BenchmarkCategory(str, Enum):
     RESONANCE = "resonance"           # Phi-alignment behavior
 
 
-class BaselineType(str, Enum):
+class BaselineType(StrEnum):
     """Baseline comparison types."""
     SINGLE_MODEL = "single_model"     # One strong model, no ensemble
     FULL_ORCHESTRATION = "full"       # Complete TMT orchestration
@@ -119,48 +118,48 @@ class BenchmarkTask:
 @dataclass
 class BenchmarkResult:
     """Result of a single benchmark task execution."""
-    
+
     task_id: str
     baseline: BaselineType
     execution_mode: ExecutionMode
-    
+
     # Structural status (control plane)
     structural_status: StructuralStatus
     routing_correct: bool  # Expected agent selected
     layers_traversed_correct: bool  # Expected layers hit
     handoffs_completed: int  # Number of successful handoffs
     contracts_valid: bool  # All contracts satisfied schema
-    
+
     # Expected targets validation
     expected_agents_hit: bool = False  # At least one expected agent was involved
     expected_layers_hit: bool = False  # All expected layers were traversed
-    
+
     # Execution status (intelligence plane)
     execution_status: ExecutionStatus = ExecutionStatus.SIMULATION_ONLY
     failure_reason: FailureReason | None = None
     failure_reason_details: str | None = None  # Free-text debug info
-    
+
     # Metrics
     duration_ms: float = 0.0
     agents_involved: list[str] = field(default_factory=list)
     layers_traversed: list[str] = field(default_factory=list)
     confidence: float = 0.0
     resonance_score: float = 0.0
-    
+
     # Coordination metrics
     contradiction_detected: bool = False
     consensus_reached: bool = False
     recovery_required: bool = False
     recovery_successful: bool = False
-    
+
     # Error details
     error_message: str | None = None
     trace_id: UUID | None = None
     timestamp: datetime = field(default_factory=datetime.utcnow)
-    
+
     # Schema version for backward compatibility (class-level constant)
     schema_version: str = field(default=BENCHMARK_SCHEMA_VERSION, init=False)
-    
+
     @property
     def success(self) -> bool:
         """Overall success requires both structural and execution success."""
@@ -173,13 +172,13 @@ class BenchmarkResult:
                 self.structural_status == StructuralStatus.PASSED and
                 self.execution_status == ExecutionStatus.COMPLETED
             )
-    
+
     @property
     def orchestration_score(self) -> float:
         """Score for orchestration/control plane quality (0-1)."""
         if self.structural_status == StructuralStatus.SKIPPED:
             return 0.0
-        
+
         score = 0.0
         if self.routing_correct:
             score += 0.3
@@ -189,28 +188,28 @@ class BenchmarkResult:
             score += 0.2
         if self.handoffs_completed > 0:
             score += min(0.3, self.handoffs_completed * 0.1)
-        
+
         return min(1.0, score)
-    
+
     @property
     def task_completion_score(self) -> float:
         """Score for task completion (0-1)."""
         if self.execution_mode == ExecutionMode.SIMULATION:
             return 0.0  # Not applicable in simulation
-        
+
         if self.execution_status == ExecutionStatus.COMPLETED:
             return 1.0
         elif self.execution_status == ExecutionStatus.SIMULATION_ONLY:
             return 0.0
         else:
             return 0.0
-    
+
     @property
     def output_quality_score(self) -> float:
         """Score for output quality (0-1)."""
         if self.execution_mode == ExecutionMode.SIMULATION:
             return 0.0  # Not applicable in simulation
-        
+
         # Based on confidence and resonance
         return (self.confidence + self.resonance_score) / 2.0
 
@@ -222,12 +221,12 @@ class BenchmarkResult:
 class TMTBenchmarkMatrix:
     """
     Comprehensive benchmark matrix for TMT Quantum Vault.
-    
+
     This class defines benchmark tasks across three layers:
     - Model Layer: Raw reasoning capability
     - Agent Layer: Tool-using and policy-following
     - System Layer: Full orchestration behavior
-    
+
     Each task is designed to measure specific coordination qualities:
     - Routing accuracy
     - Delegation correctness
@@ -237,10 +236,10 @@ class TMTBenchmarkMatrix:
     - Recovery from failure
     - Resonance/phi-alignment
     """
-    
+
     def __init__(self, vault_path: Path):
         """Initialize benchmark matrix.
-        
+
         Args:
             vault_path: Path to TMT Quantum Vault
         """
@@ -248,7 +247,7 @@ class TMTBenchmarkMatrix:
         self.tasks: list[BenchmarkTask] = []
         self.results: list[BenchmarkResult] = []
         self._initialize_tasks()
-    
+
     def _initialize_tasks(self) -> None:
         """Initialize all benchmark tasks."""
         # =====================================================================
@@ -304,7 +303,7 @@ class TMTBenchmarkMatrix:
                 },
             ),
         ])
-        
+
         # =====================================================================
         # DELEGATION TESTS - Handoff correctness
         # =====================================================================
@@ -346,7 +345,7 @@ class TMTBenchmarkMatrix:
                 },
             ),
         ])
-        
+
         # =====================================================================
         # CONFLICT TESTS - Contradiction resolution
         # =====================================================================
@@ -377,7 +376,7 @@ class TMTBenchmarkMatrix:
                 },
             ),
         ])
-        
+
         # =====================================================================
         # MEMORY TESTS - Archive/persistence flow
         # =====================================================================
@@ -407,7 +406,7 @@ class TMTBenchmarkMatrix:
                 },
             ),
         ])
-        
+
         # =====================================================================
         # CONSENSUS TESTS - Multi-agent agreement
         # =====================================================================
@@ -439,7 +438,7 @@ class TMTBenchmarkMatrix:
                 metadata={"repetitions": 5},
             ),
         ])
-        
+
         # =====================================================================
         # RECOVERY TESTS - Failure recovery
         # =====================================================================
@@ -472,7 +471,7 @@ class TMTBenchmarkMatrix:
                 timeout_seconds=5.0,
             ),
         ])
-        
+
         # =====================================================================
         # RESONANCE TESTS - Phi-alignment behavior
         # =====================================================================
@@ -501,7 +500,7 @@ class TMTBenchmarkMatrix:
                 },
             ),
         ])
-        
+
         # =====================================================================
         # ABLATION TESTS - Subsystem impact
         # =====================================================================
@@ -533,35 +532,35 @@ class TMTBenchmarkMatrix:
                 metadata={"disable_resonance": True},
             ),
         ])
-    
+
     def get_tasks_by_category(self, category: BenchmarkCategory) -> list[BenchmarkTask]:
         """Get all tasks in a category.
-        
+
         Args:
             category: Benchmark category
-            
+
         Returns:
             List of tasks in the category
         """
         return [t for t in self.tasks if t.category == category]
-    
+
     def get_tasks_by_layer(self, layer: BenchmarkLayer) -> list[BenchmarkTask]:
         """Get all tasks for a layer.
-        
+
         Args:
             layer: Benchmark layer
-            
+
         Returns:
             List of tasks for the layer
         """
         return [t for t in self.tasks if t.layer == layer]
-    
+
     def get_baseline_tasks(self, baseline: BaselineType) -> list[BenchmarkTask]:
         """Get tasks applicable to a baseline.
-        
+
         Args:
             baseline: Baseline type
-            
+
         Returns:
             List of applicable tasks
         """
@@ -571,7 +570,7 @@ class TMTBenchmarkMatrix:
         else:
             # Full and ablated can do all system-layer tasks
             return [t for t in self.tasks if t.layer == BenchmarkLayer.SYSTEM]
-    
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         return {
@@ -606,7 +605,7 @@ class TMTBenchmarkMatrix:
 
 class BenchmarkRunner:
     """Runs benchmark tasks and collects results."""
-    
+
     def __init__(
         self,
         matrix: TMTBenchmarkMatrix,
@@ -614,7 +613,7 @@ class BenchmarkRunner:
         execution_mode: ExecutionMode = ExecutionMode.SIMULATION,
     ):
         """Initialize benchmark runner.
-        
+
         Args:
             matrix: Benchmark matrix
             output_dir: Output directory for results
@@ -625,7 +624,7 @@ class BenchmarkRunner:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.execution_mode = execution_mode
         self.results: list[BenchmarkResult] = []
-    
+
     def run_task(
         self,
         task: BenchmarkTask,
@@ -633,17 +632,17 @@ class BenchmarkRunner:
         orchestrator: Any,  # AgentOrchestrator
     ) -> BenchmarkResult:
         """Run a single benchmark task.
-        
+
         Args:
             task: Benchmark task
             baseline: Baseline type
             orchestrator: Agent orchestrator
-            
+
         Returns:
             Benchmark result
         """
         start_time = time.time()
-        
+
         try:
             # Execute task through orchestrator
             trace = orchestrator.execute(
@@ -651,25 +650,25 @@ class BenchmarkRunner:
                 objective=task.description,
                 context=task.metadata,
             )
-            
+
             # Extract metrics from trace
-            agents_involved = list(set(
+            agents_involved = list({
                 d.primary_agent.value for d in trace.decisions
-            ))
-            layers_traversed = list(set(
+            })
+            layers_traversed = list({
                 d.layer.value for d in trace.decisions
-            ))
-            
+            })
+
             # Check structural correctness
             routing_correct = self._check_routing(task, agents_involved)
             layers_correct = self._check_layers(task, layers_traversed)
             contracts_valid = self._check_contracts(trace)
             handoffs = len(trace.decisions) - 1 if len(trace.decisions) > 1 else 0
-            
+
             # Check expected targets
             expected_agents_hit = routing_correct  # At least one expected agent
             expected_layers_hit = layers_correct  # All expected layers
-            
+
             # Determine structural status
             if routing_correct and layers_correct and contracts_valid:
                 structural_status = StructuralStatus.PASSED
@@ -677,7 +676,7 @@ class BenchmarkRunner:
                 structural_status = StructuralStatus.PARTIAL
             else:
                 structural_status = StructuralStatus.FAILED
-            
+
             # Determine execution status based on mode
             if self.execution_mode == ExecutionMode.SIMULATION:
                 execution_status = ExecutionStatus.SIMULATION_ONLY
@@ -691,9 +690,9 @@ class BenchmarkRunner:
                 execution_status = ExecutionStatus.FAILED
                 failure_reason = self._determine_failure_reason(trace)
                 failure_reason_details = self._get_failure_details(trace, failure_reason)
-            
+
             duration_ms = (time.time() - start_time) * 1000
-            
+
             result = BenchmarkResult(
                 task_id=task.task_id,
                 baseline=baseline,
@@ -718,7 +717,7 @@ class BenchmarkRunner:
                 recovery_required=False,
                 trace_id=trace.trace_id,
             )
-            
+
         except Exception as e:
             duration_ms = (time.time() - start_time) * 1000
             result = BenchmarkResult(
@@ -745,22 +744,22 @@ class BenchmarkRunner:
                 recovery_required=True,
                 error_message=str(e),
             )
-        
+
         self.results.append(result)
         return result
-    
+
     def _check_routing(self, task: BenchmarkTask, agents_involved: list[str]) -> bool:
         """Check if routing selected expected agents."""
         expected = [a.lower() for a in task.expected_agents]
         actual = [a.lower() for a in agents_involved]
         return any(a in expected for a in actual)
-    
+
     def _check_layers(self, task: BenchmarkTask, layers_traversed: list[str]) -> bool:
         """Check if expected layers were traversed."""
-        expected = [l.lower() for l in task.expected_layers]
-        actual = [l.lower() for l in layers_traversed]
-        return all(l in actual for l in expected) if expected else True
-    
+        expected = [layer.lower() for layer in task.expected_layers]
+        actual = [layer.lower() for layer in layers_traversed]
+        return all(layer in actual for layer in expected) if expected else True
+
     def _check_contracts(self, trace: Any) -> bool:
         """Check if all contracts were valid."""
         for contract in trace.contracts:
@@ -769,82 +768,82 @@ class BenchmarkRunner:
             if contract.output.status.value not in ("completed", "accepted"):
                 return False
         return True
-    
+
     def _determine_failure_reason(self, trace: Any) -> FailureReason:
         """Determine the reason for failure."""
         if not trace.decisions:
             return FailureReason.ROUTING_MISMATCH
-        
+
         if not trace.contracts:
             return FailureReason.SCHEMA_FAILURE
-        
+
         for contract in trace.contracts:
             if contract.output and contract.output.status.value == "failed":
                 return FailureReason.LLM_ERROR
-        
+
         return FailureReason.UNKNOWN
-    
+
     def _get_failure_details(self, trace: Any, reason: FailureReason) -> str:
         """Get detailed failure description for debugging."""
         details = []
-        
+
         if reason == FailureReason.ROUTING_MISMATCH:
             expected = getattr(trace, 'expected_agents', [])
             actual = [d.primary_agent.value for d in trace.decisions] if trace.decisions else []
             details.append(f"Expected agents: {expected}, got: {actual}")
-        
+
         elif reason == FailureReason.MISSING_AGENT:
             details.append("Required agent not found in registry")
-        
+
         elif reason == FailureReason.TIMEOUT:
-            details.append(f"Execution exceeded timeout")
-        
+            details.append("Execution exceeded timeout")
+
         elif reason == FailureReason.SCHEMA_FAILURE:
             for contract in trace.contracts:
                 if contract.output and contract.output.status.value == "failed":
                     details.append(f"Contract {contract.agent_id}: {contract.output.error or 'schema validation failed'}")
-        
+
         elif reason == FailureReason.HANDOFF_FAILURE:
             details.append("Agent handoff failed during execution")
-        
+
         elif reason == FailureReason.CONSENSUS_FAILED:
             details.append("Multi-agent consensus not reached")
-        
+
         elif reason == FailureReason.LLM_ERROR:
             for contract in trace.contracts:
                 if contract.output and hasattr(contract.output, 'error') and contract.output.error:
                     details.append(f"LLM error: {contract.output.error}")
-        
+
         return "; ".join(details) if details else f"Failure: {reason.value}"
-    
+
     def _calculate_resonance(self, trace: Any) -> float:
         """Calculate average resonance score from trace."""
         if not trace.contracts:
             return 0.0
-        
+
         resonances = [
             c.output.resonance_score
             for c in trace.contracts
             if c.output
         ]
-        
+
         return sum(resonances) / len(resonances) if resonances else 0.0
-    
+
     def _detect_contradiction(self, trace: Any) -> bool:
         """Detect if there were contradictions in the trace."""
         # Check for multiple agents with different outputs
         if len(trace.contracts) < 2:
             return False
-        
+
         outputs = [
             c.output.summary
             for c in trace.contracts
             if c.output
         ]
-        
+
         # Simple contradiction detection: different outputs
         return len(set(outputs)) > 1
-    
+
     def run_baseline(
         self,
         baseline: BaselineType,
@@ -852,12 +851,12 @@ class BenchmarkRunner:
         task_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         """Run all tasks for a baseline.
-        
+
         Args:
             baseline: Baseline type
             orchestrator: Agent orchestrator
             task_ids: Optional specific task IDs to run
-            
+
         Returns:
             Baseline results summary with three separate scores:
             - orchestration_score: Structural correctness (routing, layers, contracts)
@@ -865,15 +864,15 @@ class BenchmarkRunner:
             - output_quality_score: Quality metrics (confidence, resonance)
         """
         tasks = self.matrix.get_baseline_tasks(baseline)
-        
+
         if task_ids:
             tasks = [t for t in tasks if t.task_id in task_ids]
-        
+
         results = []
         for task in tasks:
             result = self.run_task(task, baseline, orchestrator)
             results.append(result)
-        
+
         # Calculate three separate scores
         # 1. Orchestration Score: Structural correctness
         structural_passed = [r for r in results if r.structural_status == StructuralStatus.PASSED]
@@ -881,7 +880,7 @@ class BenchmarkRunner:
         orchestration_score = (
             len(structural_passed) + 0.5 * len(structural_partial)
         ) / len(results) if results else 0.0
-        
+
         # 2. Task Completion Score: Execution success
         completed = [r for r in results if r.execution_status == ExecutionStatus.COMPLETED]
         simulation_only = [r for r in results if r.execution_status == ExecutionStatus.SIMULATION_ONLY]
@@ -892,15 +891,15 @@ class BenchmarkRunner:
             ) / len(results) if results else 0.0
         else:
             task_completion_score = len(completed) / len(results) if results else 0.0
-        
+
         # 3. Output Quality Score: Confidence and resonance
         quality_metrics = [r for r in results if r.confidence > 0.5 and r.resonance_score > 0.5]
         output_quality_score = len(quality_metrics) / len(results) if results else 0.0
-        
+
         # Additional statistics
         average_confidence = sum(r.confidence for r in results if r.confidence > 0) / len(results) if results else 0.0
         average_resonance = sum(r.resonance_score for r in results if r.resonance_score > 0) / len(results) if results else 0.0
-        
+
         return {
             "schema_version": BENCHMARK_SCHEMA_VERSION,
             "baseline": baseline.value,
@@ -955,16 +954,16 @@ class BenchmarkRunner:
                 for r in results
             ],
         }
-    
+
     def compare_baselines(
         self,
         orchestrator: Any,
     ) -> dict[str, Any]:
         """Compare all baseline types.
-        
+
         Args:
             orchestrator: Agent orchestrator
-            
+
         Returns:
             Comparison results with separate scores for each baseline
         """
@@ -973,21 +972,21 @@ class BenchmarkRunner:
             "execution_mode": self.execution_mode.value,
             "baselines": {},
         }
-        
+
         # Run full orchestration
         comparison["baselines"][BaselineType.FULL_ORCHESTRATION.value] = self.run_baseline(
             BaselineType.FULL_ORCHESTRATION, orchestrator
         )
-        
+
         # Run ablated (without resonance weighting)
         comparison["baselines"][BaselineType.ABLATED.value] = self.run_baseline(
             BaselineType.ABLATED, orchestrator
         )
-        
+
         # Calculate improvement from ablation for each score
         full_orch = comparison["baselines"][BaselineType.FULL_ORCHESTRATION.value]
         ablated_orch = comparison["baselines"][BaselineType.ABLATED.value]
-        
+
         comparison["improvement"] = {
             "orchestration_score": (
                 full_orch["orchestration_score"] - ablated_orch["orchestration_score"]
@@ -1002,21 +1001,21 @@ class BenchmarkRunner:
                 full_orch["average_resonance"] - ablated_orch["average_resonance"]
             ),
         }
-        
+
         return comparison
-    
+
     def save_results(self, filename: str | None = None) -> Path:
         """Save results to file.
-        
+
         Args:
             filename: Optional filename
-            
+
         Returns:
             Path to saved file
         """
         filename = filename or f"benchmark_results_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
         output_path = self.output_dir / filename
-        
+
         data = {
             "schema_version": BENCHMARK_SCHEMA_VERSION,
             "execution_mode": self.execution_mode.value,
@@ -1059,10 +1058,10 @@ class BenchmarkRunner:
                 for r in self.results
             ],
         }
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, default=str)
-        
+
         return output_path
 
 
@@ -1072,10 +1071,10 @@ class BenchmarkRunner:
 
 def create_benchmark_matrix(vault_path: Path) -> TMTBenchmarkMatrix:
     """Create a benchmark matrix for TMT Quantum Vault.
-    
+
     Args:
         vault_path: Path to vault
-        
+
     Returns:
         Benchmark matrix
     """
@@ -1088,25 +1087,25 @@ def run_tmt_benchmark(
     task_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     """Run TMT benchmark suite.
-    
+
     Args:
         vault_path: Path to vault
         output_dir: Output directory
         task_ids: Optional specific task IDs
-        
+
     Returns:
         Benchmark results
     """
     from .orchestration import AgentOrchestrator
-    
+
     matrix = TMTBenchmarkMatrix(vault_path)
     runner = BenchmarkRunner(matrix, output_dir)
     orchestrator = AgentOrchestrator(vault_path)
-    
+
     results = runner.run_baseline(
         BaselineType.FULL_ORCHESTRATION, orchestrator, task_ids
     )
-    
+
     runner.save_results()
-    
+
     return results

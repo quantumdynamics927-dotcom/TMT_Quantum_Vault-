@@ -3397,7 +3397,7 @@ def orchestration_matrix(
     ),
 ) -> None:
     """Show TMT Benchmark Matrix tasks."""
-    from .orchestration import TMTBenchmarkMatrix, BenchmarkCategory, BenchmarkLayer
+    from .orchestration import BenchmarkCategory, BenchmarkLayer, TMTBenchmarkMatrix
 
     matrix = TMTBenchmarkMatrix(vault_path=root)
 
@@ -3492,12 +3492,12 @@ def orchestration_run_matrix(
 ) -> None:
     """Run TMT Benchmark Matrix tasks with explicit simulation/live semantics."""
     from .orchestration import (
-        TMTBenchmarkMatrix,
-        BenchmarkRunner,
-        BaselineType,
         AgentOrchestrator,
-        RoutingPolicy,
+        BaselineType,
+        BenchmarkRunner,
         ExecutionMode,
+        RoutingPolicy,
+        TMTBenchmarkMatrix,
     )
 
     # Parse execution mode

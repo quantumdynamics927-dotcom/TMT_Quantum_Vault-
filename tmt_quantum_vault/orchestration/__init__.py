@@ -22,17 +22,17 @@ Usage:
         BenchmarkIntegration,
         TMTBenchmarkMatrix,
     )
-    
+
     orchestrator = AgentOrchestrator(vault_path=Path("."))
     trace = orchestrator.execute(
         task_type="validation",
         objective="Validate system integrity",
     )
-    
+
     # Run benchmark
     integration = BenchmarkIntegration(vault_path=Path("."))
     results = integration.run_full_benchmark()
-    
+
     # Run TMT benchmark matrix
     matrix = TMTBenchmarkMatrix(vault_path=Path("."))
     runner = BenchmarkRunner(matrix)
@@ -71,6 +71,11 @@ from .metrics import (
     MetricsExporter,
 )
 from .models import (
+    DEFAULT_CONFIDENCE_THRESHOLD,
+    DEFAULT_ESCALATION_THRESHOLD,
+    DEFAULT_RESONANCE_THRESHOLD,
+    PHI,
+    PHI_INVERSE,
     AgentChannelStats,
     AgentConflict,
     AgentContract,
@@ -84,17 +89,12 @@ from .models import (
     ConflictResolutionStrategy,
     CoordinationMetrics,
     CoordinationTrace,
-    DEFAULT_CONFIDENCE_THRESHOLD,
-    DEFAULT_ESCALATION_THRESHOLD,
-    DEFAULT_RESONANCE_THRESHOLD,
     EscalationReason,
     EscalationRequest,
     EscalationResult,
     HandoffDirective,
     HandoffStatus,
     MessagePriority,
-    PHI,
-    PHI_INVERSE,
     RoutingDecision,
     RoutingPolicy,
 )
@@ -110,12 +110,17 @@ from .orchestrator import (
 
 __all__ = [
     # Benchmark Matrix
+    "BENCHMARK_SCHEMA_VERSION",
     "BaselineType",
     "BenchmarkCategory",
     "BenchmarkLayer",
     "BenchmarkResult",
     "BenchmarkRunner",
     "BenchmarkTask",
+    "ExecutionMode",
+    "ExecutionStatus",
+    "FailureReason",
+    "StructuralStatus",
     "TMTBenchmarkMatrix",
     "create_benchmark_matrix",
     "run_tmt_benchmark",

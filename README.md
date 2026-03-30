@@ -10,7 +10,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/)
 [![Qiskit](https://img.shields.io/badge/Qiskit-IBM%20Quantum-6929C4)](https://qiskit.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
+[![License](https://img.shields.io/badge/License-GPLv3-blue)](LICENSE)
 [![Agents](https://img.shields.io/badge/Agents-17-orange)](#agent-roster-17-agents)
 [![Version](https://img.shields.io/badge/Version-v0.4.0--dev-purple)](CHANGELOG.md)
 [![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-0.8809-brightgreen)](#current-status--v040-dev)
@@ -328,7 +328,7 @@ python -m tmt_quantum_vault validate
 
 ## License
 
-Apache 2.0 — See [LICENSE](LICENSE) for details.
+GNU GPL v3.0 — See [LICENSE](LICENSE) for details.
 See [ETHICS.md](ETHICS.md) for prohibited use cases.
 
 ---

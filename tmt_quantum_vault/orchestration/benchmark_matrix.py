@@ -41,74 +41,83 @@ def _utcnow() -> datetime:
 
 class BenchmarkLayer(StrEnum):
     """Layers of benchmark evaluation."""
-    MODEL = "model"           # Raw model reasoning
-    AGENT = "agent"           # Tool-using agent behavior
-    SYSTEM = "system"         # Full multi-agent orchestration
+
+    MODEL = "model"  # Raw model reasoning
+    AGENT = "agent"  # Tool-using agent behavior
+    SYSTEM = "system"  # Full multi-agent orchestration
 
 
 class ExecutionMode(StrEnum):
     """Execution mode for benchmark runs."""
+
     SIMULATION = "simulation"  # Orchestration validation only (no LLM)
-    LIVE = "live"              # Full execution with LLM backend
+    LIVE = "live"  # Full execution with LLM backend
 
 
 class StructuralStatus(StrEnum):
     """Status of orchestration structure (control plane)."""
-    PASSED = "passed"          # All structural checks passed
-    FAILED = "failed"          # Structural failure
-    PARTIAL = "partial"        # Some structural checks passed
-    SKIPPED = "skipped"         # Structural checks not applicable
+
+    PASSED = "passed"  # All structural checks passed
+    FAILED = "failed"  # Structural failure
+    PARTIAL = "partial"  # Some structural checks passed
+    SKIPPED = "skipped"  # Structural checks not applicable
 
 
 class ExecutionStatus(StrEnum):
     """Status of task execution (intelligence plane)."""
-    COMPLETED = "completed"     # Task completed successfully
-    FAILED = "failed"           # Task execution failed
-    TIMEOUT = "timeout"         # Task timed out
+
+    COMPLETED = "completed"  # Task completed successfully
+    FAILED = "failed"  # Task execution failed
+    TIMEOUT = "timeout"  # Task timed out
     SIMULATION_ONLY = "simulation_only"  # No live execution attempted
 
 
 class FailureReason(StrEnum):
     """Machine-readable failure reasons."""
-    SIMULATION_ONLY = "simulation_only"     # No live backend connected
-    ROUTING_MISMATCH = "routing_mismatch"   # Wrong agent selected
-    MISSING_AGENT = "missing_agent"         # Required agent not found
-    TIMEOUT = "timeout"                     # Execution timed out
-    SCHEMA_FAILURE = "schema_failure"       # Output schema validation failed
-    HANDOFF_FAILURE = "handoff_failure"    # Agent handoff failed
+
+    SIMULATION_ONLY = "simulation_only"  # No live backend connected
+    ROUTING_MISMATCH = "routing_mismatch"  # Wrong agent selected
+    MISSING_AGENT = "missing_agent"  # Required agent not found
+    TIMEOUT = "timeout"  # Execution timed out
+    SCHEMA_FAILURE = "schema_failure"  # Output schema validation failed
+    HANDOFF_FAILURE = "handoff_failure"  # Agent handoff failed
     CONFLICT_UNRESOLVED = "conflict_unresolved"  # Conflict not resolved
     CONSENSUS_FAILED = "consensus_failed"  # No consensus reached
-    RECOVERY_FAILED = "recovery_failed"   # Recovery attempt failed
-    LLM_ERROR = "llm_error"                 # LLM backend error
-    UNKNOWN = "unknown"                     # Unknown failure
+    RECOVERY_FAILED = "recovery_failed"  # Recovery attempt failed
+    LLM_ERROR = "llm_error"  # LLM backend error
+    UNKNOWN = "unknown"  # Unknown failure
 
 
 class BenchmarkCategory(StrEnum):
     """Categories of benchmark tasks."""
-    ROUTING = "routing"               # Agent selection accuracy
-    DELEGATION = "delegation"         # Handoff correctness
-    CONFLICT = "conflict"             # Contradiction resolution
-    MEMORY = "memory"                 # Archive/persistence flow
-    ABLATION = "ablation"             # Subsystem impact
-    CONSENSUS = "consensus"           # Multi-agent agreement
-    RECOVERY = "recovery"             # Failure recovery
-    RESONANCE = "resonance"           # Phi-alignment behavior
+
+    ROUTING = "routing"  # Agent selection accuracy
+    DELEGATION = "delegation"  # Handoff correctness
+    CONFLICT = "conflict"  # Contradiction resolution
+    MEMORY = "memory"  # Archive/persistence flow
+    ABLATION = "ablation"  # Subsystem impact
+    CONSENSUS = "consensus"  # Multi-agent agreement
+    RECOVERY = "recovery"  # Failure recovery
+    RESONANCE = "resonance"  # Phi-alignment behavior
 
 
 class BaselineType(StrEnum):
     """Baseline comparison types."""
-    SINGLE_MODEL = "single_model"     # One strong model, no ensemble
-    FULL_ORCHESTRATION = "full"       # Complete TMT orchestration
-    ABLATED = "ablated"               # TMT with one subsystem disabled
+
+    SINGLE_MODEL = "single_model"  # One strong model, no ensemble
+    FULL_ORCHESTRATION = "full"  # Complete TMT orchestration
+    ABLATED = "ablated"  # TMT with one subsystem disabled
 
 
 # =============================================================================
 # Benchmark Task Definitions
 # =============================================================================
 
+
 @dataclass
 class BenchmarkTask:
     """A single benchmark task definition."""
+
     task_id: str
     category: BenchmarkCategory
     layer: BenchmarkLayer
@@ -174,8 +183,8 @@ class BenchmarkResult:
         else:
             # In live mode, both must succeed
             return (
-                self.structural_status == StructuralStatus.PASSED and
-                self.execution_status == ExecutionStatus.COMPLETED
+                self.structural_status == StructuralStatus.PASSED
+                and self.execution_status == ExecutionStatus.COMPLETED
             )
 
     @property
@@ -223,6 +232,7 @@ class BenchmarkResult:
 # TMT Benchmark Matrix
 # =============================================================================
 
+
 class TMTBenchmarkMatrix:
     """
     Comprehensive benchmark matrix for TMT Quantum Vault.
@@ -258,285 +268,301 @@ class TMTBenchmarkMatrix:
         # =====================================================================
         # ROUTING TESTS - Agent selection accuracy
         # =====================================================================
-        self.tasks.extend([
-            BenchmarkTask(
-                task_id="ROUTE-001",
-                category=BenchmarkCategory.ROUTING,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Route a validation task to Validator agent",
-                expected_agents=["validator", "auditor"],
-                expected_layers=["input", "integration", "output"],
-                success_criteria={
-                    "primary_agent_in_expected": True,
-                    "confidence_threshold": 0.7,
-                },
-            ),
-            BenchmarkTask(
-                task_id="ROUTE-002",
-                category=BenchmarkCategory.ROUTING,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Route a synthesis task to Synthesizer agent",
-                expected_agents=["synthesizer", "federation"],
-                expected_layers=["integration"],
-                success_criteria={
-                    "primary_agent_in_expected": True,
-                    "confidence_threshold": 0.7,
-                },
-            ),
-            BenchmarkTask(
-                task_id="ROUTE-003",
-                category=BenchmarkCategory.ROUTING,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Route a monitoring task to Observer agent",
-                expected_agents=["observer", "harmonic"],
-                expected_layers=["integration", "processing"],
-                success_criteria={
-                    "primary_agent_in_expected": True,
-                    "confidence_threshold": 0.7,
-                },
-            ),
-            BenchmarkTask(
-                task_id="ROUTE-004",
-                category=BenchmarkCategory.ROUTING,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Route a strategic analysis task to Strategic agent",
-                expected_agents=["strategic", "wormhole"],
-                expected_layers=["processing"],
-                success_criteria={
-                    "primary_agent_in_expected": True,
-                    "confidence_threshold": 0.7,
-                },
-            ),
-        ])
+        self.tasks.extend(
+            [
+                BenchmarkTask(
+                    task_id="ROUTE-001",
+                    category=BenchmarkCategory.ROUTING,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Route a validation task to Validator agent",
+                    expected_agents=["validator", "auditor"],
+                    expected_layers=["input", "integration", "output"],
+                    success_criteria={
+                        "primary_agent_in_expected": True,
+                        "confidence_threshold": 0.7,
+                    },
+                ),
+                BenchmarkTask(
+                    task_id="ROUTE-002",
+                    category=BenchmarkCategory.ROUTING,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Route a synthesis task to Synthesizer agent",
+                    expected_agents=["synthesizer", "federation"],
+                    expected_layers=["integration"],
+                    success_criteria={
+                        "primary_agent_in_expected": True,
+                        "confidence_threshold": 0.7,
+                    },
+                ),
+                BenchmarkTask(
+                    task_id="ROUTE-003",
+                    category=BenchmarkCategory.ROUTING,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Route a monitoring task to Observer agent",
+                    expected_agents=["observer", "harmonic"],
+                    expected_layers=["integration", "processing"],
+                    success_criteria={
+                        "primary_agent_in_expected": True,
+                        "confidence_threshold": 0.7,
+                    },
+                ),
+                BenchmarkTask(
+                    task_id="ROUTE-004",
+                    category=BenchmarkCategory.ROUTING,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Route a strategic analysis task to Strategic agent",
+                    expected_agents=["strategic", "wormhole"],
+                    expected_layers=["processing"],
+                    success_criteria={
+                        "primary_agent_in_expected": True,
+                        "confidence_threshold": 0.7,
+                    },
+                ),
+            ]
+        )
 
         # =====================================================================
         # DELEGATION TESTS - Handoff correctness
         # =====================================================================
-        self.tasks.extend([
-            BenchmarkTask(
-                task_id="DELEG-001",
-                category=BenchmarkCategory.DELEGATION,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Execute task requiring handoff from input to integration layer",
-                expected_agents=["bio", "fractal", "visual", "synthesizer"],
-                expected_layers=["input", "integration"],
-                success_criteria={
-                    "min_handoffs": 1,
-                    "handoff_success_rate": 0.8,
-                },
-            ),
-            BenchmarkTask(
-                task_id="DELEG-002",
-                category=BenchmarkCategory.DELEGATION,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Execute full pipeline: input → processing → integration → output",
-                expected_agents=["bio", "bitnet", "synthesizer", "bronze"],
-                expected_layers=["input", "processing", "integration", "output"],
-                success_criteria={
-                    "min_handoffs": 3,
-                    "handoff_success_rate": 0.8,
-                },
-            ),
-            BenchmarkTask(
-                task_id="DELEG-003",
-                category=BenchmarkCategory.DELEGATION,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Execute task with Validator escalation",
-                expected_agents=["workflow", "validator", "visual"],
-                expected_layers=["output"],
-                success_criteria={
-                    "escalation_detected": True,
-                    "escalation_resolved": True,
-                },
-            ),
-        ])
+        self.tasks.extend(
+            [
+                BenchmarkTask(
+                    task_id="DELEG-001",
+                    category=BenchmarkCategory.DELEGATION,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Execute task requiring handoff from input to integration layer",
+                    expected_agents=["bio", "fractal", "visual", "synthesizer"],
+                    expected_layers=["input", "integration"],
+                    success_criteria={
+                        "min_handoffs": 1,
+                        "handoff_success_rate": 0.8,
+                    },
+                ),
+                BenchmarkTask(
+                    task_id="DELEG-002",
+                    category=BenchmarkCategory.DELEGATION,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Execute full pipeline: input → processing → integration → output",
+                    expected_agents=["bio", "bitnet", "synthesizer", "bronze"],
+                    expected_layers=["input", "processing", "integration", "output"],
+                    success_criteria={
+                        "min_handoffs": 3,
+                        "handoff_success_rate": 0.8,
+                    },
+                ),
+                BenchmarkTask(
+                    task_id="DELEG-003",
+                    category=BenchmarkCategory.DELEGATION,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Execute task with Validator escalation",
+                    expected_agents=["workflow", "validator", "visual"],
+                    expected_layers=["output"],
+                    success_criteria={
+                        "escalation_detected": True,
+                        "escalation_resolved": True,
+                    },
+                ),
+            ]
+        )
 
         # =====================================================================
         # CONFLICT TESTS - Contradiction resolution
         # =====================================================================
-        self.tasks.extend([
-            BenchmarkTask(
-                task_id="CONF-001",
-                category=BenchmarkCategory.CONFLICT,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Resolve task with ambiguous routing (multiple valid agents)",
-                expected_agents=["synthesizer", "federation", "observer"],
-                expected_layers=["integration"],
-                success_criteria={
-                    "contradiction_detected": True,
-                    "resolution_strategy": "weighted_vote",
-                    "consensus_reached": True,
-                },
-            ),
-            BenchmarkTask(
-                task_id="CONF-002",
-                category=BenchmarkCategory.CONFLICT,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Handle task with conflicting agent outputs",
-                expected_agents=["strategic", "observer"],
-                expected_layers=["processing", "integration"],
-                success_criteria={
-                    "contradiction_detected": True,
-                    "resolution_time_ms": 5000,
-                },
-            ),
-        ])
+        self.tasks.extend(
+            [
+                BenchmarkTask(
+                    task_id="CONF-001",
+                    category=BenchmarkCategory.CONFLICT,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Resolve task with ambiguous routing (multiple valid agents)",
+                    expected_agents=["synthesizer", "federation", "observer"],
+                    expected_layers=["integration"],
+                    success_criteria={
+                        "contradiction_detected": True,
+                        "resolution_strategy": "weighted_vote",
+                        "consensus_reached": True,
+                    },
+                ),
+                BenchmarkTask(
+                    task_id="CONF-002",
+                    category=BenchmarkCategory.CONFLICT,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Handle task with conflicting agent outputs",
+                    expected_agents=["strategic", "observer"],
+                    expected_layers=["processing", "integration"],
+                    success_criteria={
+                        "contradiction_detected": True,
+                        "resolution_time_ms": 5000,
+                    },
+                ),
+            ]
+        )
 
         # =====================================================================
         # MEMORY TESTS - Archive/persistence flow
         # =====================================================================
-        self.tasks.extend([
-            BenchmarkTask(
-                task_id="MEM-001",
-                category=BenchmarkCategory.MEMORY,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Execute task requiring Archivist involvement",
-                expected_agents=["archivist"],
-                expected_layers=["output"],
-                success_criteria={
-                    "archivist_involved": True,
-                    "memory_written": True,
-                },
-            ),
-            BenchmarkTask(
-                task_id="MEM-002",
-                category=BenchmarkCategory.MEMORY,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Retrieve and use archived context in new task",
-                expected_agents=["archivist", "synthesizer"],
-                expected_layers=["output", "integration"],
-                success_criteria={
-                    "memory_retrieved": True,
-                    "context_used": True,
-                },
-            ),
-        ])
+        self.tasks.extend(
+            [
+                BenchmarkTask(
+                    task_id="MEM-001",
+                    category=BenchmarkCategory.MEMORY,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Execute task requiring Archivist involvement",
+                    expected_agents=["archivist"],
+                    expected_layers=["output"],
+                    success_criteria={
+                        "archivist_involved": True,
+                        "memory_written": True,
+                    },
+                ),
+                BenchmarkTask(
+                    task_id="MEM-002",
+                    category=BenchmarkCategory.MEMORY,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Retrieve and use archived context in new task",
+                    expected_agents=["archivist", "synthesizer"],
+                    expected_layers=["output", "integration"],
+                    success_criteria={
+                        "memory_retrieved": True,
+                        "context_used": True,
+                    },
+                ),
+            ]
+        )
 
         # =====================================================================
         # CONSENSUS TESTS - Multi-agent agreement
         # =====================================================================
-        self.tasks.extend([
-            BenchmarkTask(
-                task_id="CONS-001",
-                category=BenchmarkCategory.CONSENSUS,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Achieve consensus across integration layer agents",
-                expected_agents=["synthesizer", "observer", "federation", "mirror"],
-                expected_layers=["integration"],
-                success_criteria={
-                    "min_agents_involved": 2,
-                    "agreement_rate": 0.7,
-                    "consensus_time_ms": 3000,
-                },
-            ),
-            BenchmarkTask(
-                task_id="CONS-002",
-                category=BenchmarkCategory.CONSENSUS,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Measure agreement rate across repeated runs",
-                expected_agents=["synthesizer"],
-                expected_layers=["integration"],
-                success_criteria={
-                    "stability_coefficient": 0.8,
-                    "variance_threshold": 0.1,
-                },
-                metadata={"repetitions": 5},
-            ),
-        ])
+        self.tasks.extend(
+            [
+                BenchmarkTask(
+                    task_id="CONS-001",
+                    category=BenchmarkCategory.CONSENSUS,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Achieve consensus across integration layer agents",
+                    expected_agents=["synthesizer", "observer", "federation", "mirror"],
+                    expected_layers=["integration"],
+                    success_criteria={
+                        "min_agents_involved": 2,
+                        "agreement_rate": 0.7,
+                        "consensus_time_ms": 3000,
+                    },
+                ),
+                BenchmarkTask(
+                    task_id="CONS-002",
+                    category=BenchmarkCategory.CONSENSUS,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Measure agreement rate across repeated runs",
+                    expected_agents=["synthesizer"],
+                    expected_layers=["integration"],
+                    success_criteria={
+                        "stability_coefficient": 0.8,
+                        "variance_threshold": 0.1,
+                    },
+                    metadata={"repetitions": 5},
+                ),
+            ]
+        )
 
         # =====================================================================
         # RECOVERY TESTS - Failure recovery
         # =====================================================================
-        self.tasks.extend([
-            BenchmarkTask(
-                task_id="REC-001",
-                category=BenchmarkCategory.RECOVERY,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Recover from simulated agent failure",
-                expected_agents=["synthesizer", "bronze"],
-                expected_layers=["integration", "output"],
-                success_criteria={
-                    "failure_detected": True,
-                    "recovery_attempted": True,
-                    "recovery_success": True,
-                },
-                metadata={"simulate_failure": True},
-            ),
-            BenchmarkTask(
-                task_id="REC-002",
-                category=BenchmarkCategory.RECOVERY,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Handle timeout and fallback routing",
-                expected_agents=["synthesizer", "observer"],
-                expected_layers=["integration"],
-                success_criteria={
-                    "timeout_detected": True,
-                    "fallback_used": True,
-                },
-                timeout_seconds=5.0,
-            ),
-        ])
+        self.tasks.extend(
+            [
+                BenchmarkTask(
+                    task_id="REC-001",
+                    category=BenchmarkCategory.RECOVERY,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Recover from simulated agent failure",
+                    expected_agents=["synthesizer", "bronze"],
+                    expected_layers=["integration", "output"],
+                    success_criteria={
+                        "failure_detected": True,
+                        "recovery_attempted": True,
+                        "recovery_success": True,
+                    },
+                    metadata={"simulate_failure": True},
+                ),
+                BenchmarkTask(
+                    task_id="REC-002",
+                    category=BenchmarkCategory.RECOVERY,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Handle timeout and fallback routing",
+                    expected_agents=["synthesizer", "observer"],
+                    expected_layers=["integration"],
+                    success_criteria={
+                        "timeout_detected": True,
+                        "fallback_used": True,
+                    },
+                    timeout_seconds=5.0,
+                ),
+            ]
+        )
 
         # =====================================================================
         # RESONANCE TESTS - Phi-alignment behavior
         # =====================================================================
-        self.tasks.extend([
-            BenchmarkTask(
-                task_id="RES-001",
-                category=BenchmarkCategory.RESONANCE,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Select agent with highest phi-alignment for task",
-                expected_agents=["synthesizer", "observer"],
-                expected_layers=["integration"],
-                success_criteria={
-                    "phi_alignment_rate": 0.618,
-                    "resonance_fitness_correlation": 0.5,
-                },
-            ),
-            BenchmarkTask(
-                task_id="RES-002",
-                category=BenchmarkCategory.RESONANCE,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Measure resonance-to-fitness correlation",
-                expected_agents=["harmonic", "synthesizer"],
-                expected_layers=["processing", "integration"],
-                success_criteria={
-                    "resonance_fitness_correlation": 0.5,
-                },
-            ),
-        ])
+        self.tasks.extend(
+            [
+                BenchmarkTask(
+                    task_id="RES-001",
+                    category=BenchmarkCategory.RESONANCE,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Select agent with highest phi-alignment for task",
+                    expected_agents=["synthesizer", "observer"],
+                    expected_layers=["integration"],
+                    success_criteria={
+                        "phi_alignment_rate": 0.618,
+                        "resonance_fitness_correlation": 0.5,
+                    },
+                ),
+                BenchmarkTask(
+                    task_id="RES-002",
+                    category=BenchmarkCategory.RESONANCE,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Measure resonance-to-fitness correlation",
+                    expected_agents=["harmonic", "synthesizer"],
+                    expected_layers=["processing", "integration"],
+                    success_criteria={
+                        "resonance_fitness_correlation": 0.5,
+                    },
+                ),
+            ]
+        )
 
         # =====================================================================
         # ABLATION TESTS - Subsystem impact
         # =====================================================================
-        self.tasks.extend([
-            BenchmarkTask(
-                task_id="ABL-001",
-                category=BenchmarkCategory.ABLATION,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Execute task with Federation agent disabled",
-                expected_agents=["synthesizer", "observer"],
-                expected_layers=["integration"],
-                success_criteria={
-                    "ablated_agent_excluded": True,
-                    "task_completed": True,
-                },
-                metadata={"ablated_agents": ["federation"]},
-            ),
-            BenchmarkTask(
-                task_id="ABL-002",
-                category=BenchmarkCategory.ABLATION,
-                layer=BenchmarkLayer.SYSTEM,
-                description="Execute task with resonance weighting disabled",
-                expected_agents=["synthesizer"],
-                expected_layers=["integration"],
-                success_criteria={
-                    "resonance_disabled": True,
-                    "task_completed": True,
-                },
-                metadata={"disable_resonance": True},
-            ),
-        ])
+        self.tasks.extend(
+            [
+                BenchmarkTask(
+                    task_id="ABL-001",
+                    category=BenchmarkCategory.ABLATION,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Execute task with Federation agent disabled",
+                    expected_agents=["synthesizer", "observer"],
+                    expected_layers=["integration"],
+                    success_criteria={
+                        "ablated_agent_excluded": True,
+                        "task_completed": True,
+                    },
+                    metadata={"ablated_agents": ["federation"]},
+                ),
+                BenchmarkTask(
+                    task_id="ABL-002",
+                    category=BenchmarkCategory.ABLATION,
+                    layer=BenchmarkLayer.SYSTEM,
+                    description="Execute task with resonance weighting disabled",
+                    expected_agents=["synthesizer"],
+                    expected_layers=["integration"],
+                    success_criteria={
+                        "resonance_disabled": True,
+                        "task_completed": True,
+                    },
+                    metadata={"disable_resonance": True},
+                ),
+            ]
+        )
 
     def get_tasks_by_category(self, category: BenchmarkCategory) -> list[BenchmarkTask]:
         """Get all tasks in a category.
@@ -608,6 +634,7 @@ class TMTBenchmarkMatrix:
 # Benchmark Runner
 # =============================================================================
 
+
 class BenchmarkRunner:
     """Runs benchmark tasks and collects results."""
 
@@ -657,12 +684,8 @@ class BenchmarkRunner:
             )
 
             # Extract metrics from trace
-            agents_involved = list({
-                d.primary_agent.value for d in trace.decisions
-            })
-            layers_traversed = list({
-                d.layer.value for d in trace.decisions
-            })
+            agents_involved = list({d.primary_agent.value for d in trace.decisions})
+            layers_traversed = list({d.layer.value for d in trace.decisions})
 
             # Check structural correctness
             routing_correct = self._check_routing(task, agents_involved)
@@ -694,7 +717,9 @@ class BenchmarkRunner:
             else:
                 execution_status = ExecutionStatus.FAILED
                 failure_reason = self._determine_failure_reason(trace)
-                failure_reason_details = self._get_failure_details(trace, failure_reason)
+                failure_reason_details = self._get_failure_details(
+                    trace, failure_reason
+                )
 
             duration_ms = (time.time() - start_time) * 1000
 
@@ -718,7 +743,8 @@ class BenchmarkRunner:
                 confidence=trace.final_confidence,
                 resonance_score=self._calculate_resonance(trace),
                 contradiction_detected=self._detect_contradiction(trace),
-                consensus_reached=trace.final_status and trace.final_status.value == "completed",
+                consensus_reached=trace.final_status
+                and trace.final_status.value == "completed",
                 recovery_required=False,
                 trace_id=trace.trace_id,
             )
@@ -793,8 +819,12 @@ class BenchmarkRunner:
         details = []
 
         if reason == FailureReason.ROUTING_MISMATCH:
-            expected = getattr(trace, 'expected_agents', [])
-            actual = [d.primary_agent.value for d in trace.decisions] if trace.decisions else []
+            expected = getattr(trace, "expected_agents", [])
+            actual = (
+                [d.primary_agent.value for d in trace.decisions]
+                if trace.decisions
+                else []
+            )
             details.append(f"Expected agents: {expected}, got: {actual}")
 
         elif reason == FailureReason.MISSING_AGENT:
@@ -806,7 +836,9 @@ class BenchmarkRunner:
         elif reason == FailureReason.SCHEMA_FAILURE:
             for contract in trace.contracts:
                 if contract.output and contract.output.status.value == "failed":
-                    details.append(f"Contract {contract.agent_id}: {contract.output.error or 'schema validation failed'}")
+                    details.append(
+                        f"Contract {contract.agent_id}: {contract.output.error or 'schema validation failed'}"
+                    )
 
         elif reason == FailureReason.HANDOFF_FAILURE:
             details.append("Agent handoff failed during execution")
@@ -816,7 +848,11 @@ class BenchmarkRunner:
 
         elif reason == FailureReason.LLM_ERROR:
             for contract in trace.contracts:
-                if contract.output and hasattr(contract.output, 'error') and contract.output.error:
+                if (
+                    contract.output
+                    and hasattr(contract.output, "error")
+                    and contract.output.error
+                ):
                     details.append(f"LLM error: {contract.output.error}")
 
         return "; ".join(details) if details else f"Failure: {reason.value}"
@@ -826,11 +862,7 @@ class BenchmarkRunner:
         if not trace.contracts:
             return 0.0
 
-        resonances = [
-            c.output.resonance_score
-            for c in trace.contracts
-            if c.output
-        ]
+        resonances = [c.output.resonance_score for c in trace.contracts if c.output]
 
         return sum(resonances) / len(resonances) if resonances else 0.0
 
@@ -840,11 +872,7 @@ class BenchmarkRunner:
         if len(trace.contracts) < 2:
             return False
 
-        outputs = [
-            c.output.summary
-            for c in trace.contracts
-            if c.output
-        ]
+        outputs = [c.output.summary for c in trace.contracts if c.output]
 
         # Simple contradiction detection: different outputs
         return len(set(outputs)) > 1
@@ -880,30 +908,53 @@ class BenchmarkRunner:
 
         # Calculate three separate scores
         # 1. Orchestration Score: Structural correctness
-        structural_passed = [r for r in results if r.structural_status == StructuralStatus.PASSED]
-        structural_partial = [r for r in results if r.structural_status == StructuralStatus.PARTIAL]
+        structural_passed = [
+            r for r in results if r.structural_status == StructuralStatus.PASSED
+        ]
+        structural_partial = [
+            r for r in results if r.structural_status == StructuralStatus.PARTIAL
+        ]
         orchestration_score = (
-            len(structural_passed) + 0.5 * len(structural_partial)
-        ) / len(results) if results else 0.0
+            (len(structural_passed) + 0.5 * len(structural_partial)) / len(results)
+            if results
+            else 0.0
+        )
 
         # 2. Task Completion Score: Execution success
-        completed = [r for r in results if r.execution_status == ExecutionStatus.COMPLETED]
-        simulation_only = [r for r in results if r.execution_status == ExecutionStatus.SIMULATION_ONLY]
+        completed = [
+            r for r in results if r.execution_status == ExecutionStatus.COMPLETED
+        ]
+        simulation_only = [
+            r for r in results if r.execution_status == ExecutionStatus.SIMULATION_ONLY
+        ]
         # In simulation mode, we count simulation_only as "completed" for task completion
         if self.execution_mode == ExecutionMode.SIMULATION:
             task_completion_score = (
-                len(completed) + len(simulation_only)
-            ) / len(results) if results else 0.0
+                (len(completed) + len(simulation_only)) / len(results)
+                if results
+                else 0.0
+            )
         else:
             task_completion_score = len(completed) / len(results) if results else 0.0
 
         # 3. Output Quality Score: Confidence and resonance
-        quality_metrics = [r for r in results if r.confidence > 0.5 and r.resonance_score > 0.5]
+        quality_metrics = [
+            r for r in results if r.confidence > 0.5 and r.resonance_score > 0.5
+        ]
         output_quality_score = len(quality_metrics) / len(results) if results else 0.0
 
         # Additional statistics
-        average_confidence = sum(r.confidence for r in results if r.confidence > 0) / len(results) if results else 0.0
-        average_resonance = sum(r.resonance_score for r in results if r.resonance_score > 0) / len(results) if results else 0.0
+        average_confidence = (
+            sum(r.confidence for r in results if r.confidence > 0) / len(results)
+            if results
+            else 0.0
+        )
+        average_resonance = (
+            sum(r.resonance_score for r in results if r.resonance_score > 0)
+            / len(results)
+            if results
+            else 0.0
+        )
 
         return {
             "schema_version": BENCHMARK_SCHEMA_VERSION,
@@ -912,25 +963,47 @@ class BenchmarkRunner:
             "total_tasks": len(results),
             "structural_passed": len(structural_passed),
             "structural_partial": len(structural_partial),
-            "structural_failed": len([r for r in results if r.structural_status == StructuralStatus.FAILED]),
+            "structural_failed": len(
+                [r for r in results if r.structural_status == StructuralStatus.FAILED]
+            ),
             "execution_completed": len(completed),
             "execution_simulation_only": len(simulation_only),
-            "execution_failed": len([r for r in results if r.execution_status == ExecutionStatus.FAILED]),
+            "execution_failed": len(
+                [r for r in results if r.execution_status == ExecutionStatus.FAILED]
+            ),
             # Three separate scores
             "orchestration_score": round(orchestration_score, 3),
             "task_completion_score": round(task_completion_score, 3),
             "output_quality_score": round(output_quality_score, 3),
             # Expected targets hit rates
-            "expected_agents_hit_rate": sum(1 for r in results if r.expected_agents_hit) / len(results) if results else 0.0,
-            "expected_layers_hit_rate": sum(1 for r in results if r.expected_layers_hit) / len(results) if results else 0.0,
+            "expected_agents_hit_rate": (
+                sum(1 for r in results if r.expected_agents_hit) / len(results)
+                if results
+                else 0.0
+            ),
+            "expected_layers_hit_rate": (
+                sum(1 for r in results if r.expected_layers_hit) / len(results)
+                if results
+                else 0.0
+            ),
             # Legacy success field for backwards compatibility
             "success": orchestration_score >= 0.5 and task_completion_score >= 0.5,
             # Detailed metrics
-            "average_duration_ms": sum(r.duration_ms for r in results) / len(results) if results else 0.0,
+            "average_duration_ms": (
+                sum(r.duration_ms for r in results) / len(results) if results else 0.0
+            ),
             "average_confidence": round(average_confidence, 3),
             "average_resonance": round(average_resonance, 3),
-            "contradiction_rate": sum(1 for r in results if r.contradiction_detected) / len(results) if results else 0.0,
-            "consensus_rate": sum(1 for r in results if r.consensus_reached) / len(results) if results else 0.0,
+            "contradiction_rate": (
+                sum(1 for r in results if r.contradiction_detected) / len(results)
+                if results
+                else 0.0
+            ),
+            "consensus_rate": (
+                sum(1 for r in results if r.consensus_reached) / len(results)
+                if results
+                else 0.0
+            ),
             "results": [
                 {
                     "task_id": r.task_id,
@@ -948,7 +1021,9 @@ class BenchmarkRunner:
                     "handoffs_completed": r.handoffs_completed,
                     "contracts_valid": r.contracts_valid,
                     # Failure info
-                    "failure_reason": r.failure_reason.value if r.failure_reason else None,
+                    "failure_reason": (
+                        r.failure_reason.value if r.failure_reason else None
+                    ),
                     "failure_reason_details": r.failure_reason_details,
                     # Metrics
                     "duration_ms": r.duration_ms,
@@ -979,8 +1054,8 @@ class BenchmarkRunner:
         }
 
         # Run full orchestration
-        comparison["baselines"][BaselineType.FULL_ORCHESTRATION.value] = self.run_baseline(
-            BaselineType.FULL_ORCHESTRATION, orchestrator
+        comparison["baselines"][BaselineType.FULL_ORCHESTRATION.value] = (
+            self.run_baseline(BaselineType.FULL_ORCHESTRATION, orchestrator)
         )
 
         # Run ablated (without resonance weighting)
@@ -997,7 +1072,8 @@ class BenchmarkRunner:
                 full_orch["orchestration_score"] - ablated_orch["orchestration_score"]
             ),
             "task_completion_score": (
-                full_orch["task_completion_score"] - ablated_orch["task_completion_score"]
+                full_orch["task_completion_score"]
+                - ablated_orch["task_completion_score"]
             ),
             "output_quality_score": (
                 full_orch["output_quality_score"] - ablated_orch["output_quality_score"]
@@ -1018,7 +1094,10 @@ class BenchmarkRunner:
         Returns:
             Path to saved file
         """
-        filename = filename or f"benchmark_results_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.json"
+        filename = (
+            filename
+            or f"benchmark_results_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.json"
+        )
         output_path = self.output_dir / filename
 
         data = {
@@ -1033,7 +1112,9 @@ class BenchmarkRunner:
                     "execution_mode": r.execution_mode.value,
                     "structural_status": r.structural_status.value,
                     "execution_status": r.execution_status.value,
-                    "failure_reason": r.failure_reason.value if r.failure_reason else None,
+                    "failure_reason": (
+                        r.failure_reason.value if r.failure_reason else None
+                    ),
                     "failure_reason_details": r.failure_reason_details,
                     # Three separate scores
                     "orchestration_score": r.orchestration_score,
@@ -1064,7 +1145,7 @@ class BenchmarkRunner:
             ],
         }
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, default=str)
 
         return output_path
@@ -1073,6 +1154,7 @@ class BenchmarkRunner:
 # =============================================================================
 # Convenience Functions
 # =============================================================================
+
 
 def create_benchmark_matrix(vault_path: Path) -> TMTBenchmarkMatrix:
     """Create a benchmark matrix for TMT Quantum Vault.

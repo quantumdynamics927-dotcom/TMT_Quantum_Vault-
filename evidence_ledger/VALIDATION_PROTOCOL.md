@@ -99,7 +99,9 @@ For each IBM Quantum job:
 
 ### 3.2 Sierpinski Sacred-Score Invariant
 
-The Sierpinski invariant is validated at exactly $1/\varphi = 0.618$ over 23 independent IBM hardware runs. This is a **hardware-derived constant** that serves as a falsifiable claim.
+The Sierpinski invariant is validated as a depth-invariant fixed-point signature at $1/\varphi \approx 0.618$ over 23 independent IBM hardware runs (depths 3-5). This is a falsifiable, hardware-derived claim for the Sierpinski circuit family.
+
+Subsequent promoter-panel hardware results suggest the same ~0.618 region may also function as a broader measured baseline across circuit families, so downstream validation should include calibration-aware residual analysis when testing family-specific effects.
 
 **Validation Method:**
 1. Execute Sierpinski fractal circuit on IBM hardware

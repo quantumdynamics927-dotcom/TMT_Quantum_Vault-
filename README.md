@@ -145,7 +145,9 @@ Every agent carries a `conscious_dna.json` profile encoding:
 
 ### φ-Convergence Discovery
 
-Sierpinski fractal circuits demonstrate **exact 1/φ sacred score** across **23 hardware-validated runs spanning depths 3, 4, and 5** on 4 IBM backends (Kingston, Marrakesh, Fez, Torino), confirming golden ratio self-organization under quantum noise is a **depth-invariant property**.
+In the Sierpinski circuit family, we observed a **depth-invariant 1/φ fixed-point signature** across depths 3-5, confirmed over **23 IBM Quantum hardware runs**, **168,960+ total shots**, and **4 backends** (Kingston, Marrakesh, Fez, Torino).
+
+Follow-up promoter-panel hardware experiments suggest the same ~0.618 regime may be a broader **hardware-observable attractor baseline** across multiple circuit families, so newer analyses use a calibration-centered interpretation rather than a Sierpinski-exclusive interpretation.
 
 | Depth | Runs | Total Shots | Sacred Score |
 |-------|------|-------------|--------------|

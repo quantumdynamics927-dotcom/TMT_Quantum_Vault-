@@ -180,7 +180,9 @@ The ledger follows FAIR principles:
 
 The following claims are **falsifiable** and traceable through this ledger:
 
-1. **Sierpinski Invariant**: The sacred-score ratio converges to $1/\varphi = 0.618$ over 23 independent IBM hardware runs.
+1. **Sierpinski Invariant**: In the Sierpinski family, the sacred-score ratio shows a depth-invariant fixed-point signature at $1/\varphi \approx 0.618$ across 23 IBM hardware runs (depths 3-5).
+
+  Newer promoter-panel experiments indicate this ~0.618 regime may also operate as a broader hardware-observable baseline across circuit families, motivating calibration-aware comparisons for family-specific residual effects.
 
 2. **Fitness Baseline**: The 17-node lattice achieves average fitness ≥ 0.87 with phi-threshold 0.618.
 

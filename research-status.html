@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMT Quantum Vault Research Status</title>
+    <style>
+        :root {
+            --primary: #6929C4;
+            --secondary: #4A1A7C;
+            --accent: #FFD700;
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --text: #e0e0e0;
+            --text-muted: #9b9bb0;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; }
+        header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            padding: 48px 0 36px;
+            margin-bottom: 32px;
+        }
+        h1 { margin: 0; font-size: 2.2rem; }
+        .subtitle { margin-top: 10px; color: rgba(255,255,255,0.88); }
+        .nav { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+        }
+        section { margin: 28px 0; }
+        h2 {
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+            padding-left: 12px;
+        }
+        .callout {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent);
+            padding: 16px 18px;
+            border-radius: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid #2a2a3a;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .card h3 { margin-top: 0; color: var(--accent); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid #2a2a3a;
+            vertical-align: top;
+        }
+        th { background: var(--secondary); }
+        tr:last-child td { border-bottom: none; }
+        .muted { color: var(--text-muted); }
+        code { color: var(--accent); }
+    </style>
+</head>
+<body id="research-status-page">
+    <header>
+        <div class="container">
+            <h1>Research Status</h1>
+            <p class="subtitle">Provider-pure measurement vocabulary synchronized with the AGI-model validation framework.</p>
+            <div class="nav">
+                <a href="index.html">Overview</a>
+                <a href="research-status.html">Research Status</a>
+                <a href="README.md">README</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section>
+            <div class="callout" id="research-load-state">Loading research status JSON artifacts...</div>
+        </section>
+
+        <section>
+            <h2>Measurement Vocabulary</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>measurement_clean</h3>
+                    <p>Single-provider, no-fallback runs suitable for hypothesis testing and publication-grade interpretation.</p>
+                </div>
+                <div class="card">
+                    <h3>measurement_mixed</h3>
+                    <p>Mixed-provider or provider-uncertain runs that remain useful for exploration but not for strong causal claims.</p>
+                </div>
+                <div class="card">
+                    <h3>production_resilient</h3>
+                    <p>Operational runs that prioritize uptime and graceful fallback rather than research attribution purity.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Synced AGI-model Status</h2>
+            <div class="callout" id="research-summary">Waiting for synced measurement snapshot...</div>
+        </section>
+
+        <section>
+            <h2>Clean vs Mixed Measurements</h2>
+            <table id="measurement-status-table">
+                <thead>
+                    <tr>
+                        <th>Run</th>
+                        <th>Class</th>
+                        <th>Provider</th>
+                        <th>Purity</th>
+                        <th>Mean φ</th>
+                        <th>Null</th>
+                        <th>Cohen's d</th>
+                        <th>p-value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="8">Loading measurement comparison rows...</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Cloud Model Benchmark Queue</h2>
+            <table id="cloud-model-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Status</th>
+                        <th>Target Prompt Family</th>
+                        <th>Target Measurement Class</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="5">Loading cloud benchmark status...</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Scientific Validation Sync</h2>
+            <div class="callout" id="scientific-sync-summary">Loading scientific validation summary...</div>
+            <p class="muted">Source files are rendered client-side from <code>research_status.json</code> and <code>scientific_validation_report.json</code>.</p>
+        </section>
+    </main>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

@@ -86,6 +86,26 @@
             font-size: 0.85rem;
             backdrop-filter: blur(10px);
         }
+
+        .top-nav {
+            margin-top: 18px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .top-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+            font-size: 0.9rem;
+        }
         
         /* Stats Section */
         .stats {
@@ -336,6 +356,52 @@
             margin: 10px 0 0 18px;
         }
 
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+            margin-top: 24px;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border: 1px solid #2a2a3a;
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .dashboard-card h3 {
+            margin: 0 0 10px;
+            color: var(--accent);
+            font-size: 1.05rem;
+        }
+
+        .dashboard-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: 0.92rem;
+        }
+
+        .mini-table td,
+        .mini-table th {
+            padding: 8px 10px;
+            border-bottom: 1px solid #2a2a3a;
+            text-align: left;
+        }
+
+        .mini-table tr:last-child td,
+        .mini-table tr:last-child th {
+            border-bottom: none;
+        }
+
         .callout {
             background: rgba(18, 18, 26, 0.92);
             border-left: 4px solid var(--accent);
@@ -430,6 +496,11 @@
                 <span class="badge">Avg Fitness: 0.8809</span>
                 <span class="badge">Research Update: Provider-Pure Validation</span>
             </div>
+            <div class="top-nav">
+                <a href="index.html">Overview</a>
+                <a href="research-status.html">Research Status</a>
+                <a href="README.md">README</a>
+            </div>
         </div>
     </header>
     
@@ -479,6 +550,46 @@
                     <span class="pill">kimi-k2.5:cloud</span>
                 </div>
             </div>
+        </section>
+
+        <section>
+            <h2>📈 Live Benchmark Dashboard</h2>
+            <div class="callout" id="dashboard-load-state">Loading benchmark JSON artifacts from the repository...</div>
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3>Extended-17 Fitness</h3>
+                    <div class="dashboard-value" id="extended17-fitness">--</div>
+                    <div id="extended17-meta">Waiting for benchmark results...</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Scientific Validation</h3>
+                    <div class="dashboard-value" id="validation-pass-rate">--</div>
+                    <div id="validation-meta">Waiting for validation report...</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3>BitNet Improvement</h3>
+                    <div class="dashboard-value" id="bitnet-score">--</div>
+                    <div id="bitnet-meta">Waiting for BitNet benchmark...</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Measurement Vocabulary</h3>
+                    <div class="dashboard-value" id="research-clean-count">--</div>
+                    <div id="research-meta">Waiting for research status data...</div>
+                </div>
+            </div>
+            <table class="mini-table" id="top-agents-table">
+                <thead>
+                    <tr>
+                        <th>Top Agents</th>
+                        <th>Fitness</th>
+                        <th>Φ Score</th>
+                        <th>Resonance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4">Loading top-agent benchmark rows...</td></tr>
+                </tbody>
+            </table>
         </section>
         
         <!-- Key Innovations -->
@@ -797,10 +908,12 @@ OLLAMA_API_KEY=*** python phi_recursive_validation.py \
             <div class="footer-links">
                 <a href="https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-">GitHub Repository</a>
                 <a href="https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/issues">Issue Tracker</a>
+                <a href="research-status.html">Research Status</a>
                 <a href="https://qiskit.org">Qiskit Documentation</a>
             </div>
             <p class="copyright">© 2026 TMT Quantum Vault Team. All rights reserved.</p>
         </div>
     </footer>
+    <script src="dashboard.js"></script>
 </body>
 </html>

@@ -1,0 +1,78 @@
+{
+  "generated_at": "2026-04-13T23:45:00Z",
+  "source_snapshot": {
+    "repo": "AGI-model",
+    "generated_at": "2026-04-13T23:45:00Z",
+    "notes": "Client-side research status snapshot synchronized from AGI-model validation outputs for TMT site rendering."
+  },
+  "measurement_vocabulary": {
+    "provider_purity_target": 1.0,
+    "measurement_clean": "Single-provider, no-fallback, research-grade measurement.",
+    "measurement_mixed": "Mixed-provider or provider-uncertain measurement; provisional.",
+    "production_resilient": "Operational run with fallback tolerance for reliability."
+  },
+  "measurements": [
+    {
+      "label": "mechanistic_emergence (mixed/provider-unqualified)",
+      "prompt_family": "mechanistic_emergence",
+      "measurement_class": "measurement_mixed",
+      "provider_path": "mixed_or_unknown",
+      "provider_purity": null,
+      "mean_phi_resonance": 2.2685214494681185,
+      "null_baseline_mean": 1.04897112033491,
+      "effect_size": 1.3444959742514313,
+      "p_value": 0.00018376483424719668,
+      "confidence": "medium",
+      "interpretation": "Historical mixed-provider run. Useful as exploratory evidence only."
+    },
+    {
+      "label": "mechanistic_emergence (clean fallback)",
+      "prompt_family": "mechanistic_emergence",
+      "measurement_class": "measurement_clean",
+      "provider_path": "fallback",
+      "provider_purity": 1.0,
+      "mean_phi_resonance": 2.2685214494681185,
+      "null_baseline_mean": 0.8482529116785829,
+      "effect_size": 1.4987429036867455,
+      "p_value": 3.218982924158631e-07,
+      "confidence": "medium",
+      "interpretation": "Provider-pure fallback benchmark suitable for clean comparison."
+    },
+    {
+      "label": "biomimetic_resilience (provider-pure fallback)",
+      "prompt_family": "biomimetic_resilience",
+      "measurement_class": "production_resilient",
+      "provider_path": "fallback",
+      "provider_purity": 1.0,
+      "mean_phi_resonance": 1.6985184806686409,
+      "null_baseline_mean": 0.7029039162791576,
+      "effect_size": 3.3258173238274895,
+      "p_value": 4.889908786902385e-20,
+      "confidence": "medium",
+      "interpretation": "Provider-pure operational run with strong standardized separation but without strict no-fallback measurement flags."
+    }
+  ],
+  "cloud_model_results": [
+    {
+      "model": "glm-5:cloud",
+      "status": "queued",
+      "target_prompt_family": "mechanistic_emergence",
+      "measurement_target": "measurement_clean",
+      "notes": "Run with --backend ollama_cloud --require-single-backend --no-fallback."
+    },
+    {
+      "model": "qwen3-coder:480b",
+      "status": "queued",
+      "target_prompt_family": "falsifiable_claims",
+      "measurement_target": "measurement_clean",
+      "notes": "Use for code-centric validation and pipeline-edit benchmarks."
+    },
+    {
+      "model": "kimi-k2.5:cloud",
+      "status": "queued",
+      "target_prompt_family": "biomimetic_resilience",
+      "measurement_target": "measurement_clean",
+      "notes": "Use for generated-thought and long-form comparative runs."
+    }
+  ]
+}

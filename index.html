@@ -293,6 +293,71 @@
             padding: 20px;
             border: 1px solid #2a2a3a;
         }
+
+        .research-banner {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(105, 41, 196, 0.18));
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 14px;
+            padding: 24px;
+            margin: 32px 0 8px;
+        }
+
+        .research-banner h3 {
+            margin-top: 0;
+            color: var(--accent);
+        }
+
+        .research-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-top: 24px;
+        }
+
+        .research-card {
+            background: var(--bg-card);
+            border: 1px solid #2a2a3a;
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .research-card h3 {
+            margin: 0 0 12px;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .research-card p,
+        .research-card li {
+            color: var(--text);
+        }
+
+        .research-card ul {
+            margin: 10px 0 0 18px;
+        }
+
+        .callout {
+            background: rgba(18, 18, 26, 0.92);
+            border-left: 4px solid var(--accent);
+            border-radius: 8px;
+            padding: 16px 18px;
+            margin: 18px 0;
+        }
+
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .pill {
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(105, 41, 196, 0.18);
+            border: 1px solid rgba(105, 41, 196, 0.35);
+            font-size: 0.85rem;
+        }
         
         .hardware-name {
             font-weight: 600;
@@ -363,6 +428,7 @@
                 <span class="badge">17 Agents</span>
                 <span class="badge">v0.4.0-dev</span>
                 <span class="badge">Avg Fitness: 0.8809</span>
+                <span class="badge">Research Update: Provider-Pure Validation</span>
             </div>
         </div>
     </header>
@@ -389,6 +455,29 @@
             <div class="stat">
                 <div class="stat-value">106</div>
                 <div class="stat-label">Tests Passed</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">1.0</div>
+                <div class="stat-label">Provider Purity Target</div>
+            </div>
+        </section>
+
+        <section>
+            <div class="research-banner">
+                <h3>Latest Research Upgrade</h3>
+                <p>
+                    The current research direction now emphasizes <strong>provider-pure measurement</strong>,
+                    <strong>mechanistic prompt families</strong>, and <strong>explicit cloud-model benchmarking</strong>.
+                    Mixed-provider runs are treated as provisional; clean single-backend runs are treated as research-grade measurements.
+                </p>
+                <div class="pill-row">
+                    <span class="pill">measurement_clean</span>
+                    <span class="pill">measurement_mixed</span>
+                    <span class="pill">production_resilient</span>
+                    <span class="pill">glm-5:cloud</span>
+                    <span class="pill">qwen3-coder:480b</span>
+                    <span class="pill">kimi-k2.5:cloud</span>
+                </div>
             </div>
         </section>
         
@@ -423,8 +512,53 @@
                         <td><strong>Three-Layer Entropy</strong></td>
                         <td>QTRG + DNA discovery + BitNet ternary weights combined</td>
                     </tr>
+                    <tr>
+                        <td><strong>Provider-Pure Measurement</strong></td>
+                        <td>Latest validation separates clean single-backend experiments from mixed-provider operational runs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cloud Model Benchmarking</strong></td>
+                        <td>Research workflow now compares `glm-5:cloud`, `qwen3-coder:480b`, and `kimi-k2.5:cloud` under fixed prompts and null baselines</td>
+                    </tr>
                 </tbody>
             </table>
+        </section>
+
+        <section>
+            <h2>🧪 Research-Grade Validation</h2>
+            <div class="callout">
+                <strong>Current interpretation rule:</strong> results from mixed provider paths are provisional.
+                Strong causal claims require fixed prompt order, fixed temperature, provider purity of 1.0, and explicit null-baseline comparison.
+            </div>
+
+            <div class="research-grid">
+                <div class="research-card">
+                    <h3>Measurement Classes</h3>
+                    <ul>
+                        <li><strong>measurement_clean</strong>: single-provider, no-fallback, research-grade hypothesis testing</li>
+                        <li><strong>measurement_mixed</strong>: exploratory runs with provider contamination</li>
+                        <li><strong>production_resilient</strong>: operational runs that tolerate fallback for uptime</li>
+                    </ul>
+                </div>
+
+                <div class="research-card">
+                    <h3>Prompt Families That Matter</h3>
+                    <ul>
+                        <li><strong>Mechanistic emergence</strong>: local rules, macro coherence, measurable predictions</li>
+                        <li><strong>Biomimetic resilience</strong>: adaptation under perturbation and heterogeneity</li>
+                        <li><strong>Falsifiable claims</strong>: claims that can be disproven under fixed conditions</li>
+                    </ul>
+                </div>
+
+                <div class="research-card">
+                    <h3>Cloud Benchmark Targets</h3>
+                    <ul>
+                        <li><strong>glm-5:cloud</strong>: default reasoning benchmark</li>
+                        <li><strong>qwen3-coder:480b</strong>: code and validation-pipeline edits</li>
+                        <li><strong>kimi-k2.5:cloud</strong>: long-form thought generation</li>
+                    </ul>
+                </div>
+            </div>
         </section>
         
         <!-- Phi Stack -->
@@ -624,6 +758,31 @@ tmt-vault optimize --phi-threshold 0.618
 tmt-vault report --format json
                 </code>
             </div>
+
+                        <h3>Research Benchmark Pattern</h3>
+                        <div class="code-block">
+                                <code>
+<span class="comment"># Research-grade cloud benchmark (provider-pure)</span>
+OLLAMA_API_KEY=*** python phi_recursive_validation.py \
+    --high-value \
+    --backend ollama_cloud \
+    --model glm-5:cloud \
+    --prompt-set mechanistic_emergence \
+    --runs <span class="number">10</span> \
+    --require-single-backend \
+    --no-fallback
+
+<span class="comment"># Comparative code-focused run</span>
+OLLAMA_API_KEY=*** python phi_recursive_validation.py \
+    --high-value \
+    --backend ollama_cloud \
+    --model qwen3-coder:480b \
+    --prompt-set falsifiable_claims \
+    --runs <span class="number">10</span> \
+    --require-single-backend \
+    --no-fallback
+                                </code>
+                        </div>
         </section>
         
         <!-- License -->

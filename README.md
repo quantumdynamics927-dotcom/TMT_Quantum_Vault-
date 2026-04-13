@@ -68,6 +68,13 @@ inspection, validation, and release workflows.
 - **Cognitive Assessment Mapping** (`tools/cognitive_assessment_to_agent_dna.py`) - Clinical scores → agent DNA parameters
 - **Promoter DNA Integration** (`tools/promoter_loader.py`, `tools/quantum_circuits.py`) - 10 real gene promoters with φ-structured quantum circuits
 
+### Latest Research Direction — April 2026
+
+- **Provider-Pure Measurement** - Current validation practice distinguishes `measurement_clean`, `measurement_mixed`, and `production_resilient` runs so operational fallback behavior is not confused with research-grade evidence.
+- **Cloud Benchmark Models** - Recommended Ollama cloud comparison set: `glm-5:cloud` for reasoning, `qwen3-coder:480b` for code-centric work, and `kimi-k2.5:cloud` for long-form generated-thought experiments.
+- **Prompt-Family Discipline** - Stronger results come from mechanistic, biomimetic, and falsifiable prompt families rather than symbolic prompts alone.
+- **Interpretation Discipline** - Mixed-provider results are now treated as provisional until repeated under fixed backend, fixed prompt order, fixed temperature, and explicit null-baseline comparison.
+
 ### The φ-Stack: Biological Quantum Circuits
 
 The DNA helix physically encodes the golden ratio φ in its geometry:

@@ -1,0 +1,82 @@
+[
+  {
+    "filepath": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\qasm\\hardware_entropy_small_test.qasm",
+    "num_qubits": 27,
+    "num_clbits": 27,
+    "original_depth": 12,
+    "transpiled_depth": 12,
+    "original_gates": 221,
+    "transpiled_gates": 221,
+    "gate_counts": {
+      "h": 27,
+      "cx": 91,
+      "barrier": 4,
+      "rz": 27,
+      "ry": 27,
+      "t": 9,
+      "tdg": 9,
+      "measure": 27
+    },
+    "backend": "ibm_brisbane"
+  },
+  {
+    "filepath": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\qasm\\hardware_entropy_brisbane_127q.qasm",
+    "num_qubits": 127,
+    "num_clbits": 127,
+    "original_depth": 10,
+    "transpiled_depth": 10,
+    "original_gates": 911,
+    "transpiled_gates": 911,
+    "gate_counts": {
+      "h": 127,
+      "cx": 315,
+      "barrier": 3,
+      "rz": 127,
+      "ry": 127,
+      "t": 43,
+      "tdg": 42,
+      "measure": 127
+    },
+    "backend": "ibm_brisbane"
+  },
+  {
+    "filepath": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\qasm\\hardware_entropy_sherbrooke_127q.qasm",
+    "num_qubits": 127,
+    "num_clbits": 127,
+    "original_depth": 10,
+    "transpiled_depth": 10,
+    "original_gates": 911,
+    "transpiled_gates": 911,
+    "gate_counts": {
+      "h": 127,
+      "cx": 315,
+      "barrier": 3,
+      "rz": 127,
+      "ry": 127,
+      "t": 43,
+      "tdg": 42,
+      "measure": 127
+    },
+    "backend": "ibm_sherbrooke"
+  },
+  {
+    "filepath": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\qasm\\hardware_entropy_fez_156q.qasm",
+    "num_qubits": 156,
+    "num_clbits": 156,
+    "original_depth": 10,
+    "transpiled_depth": 10,
+    "original_gates": 1119,
+    "transpiled_gates": 1119,
+    "gate_counts": {
+      "h": 156,
+      "cx": 388,
+      "barrier": 3,
+      "rz": 156,
+      "ry": 156,
+      "t": 52,
+      "tdg": 52,
+      "measure": 156
+    },
+    "backend": "ibm_fez"
+  }
+]

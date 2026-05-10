@@ -1,11 +1,20 @@
 {
   "circuit": "sierpinski",
-  "qasm_file": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\qasm\\sierpinski_20260321_025656.qasm",
+  "qasm_file": "circuits/qasm/sierpinski_20260321_025656.qasm",
   "qubits": 21,
   "depth": 4,
   "generated": "20260321_025656",
-  "status": "PENDING_UPLOAD",
+  "status": "UPLOADED",
   "job_id": null,
   "backend": "ibm_fez",
-  "shots": 4096
+  "shots": 4096,
+  "hardware_validated": true,
+  "provenance": {
+    "commit": "393d14f",
+    "repository": "quantumdynamics927-dotcom/TMT_Quantum_Vault-",
+    "qasm_url": "https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/blob/main/circuits/qasm/sierpinski_20260321_025656.qasm",
+    "validation_runs": 23,
+    "sacred_score_mean": 0.618,
+    "phi_convergence": "depth-invariant"
+  }
 }

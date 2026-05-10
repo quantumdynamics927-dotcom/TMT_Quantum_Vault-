@@ -30,3 +30,14 @@ circuits/qasm/*.qasm
 circuits/qasm/*_manifest.json
 !circuits/ingested/SIGNIFICANT/
 circuits/ingested/SIGNIFICANT/*.json
+
+# HF Space local clone (deployed via hf-deploy/)
+hf-space/
+
+# Node.js dependencies
+node_modules/
+package.json
+package-lock.json
+
+# Benchmark results (generated locally)
+benchmark_results/

@@ -14,6 +14,27 @@ COPY pyproject.toml .
 COPY tmt_quantum_vault/ ./tmt_quantum_vault/
 COPY vault_config.json .
 COPY metatron_geometry.json .
+COPY hf_app.py .
+
+# Copy Agent directories (conscious_dna.json files)
+COPY Agent_Archivist/ ./Agent_Archivist/
+COPY Agent_Auditor/ ./Agent_Auditor/
+COPY Agent_Bio/ ./Agent_Bio/
+COPY Agent_BitNet/ ./Agent_BitNet/
+COPY Agent_Bronze/ ./Agent_Bronze/
+COPY Agent_Data/ ./Agent_Data/
+COPY Agent_Federation/ ./Agent_Federation/
+COPY Agent_Fractal/ ./Agent_Fractal/
+COPY Agent_Harmonic/ ./Agent_Harmonic/
+COPY Agent_Mirror/ ./Agent_Mirror/
+COPY Agent_Observer/ ./Agent_Observer/
+COPY Agent_Stealth/ ./Agent_Stealth/
+COPY Agent_Strategic/ ./Agent_Strategic/
+COPY Agent_Synthesizer/ ./Agent_Synthesizer/
+COPY Agent_Validator/ ./Agent_Validator/
+COPY Agent_Visual/ ./Agent_Visual/
+COPY Agent_Workflow/ ./Agent_Workflow/
+COPY Agent_Wormhole/ ./Agent_Wormhole/
 
 # Install TMT Quantum Vault
 RUN pip install --no-cache-dir -e ".[all]" && \

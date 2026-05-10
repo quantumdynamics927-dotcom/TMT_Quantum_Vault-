@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sierpinski Quantum Circuit</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #0a0a0a; color: #fff; font-family: monospace; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border: 1px solid #444; border-radius: 8px; }
+        .metric { color: #bb86fc; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h3>Scale-Invariant Routing (Fractal Depth)</h3>
+        <label>Recursion Depth: <span id="depthVal" class="metric">1</span></label><br><br>
+        <input type="range" id="depthSlider" min="0" max="6" step="1" value="1"><br><br>
+        <label>Active Sub-Circuits: <span id="circuitsVal" class="metric">3</span></label>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const slider = document.getElementById('depthSlider');
+        const depthVal = document.getElementById('depthVal');
+        const circuitsVal = document.getElementById('circuitsVal');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Draw a single triangle
+        function drawTriangle(x, y, size, fillOpacity, glow) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - size / Math.sqrt(3));
+            ctx.lineTo(x - size / 2, y + size * Math.sqrt(3) / 6);
+            ctx.lineTo(x + size / 2, y + size * Math.sqrt(3) / 6);
+            ctx.closePath();
+            
+            ctx.fillStyle = `rgba(187, 134, 252, ${fillOpacity})`;
+            if (glow) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "#bb86fc";
+            } else {
+                ctx.shadowBlur = 0;
+            }
+            ctx.fill();
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Reset
+        }
+
+        // Recursive Sierpinski function
+        function drawSierpinski(x, y, size, depth, maxDepth, time) {
+            if (depth === 0) {
+                // Base case: draw the active sub-circuit
+                // Pulsing effect based on time
+                const pulse = (Math.sin(time * 0.003 + x * 0.01 + y * 0.01) + 1) / 2;
+                const opacity = 0.2 + (pulse * 0.6);
+                drawTriangle(x, y, size, opacity, true);
+                return;
+            }
+
+            const newSize = size / 2;
+            const h = newSize * Math.sqrt(3) / 2;
+
+            // Top, Bottom-Left, Bottom-Right recursive calls
+            drawSierpinski(x, y - h * 2/3, newSize, depth - 1, maxDepth, time);
+            drawSierpinski(x - newSize / 2, y + h / 3, newSize, depth - 1, maxDepth, time);
+            drawSierpinski(x + newSize / 2, y + h / 3, newSize, depth - 1, maxDepth, time);
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const depth = parseInt(slider.value);
+            depthVal.innerText = depth;
+            circuitsVal.innerText = Math.pow(3, depth);
+
+            const size = Math.min(canvas.width, canvas.height) * 0.7;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 + size * 0.1; // Offset slightly for visual balance
+
+            drawSierpinski(centerX, centerY, size, depth, depth, Date.now());
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

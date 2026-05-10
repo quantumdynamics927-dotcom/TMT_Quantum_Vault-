@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phi-Resonance Quantum State</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #050505; color: #fff; font-family: monospace; }
+        #ui { position: absolute; top: 20px; left: 20px; z-index: 100; background: rgba(0,0,0,0.7); padding: 15px; border: 1px solid #333; border-radius: 8px; }
+        input[type="range"] { width: 200px; }
+        .highlight { color: #00ffcc; font-weight: bold; }
+    </style>
+    <!-- Load Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="ui">
+        <h3>Metatron Gating: Phi-Resonance</h3>
+        <label>Phase Alignment: <span id="phaseVal" class="highlight">1.00</span></label><br><br>
+        <input type="range" id="phaseSlider" min="0" max="3.14" step="0.01" value="1.0"><br><br>
+        <label>Entanglement Fidelity: <span id="fidelityVal" class="highlight">0%</span></label>
+    </div>
+
+    <script>
+        const PHI = 1.618;
+        
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Icosahedron Geometry (Platonic solid tied to Phi)
+        const radius = 2;
+        const detail = 0;
+        let geometry = new THREE.IcosahedronGeometry(radius, detail);
+        // Store original vertices for baseline
+        const baseVertices = [];
+        const positionAttribute = geometry.attributes.position;
+        for (let i = 0; i < positionAttribute.count; i++) {
+            baseVertices.push(new THREE.Vector3().fromBufferAttribute(positionAttribute, i));
+        }
+
+        // Materials: Glowing core + Wireframe
+        const solidMat = new THREE.MeshBasicMaterial({ color: 0x0044ff, transparent: true, opacity: 0.3 });
+        const wireMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, wireframe: true });
+        
+        const mesh = new THREE.Mesh(geometry, solidMat);
+        const wireframe = new THREE.Mesh(geometry, wireMat);
+        mesh.add(wireframe);
+        scene.add(mesh);
+
+        camera.position.z = 5;
+
+        // UI Elements
+        const slider = document.getElementById('phaseSlider');
+        const phaseVal = document.getElementById('phaseVal');
+        const fidelityVal = document.getElementById('fidelityVal');
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const phase = parseFloat(slider.value);
+            phaseVal.innerText = phase.toFixed(2);
+
+            // Calculate distance from Golden Ratio
+            const deviation = Math.abs(phase - PHI);
+            
+            // Fidelity maps to 100% when deviation is 0
+            const maxDeviation = 1.618; // approx max distance in slider range
+            let fidelity = Math.max(0, 100 - (deviation / maxDeviation) * 150);
+            if (deviation < 0.05) fidelity = 100; // Snap to 100% when very close
+            fidelityVal.innerText = fidelity.toFixed(1) + "%";
+            fidelityVal.style.color = fidelity === 100 ? '#00ffcc' : '#ff3366';
+
+            // Apply Jitter based on deviation
+            const positions = mesh.geometry.attributes.position;
+            const jitterAmount = deviation * 0.3; // Noise multiplier
+
+            for (let i = 0; i < positions.count; i++) {
+                const base = baseVertices[i];
+                // Smooth pulsing if at Phi, chaotic jitter if deviated
+                const time = Date.now() * 0.005;
+                const harmonic = fidelity === 100 ? Math.sin(time + base.y) * 0.05 : 0;
+                
+                const noiseX = (Math.random() - 0.5) * jitterAmount;
+                const noiseY = (Math.random() - 0.5) * jitterAmount;
+                const noiseZ = (Math.random() - 0.5) * jitterAmount;
+
+                positions.setXYZ(i, base.x + noiseX + harmonic, base.y + noiseY + harmonic, base.z + noiseZ + harmonic);
+            }
+            positions.needsUpdate = true;
+
+            // Base rotation
+            mesh.rotation.x += 0.005;
+            mesh.rotation.y += 0.01;
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+        animate();
+    </script>
+</body>
+</html>

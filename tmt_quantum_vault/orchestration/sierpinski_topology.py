@@ -28,6 +28,11 @@ Reference:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from qiskit import QuantumCircuit
+
 import logging
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -163,6 +168,196 @@ class SierpinskiCircuitSpec:
             "phase_rotations": self.phase_rotations,
             "expected_phi_score": self.expected_phi_score,
         }
+
+    def to_qasm(self, version: str = "2.0", include_measurements: bool = True) -> str:
+        """Convert Sierpinski circuit specification to OpenQASM format.
+
+        This is the bridge to actual IBM Quantum hardware execution.
+        Generates a scale-invariant entanglement circuit with φ-phase rotations.
+
+        Args:
+            version: OpenQASM version ("2.0" or "3.0")
+            include_measurements: Whether to include measurement operations
+
+        Returns:
+            OpenQASM circuit string
+
+        Example output (depth=1, 3 qubits):
+            OPENQASM 2.0;
+            include "qelib1.inc";
+            qreg q[3];
+            creg c[3];
+            // Sierpinski depth-1: Base GHZ triangle
+            h q[0];
+            h q[1];
+            h q[2];
+            // Entanglement (Sierpinski pattern)
+            cx q[0], q[1];
+            cx q[1], q[2];
+            // φ-phase rotations (Sefirah mapping)
+            rz(0) q[0];      // Kether
+            rz(3.883) q[1];  // Chokmah
+            rz(7.766) q[2];  // Binah
+            measure q -> c;
+        """
+        n_qubits = self.config.total_qubits
+
+        if version == "3.0":
+            return self._to_qasm3(n_qubits, include_measurements)
+        return self._to_qasm2(n_qubits, include_measurements)
+
+    def _to_qasm2(self, n_qubits: int, include_measurements: bool) -> str:
+        """Generate OpenQASM 2.0 format."""
+        lines = [
+            'OPENQASM 2.0;',
+            'include "qelib1.inc";',
+            f'qreg q[{n_qubits}];',
+            f'creg c[{n_qubits}];',
+            f'// Sierpinski depth-{self.config.depth}: {n_qubits}-qubit fractal',
+            f'// Expected φ-score: {self.expected_phi_score:.4f}',
+            '',
+            '// Initialize superposition (Hadamard layer)',
+        ]
+
+        # Hadamard on all qubits
+        for i in range(n_qubits):
+            lines.append(f'h q[{i}];')
+
+        lines.append('')
+        lines.append('// Sierpinski entanglement pattern')
+
+        # Apply entanglement map
+        for control, target in self.entanglement_map:
+            if control < n_qubits and target < n_qubits:
+                lines.append(f'cx q[{control}], q[{target}];')
+
+        # Apply φ-phase rotations
+        if self.config.phi_phase and self.phase_rotations:
+            lines.append('')
+            lines.append('// φ-phase rotations (Sefirah mapping)')
+
+            # Sort by qubit index for cleaner output
+            for qubit in sorted(self.phase_rotations.keys()):
+                if qubit < n_qubits:
+                    phase = self.phase_rotations[qubit]
+                    # Find Sefirah name if available
+                    sefirah = self._get_sefirah_for_qubit(qubit)
+                    comment = f'  // {sefirah}' if sefirah else ''
+                    lines.append(f'rz({phase:.6f}) q[{qubit}];{comment}')
+
+        # Metatron overlay enhancement
+        if self.config.metatron_overlay:
+            lines.append('')
+            lines.append('// Metatron cube enhancement (13-fold symmetry)')
+            angle_step = 2 * np.pi / METATRON_NODES
+            for i in range(min(METATRON_NODES, n_qubits)):
+                lines.append(f'rz({angle_step:.6f}) q[{i % n_qubits}];')
+
+        # Measurements
+        if include_measurements:
+            lines.append('')
+            lines.append('// Measurement')
+            for i in range(n_qubits):
+                lines.append(f'measure q[{i}] -> c[{i}];')
+
+        return '\n'.join(lines)
+
+    def _to_qasm3(self, n_qubits: int, include_measurements: bool) -> str:
+        """Generate OpenQASM 3.0 format."""
+        lines = [
+            '// Sierpinski Fractal Quantum Circuit',
+            f'// Depth: {self.config.depth}, Qubits: {n_qubits}',
+            f'// Expected φ-score: {self.expected_phi_score:.4f}',
+            '',
+            f'qubit[{n_qubits}] q;',
+            f'bit[{n_qubits}] c;',
+            '',
+            '// Initialize superposition',
+        ]
+
+        # Hadamard on all qubits
+        for i in range(n_qubits):
+            lines.append(f'h q[{i}];')
+
+        lines.append('')
+        lines.append('// Sierpinski entanglement pattern')
+
+        # Apply entanglement map
+        for control, target in self.entanglement_map:
+            if control < n_qubits and target < n_qubits:
+                lines.append(f'cx q[{control}], q[{target}];')
+
+        # Apply φ-phase rotations
+        if self.config.phi_phase and self.phase_rotations:
+            lines.append('')
+            lines.append('// φ-phase rotations')
+
+            for qubit in sorted(self.phase_rotations.keys()):
+                if qubit < n_qubits:
+                    phase = self.phase_rotations[qubit]
+                    lines.append(f'rz({phase:.6f}) q[{qubit}];')
+
+        # Measurements
+        if include_measurements:
+            lines.append('')
+            lines.append('// Measurement')
+            lines.append('c = measure q;')
+
+        return '\n'.join(lines)
+
+    def _get_sefirah_for_qubit(self, qubit: int) -> str | None:
+        """Get Sefirah name for a qubit if mapped."""
+        for node in self.nodes:
+            if qubit in node.qubit_indices and node.sefirah:
+                return node.sefirah
+        return None
+
+    def to_qiskit(self) -> QuantumCircuit:
+        """Convert to Qiskit QuantumCircuit object.
+
+        Requires: from qiskit import QuantumCircuit
+
+        Returns:
+            Qiskit QuantumCircuit ready for IBM backend execution
+
+        Raises:
+            ImportError: If qiskit is not installed
+        """
+        try:
+            from qiskit import QuantumCircuit
+        except ImportError as e:
+            raise ImportError(
+                "Qiskit is required for to_qiskit(). "
+                "Install with: pip install qiskit"
+            ) from e
+
+        n_qubits = self.config.total_qubits
+        qc = QuantumCircuit(n_qubits, n_qubits)
+
+        # Hadamard layer
+        qc.h(range(n_qubits))
+
+        # Entanglement pattern
+        for control, target in self.entanglement_map:
+            if control < n_qubits and target < n_qubits:
+                qc.cx(control, target)
+
+        # φ-phase rotations
+        if self.config.phi_phase:
+            for qubit, phase in self.phase_rotations.items():
+                if qubit < n_qubits:
+                    qc.rz(phase, qubit)
+
+        # Metatron overlay
+        if self.config.metatron_overlay:
+            angle_step = 2 * np.pi / METATRON_NODES
+            for i in range(min(METATRON_NODES, n_qubits)):
+                qc.rz(angle_step, i % n_qubits)
+
+        # Measurements
+        qc.measure(range(n_qubits), range(n_qubits))
+
+        return qc
 
 
 class SierpinskiGenerator:

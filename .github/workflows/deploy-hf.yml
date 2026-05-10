@@ -1,8 +1,14 @@
-name: Deploy to Hugging Face Spaces
+name: Deploy to Hugging Face Spaces (Static)
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'index.html'
+      - 'dashboard.js'
+      - 'research-status.html'
+      - 'README_HF.md'
+      - '.github/workflows/deploy-hf.yml'
   workflow_dispatch:
 
 jobs:
@@ -21,12 +27,12 @@ jobs:
 
       - name: Clone HF Space
         run: |
-          git clone https://Quantum927:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Quantum927/tmt-quantum-vault-dashboard hf-space || {
+          git clone https://Quantum927:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Quantum927/quantumvault hf-space 2>/dev/null || {
             echo "Creating new Space..."
             mkdir -p hf-space
             cd hf-space
             git init
-            git remote add origin https://Quantum927:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Quantum927/tmt-quantum-vault-dashboard
+            git remote add origin https://Quantum927:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Quantum927/quantumvault
           }
 
       - name: Copy static files
@@ -35,37 +41,27 @@ jobs:
           cp ../index.html . 2>/dev/null || echo "index.html not found"
           cp ../dashboard.js . 2>/dev/null || echo "dashboard.js not found"
           cp ../research-status.html . 2>/dev/null || echo "research-status.html not found"
-          cp ../README_HF.md README.md 2>/dev/null || echo "README_HF.md not found"
 
       - name: Create Space config
         run: |
           cd hf-space
           cat > README.md << 'EOF'
           ---
-          title: TMT Quantum Vault Dashboard
-          emoji: 🔮
-          colorFrom: purple
-          colorTo: indigo
-          sdk: static
+          title: TMT Quantum Vault
+          emoji: ⚛️
+          colorFrom: blue
+          colorTo: purple
+          sdk: docker
+          app_port: 7860
           pinned: false
+          private: true
           license: mit
-          short_description: Multi-agent orchestration for quantum computing workflows
+          short_description: 17-agent resonant intelligence lattice with phi-alignment
           ---
           
           # TMT Quantum Vault
           
           Multi-agent orchestration framework for quantum computing workflows with phi-resonance alignment.
-          
-          ## Features
-          
-          - **17-Agent Ensemble**: Specialized agents for synthesis, observation, validation, and more
-          - **Three-Lane Routing**: Simulation, Quantum, and LLM execution
-          - **Phi-Resonance Alignment**: Golden ratio-based coordination scoring
-          - **Benchmark Suite**: 19-task evaluation matrix
-          
-          ## Live Dashboard
-          
-          Open `index.html` to view the documentation and dashboard.
           EOF
 
       - name: Push to Hugging Face
@@ -79,6 +75,4 @@ jobs:
         run: |
           echo "## ✅ Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**URL**: https://huggingface.co/spaces/Quantum927/tmt-quantum-vault-dashboard" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Visibility**: Private (requires login)" >> $GITHUB_STEP_SUMMARY
+          echo "**URL**: https://huggingface.co/spaces/Quantum927/quantumvault" >> $GITHUB_STEP_SUMMARY

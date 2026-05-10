@@ -38,6 +38,19 @@ Usage:
     runner = BenchmarkRunner(matrix)
 """
 
+from .ablation import (
+    AGENT_ABLATIONS,
+    COMBINATION_ABLATIONS,
+    FEATURE_ABLATIONS,
+    LAYER_ABLATIONS,
+    AblationConfig,
+    AblationResult,
+    AblationScope,
+    AblationStudy,
+    AblationStudyRunner,
+    AblationType,
+    run_ablation_study,
+)
 from .benchmark import (
     BenchmarkIntegration,
     OrchestrationBenchmark,
@@ -106,19 +119,6 @@ from .orchestrator import (
     ExecutionStage,
     HandoffManager,
     RoutingEngine,
-)
-from .ablation import (
-    AblationConfig,
-    AblationResult,
-    AblationScope,
-    AblationStudy,
-    AblationStudyRunner,
-    AblationType,
-    AGENT_ABLATIONS,
-    COMBINATION_ABLATIONS,
-    FEATURE_ABLATIONS,
-    LAYER_ABLATIONS,
-    run_ablation_study,
 )
 
 __all__ = [

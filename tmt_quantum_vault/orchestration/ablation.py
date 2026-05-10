@@ -25,14 +25,10 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
-from uuid import UUID, uuid4
-
-logger = logging.getLogger(__name__)
+from uuid import uuid4
 
 from .benchmark_matrix import (
     BaselineType,
-    BenchmarkCategory,
-    BenchmarkLayer,
     BenchmarkResult,
     BenchmarkTask,
     ExecutionMode,
@@ -41,6 +37,8 @@ from .benchmark_matrix import (
     StructuralStatus,
     TMTBenchmarkMatrix,
 )
+
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # Ablation Types
@@ -489,7 +487,7 @@ class AblationStudyRunner:
         all_layers = ["input", "processing", "integration", "output"]
 
         agents_disabled = len([a for a in all_agents if a in config.disabled_components])
-        layers_disabled = len([l for l in all_layers if l in config.disabled_components])
+        layers_disabled = len([layer for layer in all_layers if layer in config.disabled_components])
 
         return AblationResult(
             ablation_id=config.ablation_id,
@@ -539,7 +537,7 @@ class AblationStudyRunner:
                 for agent in task.expected_agents
             )
             layers_correct = all(
-                layer.lower() in [l.lower() for l in layers_traversed]
+                layer.lower() in [lyr.lower() for lyr in layers_traversed]
                 for layer in task.expected_layers
             )
             contracts_valid = True

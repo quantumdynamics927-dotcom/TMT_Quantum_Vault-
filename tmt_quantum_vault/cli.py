@@ -3675,7 +3675,6 @@ def create_agents(
     with appropriate specializations, fitness scores, and consciousness status.
     """
     import random
-    import string
 
     # Agent definitions: metatron_name -> (dna_name, specialization, base_phi, base_fitness)
     AGENT_PROFILES = {
@@ -3708,7 +3707,7 @@ def create_agents(
             # Use golden ratio proportions for GC content
             gc_ratio = 0.618  # phi proportion
             sequence = []
-            for i in range(length):
+            for _ in range(length):
                 if random.random() < gc_ratio:
                     sequence.append(random.choice(["G", "C"]))
                 else:
@@ -3937,7 +3936,6 @@ def run_ablation(
     """
     from .orchestration import (
         AblationStudyRunner,
-        AblationType,
         ExecutionMode,
     )
 

@@ -23,8 +23,6 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID, uuid4
 
-logger = logging.getLogger(__name__)
-
 from .channel import AgentBus, AgentChannel, ChannelRegistry
 from .models import (
     AgentConflict,
@@ -49,10 +47,11 @@ from .models import (
 from .queue_monitor import (
     KingstonQueueMonitor,
     PreflightResult,
-    preflight_check,
     create_hardware_evidence_entry,
-    PHI_THRESHOLD,
+    preflight_check,
 )
+
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # Constants
@@ -627,7 +626,7 @@ class ExecutionPlanner:
                 "integration": AgentLayer.INTEGRATION,
                 "output": AgentLayer.OUTPUT,
             }
-            target_layers = [layer_map.get(l.lower(), l) for l in expected_layers if l.lower() in layer_map]
+            target_layers = [layer_map.get(layer_name.lower(), layer_name) for layer_name in expected_layers if layer_name.lower() in layer_map]
 
             for layer in target_layers:
                 profiles = self.routing_engine.get_profiles_by_layer(layer)
@@ -1317,7 +1316,7 @@ class AgentOrchestrator:
             Agent output or None on failure
         """
         try:
-            from tmt_quantum_vault.ollama_api import run, is_available
+            from tmt_quantum_vault.ollama_api import is_available, run
 
             if not is_available():
                 logger.debug("Ollama not available, falling back to simulation")

@@ -89,18 +89,31 @@ ROLE_LAYER_MAP = {
 }
 
 # Task type to role mapping
+# Maps task types to agent roles that can handle them.
+# Roles are listed in priority order. Fallback to synthesizer if none available.
 TASK_ROLE_ROUTING = {
-    "validation": [AgentRole.VALIDATOR, AgentRole.AUDITOR],
-    "synthesis": [AgentRole.SYNTHESIZER, AgentRole.FEDERATION],
-    "analysis": [AgentRole.STRATEGIC, AgentRole.OBSERVER],
-    "monitoring": [AgentRole.OBSERVER, AgentRole.HARMONIC],
-    "coordination": [AgentRole.FEDERATION, AgentRole.WORKFLOW],
-    "archival": [AgentRole.ARCHIVIST, AgentRole.AUDITOR],
+    # Validation tasks - use observer (monitoring) or archivist (records) as fallback
+    "validation": [AgentRole.VALIDATOR, AgentRole.AUDITOR, AgentRole.OBSERVER, AgentRole.ARCHIVIST],
+    # Synthesis tasks - primary integration agents
+    "synthesis": [AgentRole.SYNTHESIZER, AgentRole.FEDERATION, AgentRole.MIRROR],
+    # Analysis tasks - use observer as fallback for strategic
+    "analysis": [AgentRole.STRATEGIC, AgentRole.WORMHOLE, AgentRole.OBSERVER],
+    # Monitoring tasks - use observer (available) or bitnet as fallback
+    "monitoring": [AgentRole.OBSERVER, AgentRole.HARMONIC, AgentRole.BITNET],
+    # Coordination tasks - use synthesizer as fallback for federation
+    "coordination": [AgentRole.FEDERATION, AgentRole.WORKFLOW, AgentRole.SYNTHESIZER],
+    # Archival tasks - use archivist (available) or observer as fallback
+    "archival": [AgentRole.ARCHIVIST, AgentRole.AUDITOR, AgentRole.OBSERVER],
+    # Protection tasks - use bronze (available) or stealth
     "protection": [AgentRole.BRONZE, AgentRole.STEALTH],
-    "processing": [AgentRole.BITNET, AgentRole.HARMONIC],
-    "visualization": [AgentRole.VISUAL, AgentRole.FRACTAL],
+    # Processing tasks - use bitnet (available) or fractal as fallback
+    "processing": [AgentRole.BITNET, AgentRole.HARMONIC, AgentRole.FRACTAL],
+    # Visualization tasks - use fractal (available) or mirror as fallback
+    "visualization": [AgentRole.VISUAL, AgentRole.FRACTAL, AgentRole.MIRROR],
+    # Biological tasks - use bio (available) or mirror as fallback
     "biological": [AgentRole.BIO, AgentRole.MIRROR],
-    "strategic": [AgentRole.STRATEGIC, AgentRole.WORMHOLE],
+    # Strategic tasks - use wormhole (available) or observer as fallback
+    "strategic": [AgentRole.STRATEGIC, AgentRole.WORMHOLE, AgentRole.OBSERVER],
 }
 
 

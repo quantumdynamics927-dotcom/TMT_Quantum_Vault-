@@ -122,6 +122,7 @@ class BenchmarkTask:
     category: BenchmarkCategory
     layer: BenchmarkLayer
     description: str
+    task_type: str = "synthesis"  # Task type for routing (validation, synthesis, etc.)
     expected_agents: list[str] = field(default_factory=list)
     expected_layers: list[str] = field(default_factory=list)
     success_criteria: dict[str, Any] = field(default_factory=dict)
@@ -275,8 +276,9 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.ROUTING,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Route a validation task to Validator agent",
-                    expected_agents=["validator", "auditor"],
-                    expected_layers=["input", "integration", "output"],
+                    task_type="validation",  # Maps to Validator/Auditor agents
+                    expected_agents=["validator", "auditor", "observer", "archivist"],  # Fallbacks included
+                    expected_layers=["output", "integration"],  # Validator is output layer
                     success_criteria={
                         "primary_agent_in_expected": True,
                         "confidence_threshold": 0.7,
@@ -287,6 +289,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.ROUTING,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Route a synthesis task to Synthesizer agent",
+                    task_type="synthesis",  # Maps to Synthesizer/Federation agents
                     expected_agents=["synthesizer", "federation"],
                     expected_layers=["integration"],
                     success_criteria={
@@ -299,6 +302,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.ROUTING,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Route a monitoring task to Observer agent",
+                    task_type="monitoring",  # Maps to Observer/Harmonic agents
                     expected_agents=["observer", "harmonic"],
                     expected_layers=["integration", "processing"],
                     success_criteria={
@@ -311,6 +315,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.ROUTING,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Route a strategic analysis task to Strategic agent",
+                    task_type="analysis",  # Maps to Strategic/Wormhole agents
                     expected_agents=["strategic", "wormhole"],
                     expected_layers=["processing"],
                     success_criteria={
@@ -331,6 +336,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.DELEGATION,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute task requiring handoff from input to integration layer",
+                    task_type="coordination",  # Multi-agent coordination
                     expected_agents=["bio", "fractal", "visual", "synthesizer"],
                     expected_layers=["input", "integration"],
                     success_criteria={
@@ -343,6 +349,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.DELEGATION,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute full pipeline: input → processing → integration → output",
+                    task_type="coordination",  # Multi-agent coordination
                     expected_agents=["bio", "bitnet", "synthesizer", "bronze"],
                     expected_layers=["input", "processing", "integration", "output"],
                     success_criteria={
@@ -355,6 +362,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.DELEGATION,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute task with Validator escalation",
+                    task_type="validation",  # Maps to Validator/Auditor agents
                     expected_agents=["workflow", "validator", "visual"],
                     expected_layers=["output"],
                     success_criteria={
@@ -375,6 +383,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.CONFLICT,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Resolve task with ambiguous routing (multiple valid agents)",
+                    task_type="synthesis",  # Maps to Synthesizer/Federation agents
                     expected_agents=["synthesizer", "federation", "observer"],
                     expected_layers=["integration"],
                     success_criteria={
@@ -388,6 +397,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.CONFLICT,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Handle task with conflicting agent outputs",
+                    task_type="analysis",  # Maps to Strategic/Wormhole agents
                     expected_agents=["strategic", "observer"],
                     expected_layers=["processing", "integration"],
                     success_criteria={
@@ -408,6 +418,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.MEMORY,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute task requiring Archivist involvement",
+                    task_type="archival",  # Maps to Archivist/Auditor agents
                     expected_agents=["archivist"],
                     expected_layers=["output"],
                     success_criteria={
@@ -420,6 +431,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.MEMORY,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Retrieve and use archived context in new task",
+                    task_type="archival",  # Maps to Archivist/Auditor agents
                     expected_agents=["archivist", "synthesizer"],
                     expected_layers=["output", "integration"],
                     success_criteria={
@@ -440,6 +452,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.CONSENSUS,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Achieve consensus across integration layer agents",
+                    task_type="coordination",  # Multi-agent coordination
                     expected_agents=["synthesizer", "observer", "federation", "mirror"],
                     expected_layers=["integration"],
                     success_criteria={
@@ -453,6 +466,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.CONSENSUS,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Measure agreement rate across repeated runs",
+                    task_type="coordination",  # Multi-agent coordination
                     expected_agents=["synthesizer"],
                     expected_layers=["integration"],
                     success_criteria={
@@ -474,6 +488,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.RECOVERY,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Recover from simulated agent failure",
+                    task_type="synthesis",  # Maps to Synthesizer/Federation agents
                     expected_agents=["synthesizer", "bronze"],
                     expected_layers=["integration", "output"],
                     success_criteria={
@@ -488,6 +503,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.RECOVERY,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Handle timeout and fallback routing",
+                    task_type="synthesis",  # Maps to Synthesizer/Federation agents
                     expected_agents=["synthesizer", "observer"],
                     expected_layers=["integration"],
                     success_criteria={
@@ -509,6 +525,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.RESONANCE,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Select agent with highest phi-alignment for task",
+                    task_type="synthesis",  # Maps to Synthesizer/Federation agents
                     expected_agents=["synthesizer", "observer"],
                     expected_layers=["integration"],
                     success_criteria={
@@ -521,6 +538,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.RESONANCE,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Measure resonance-to-fitness correlation",
+                    task_type="processing",  # Maps to BitNet/Harmonic agents
                     expected_agents=["harmonic", "synthesizer"],
                     expected_layers=["processing", "integration"],
                     success_criteria={
@@ -540,6 +558,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.ABLATION,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute task with Federation agent disabled",
+                    task_type="synthesis",  # Maps to Synthesizer/Federation agents
                     expected_agents=["synthesizer", "observer"],
                     expected_layers=["integration"],
                     success_criteria={
@@ -553,6 +572,7 @@ class TMTBenchmarkMatrix:
                     category=BenchmarkCategory.ABLATION,
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute task with resonance weighting disabled",
+                    task_type="synthesis",  # Maps to Synthesizer/Federation agents
                     expected_agents=["synthesizer"],
                     expected_layers=["integration"],
                     success_criteria={
@@ -678,7 +698,7 @@ class BenchmarkRunner:
         try:
             # Execute task through orchestrator
             trace = orchestrator.execute(
-                task_type=task.category.value,
+                task_type=task.task_type,  # Use task_type for routing
                 objective=task.description,
                 context=task.metadata,
             )

@@ -15,11 +15,15 @@ Key Components:
 from __future__ import annotations
 
 import json
+import logging
 import time
 from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 from uuid import UUID, uuid4
+
+logger = logging.getLogger(__name__)
 
 from .channel import AgentBus, AgentChannel, ChannelRegistry
 from .models import (
@@ -42,6 +46,13 @@ from .models import (
     RoutingDecision,
     RoutingPolicy,
 )
+from .queue_monitor import (
+    KingstonQueueMonitor,
+    PreflightResult,
+    preflight_check,
+    create_hardware_evidence_entry,
+    PHI_THRESHOLD,
+)
 
 # =============================================================================
 # Constants
@@ -49,6 +60,13 @@ from .models import (
 
 PHI = 1.618033988749895
 PHI_INVERSE = 1.0 / PHI
+
+# Execution modes
+class ExecutionMode(StrEnum):
+    """Execution mode for agent tasks."""
+    SIMULATION = "simulation"
+    LIVE = "live"
+    HYBRID = "hybrid"  # Simulation with selective live routing
 
 # Default routing weights
 DEFAULT_ROUTING_WEIGHTS = {
@@ -740,15 +758,18 @@ class AgentOrchestrator:
         self,
         vault_path: Path,
         policy: RoutingPolicy | None = None,
+        execution_mode: ExecutionMode = ExecutionMode.SIMULATION,
     ):
         """Initialize agent orchestrator.
 
         Args:
             vault_path: Path to TMT Quantum Vault
             policy: Routing policy
+            execution_mode: Execution mode (simulation, live, hybrid)
         """
         self.vault_path = Path(vault_path)
         self.policy = policy or RoutingPolicy(policy_name="default")
+        self.execution_mode = execution_mode
 
         # Core components
         self._registry = ChannelRegistry()
@@ -756,6 +777,9 @@ class AgentOrchestrator:
         self._routing_engine = RoutingEngine(policy=self.policy)
         self._execution_planner = ExecutionPlanner(self._routing_engine)
         self._handoff_manager = HandoffManager(self._bus)
+
+        # Queue monitor for live execution (lazy loaded)
+        self._queue_monitor: KingstonQueueMonitor | None = None
 
         # State
         self._profiles: dict[int, AgentProfile] = {}
@@ -993,16 +1017,33 @@ class AgentOrchestrator:
             input=input_schema,
         )
 
+    def _get_queue_monitor(self) -> KingstonQueueMonitor:
+        """Get or create the queue monitor for live execution.
+
+        Returns:
+            KingstonQueueMonitor instance
+        """
+        if self._queue_monitor is None:
+            self._queue_monitor = KingstonQueueMonitor()
+        return self._queue_monitor
+
     def _execute_agent(
         self,
         profile: AgentProfile | None,
         contract: AgentContract,
+        circuit: Any | None = None,
     ) -> AgentOutputSchema | None:
-        """Execute a single agent (placeholder for actual execution).
+        """Execute a single agent with three-lane routing.
+
+        Three-Lane Routing Strategy:
+        1. SIMULATION mode: Fast, free, always available
+        2. LIVE mode with quantum: Route to ibm_kingston if resonance >= 0.618
+        3. LIVE mode with LLM: Route to Ollama for synthesis tasks
 
         Args:
             profile: Agent profile
             contract: Agent contract
+            circuit: Optional quantum circuit for hardware execution
 
         Returns:
             Agent output or None
@@ -1013,19 +1054,103 @@ class AgentOrchestrator:
         # Update agent state
         profile.current_load += 1
         profile.last_activity = datetime.now(UTC)
-
-        # Simulate execution (in real implementation,
-        # this would call the agent)
         start_time = time.time()
 
-        # Create output based on profile metrics
-        output = AgentOutputSchema(
+        try:
+            # ── Lane 1: Simulation (always fast, free) ──────────────────────
+            if self.execution_mode == ExecutionMode.SIMULATION:
+                return self._simulate_agent(profile, contract, start_time)
+
+            # ── Lane 2: Quantum tasks → ibm_kingston (if resonance + budget) ──
+            if circuit is not None and self._requires_quantum_execution(contract):
+                preflight = preflight_check(circuit)
+
+                if preflight.ready_for_hardware:
+                    monitor = self._get_queue_monitor()
+                    if monitor.should_route_live(preflight.phi_score):
+                        result = self._run_on_kingston(
+                            profile, contract, circuit, preflight
+                        )
+                        if result:
+                            return result
+                        # Fall through to Lane 3 on failure
+
+            # ── Lane 3: LLM tasks / fallback → Ollama or Synthesizer ─────────
+            if self._is_llm_task(profile.agent_role, contract):
+                result = self._run_on_ollama(profile, contract)
+                if result:
+                    return result
+
+            # ── Fallback: Simulation ──────────────────────────────────────────
+            return self._simulate_agent(profile, contract, start_time)
+
+        except Exception as e:
+            logger.error(f"Agent execution failed: {e}")
+            return self._create_error_output(profile, contract, str(e), start_time)
+
+        finally:
+            profile.current_load -= 1
+            profile.total_tasks_completed += 1
+
+    def _requires_quantum_execution(self, contract: AgentContract) -> bool:
+        """Check if contract requires quantum execution.
+
+        Args:
+            contract: Agent contract
+
+        Returns:
+            True if quantum execution required
+        """
+        task_type = contract.input.task_type.lower()
+        quantum_types = {
+            "quantum", "circuit", "entanglement", "superposition",
+            "teleportation", "qrng", "bell_state", "grover", "shor",
+        }
+        return any(qt in task_type for qt in quantum_types)
+
+    def _is_llm_task(
+        self, agent_role: AgentRole, contract: AgentContract
+    ) -> bool:
+        """Check if task should be routed to LLM.
+
+        Args:
+            agent_role: Agent role
+            contract: Agent contract
+
+        Returns:
+            True if LLM routing appropriate
+        """
+        llm_roles = {
+            AgentRole.SYNTHESIZER,
+            AgentRole.STRATEGIC,
+            AgentRole.OBSERVER,
+            AgentRole.MIRROR,
+        }
+        return agent_role in llm_roles
+
+    def _simulate_agent(
+        self,
+        profile: AgentProfile,
+        contract: AgentContract,
+        start_time: float,
+    ) -> AgentOutputSchema:
+        """Simulate agent execution.
+
+        Args:
+            profile: Agent profile
+            contract: Agent contract
+            start_time: Execution start time
+
+        Returns:
+            Simulated agent output
+        """
+        return AgentOutputSchema(
             task_id=contract.input.task_id,
             agent_id=profile.agent_id,
             agent_name=profile.agent_name,
             agent_role=profile.agent_role,
-            result={"status": "processed"},
-            summary=f"Processed by {profile.agent_name}",
+            result={"status": "simulated", "mode": "simulation"},
+            summary=f"Simulated by {profile.agent_name}",
             confidence=profile.fitness,
             resonance_score=profile.phi_alignment,
             fitness_contribution=profile.fitness * 0.1,
@@ -1033,11 +1158,186 @@ class AgentOrchestrator:
             processing_time_ms=(time.time() - start_time) * 1000,
         )
 
-        # Update agent state
-        profile.current_load -= 1
-        profile.total_tasks_completed += 1
+    def _run_on_kingston(
+        self,
+        profile: AgentProfile,
+        contract: AgentContract,
+        circuit: Any,
+        preflight: PreflightResult,
+    ) -> AgentOutputSchema | None:
+        """Run task on ibm_kingston backend.
 
-        return output
+        Args:
+            profile: Agent profile
+            contract: Agent contract
+            circuit: Quantum circuit
+            preflight: Pre-flight check result
+
+        Returns:
+            Agent output or None on failure
+        """
+        try:
+            from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2
+            from qiskit_ibm_runtime.options import SamplerOptions
+
+            monitor = self._get_queue_monitor()
+            service = QiskitRuntimeService(channel="ibm_quantum")
+            backend = service.backend("ibm_kingston")
+
+            # Configure sampler
+            options = SamplerOptions(default_shots=1024)
+            sampler = SamplerV2(backend, options=options)
+
+            # Run job
+            job = sampler.run([circuit])
+            result = job.result()
+
+            # Record usage (estimate based on job time)
+            usage_minutes = 0.5  # Conservative estimate
+            monitor.record_usage(usage_minutes)
+
+            # Create evidence entry
+            evidence = create_hardware_evidence_entry(
+                {"fidelity": preflight.fidelity},
+                preflight.phi_score,
+                monitor,
+            )
+
+            return AgentOutputSchema(
+                task_id=contract.input.task_id,
+                agent_id=profile.agent_id,
+                agent_name=profile.agent_name,
+                agent_role=profile.agent_role,
+                result={
+                    "status": "completed",
+                    "backend": "ibm_kingston",
+                    "counts": result[0].data.meas.get_counts(),
+                },
+                summary=f"Executed on ibm_kingston by {profile.agent_name}",
+                confidence=preflight.fidelity,
+                resonance_score=preflight.phi_score,
+                fitness_contribution=profile.fitness * 0.1,
+                status=HandoffStatus.COMPLETED,
+                evidence=evidence,
+            )
+
+        except ImportError:
+            logger.warning("qiskit-ibm-runtime not installed, falling back to simulation")
+            return None
+        except Exception as e:
+            logger.warning(f"IBM Quantum execution failed: {e}")
+            return None
+
+    def _run_on_ollama(
+        self,
+        profile: AgentProfile,
+        contract: AgentContract,
+    ) -> AgentOutputSchema | None:
+        """Run task on local Ollama instance.
+
+        Args:
+            profile: Agent profile
+            contract: Agent contract
+
+        Returns:
+            Agent output or None on failure
+        """
+        try:
+            from tmt_quantum_vault.ollama_api import run, is_available
+
+            if not is_available():
+                logger.debug("Ollama not available, falling back to simulation")
+                return None
+
+            # Build prompt from contract
+            prompt = self._build_prompt(profile, contract)
+
+            # Run on Ollama with local model
+            response = run(
+                model="qwen2.5:1.5b",  # Local mini model
+                prompt=prompt,
+                num_predict=512,
+                temperature=0.7,
+            )
+
+            return AgentOutputSchema(
+                task_id=contract.input.task_id,
+                agent_id=profile.agent_id,
+                agent_name=profile.agent_name,
+                agent_role=profile.agent_role,
+                result={
+                    "status": "completed",
+                    "backend": "ollama_local",
+                    "response": response.response,
+                },
+                summary=f"Processed by {profile.agent_name} via Ollama",
+                confidence=0.82,  # Default confidence for Ollama
+                resonance_score=profile.phi_alignment,
+                fitness_contribution=profile.fitness * 0.1,
+                status=HandoffStatus.COMPLETED,
+            )
+
+        except ImportError:
+            logger.debug("Ollama API not available, falling back to simulation")
+            return None
+        except Exception as e:
+            logger.warning(f"Ollama execution failed: {e}")
+            return None
+
+    def _build_prompt(
+        self, profile: AgentProfile, contract: AgentContract
+    ) -> str:
+        """Build prompt for LLM execution.
+
+        Args:
+            profile: Agent profile
+            contract: Agent contract
+
+        Returns:
+            Formatted prompt string
+        """
+        return f"""You are {profile.agent_name}, a {profile.agent_role.value} agent.
+Specialization: {profile.specialization}
+Fitness: {profile.fitness:.3f}
+Phi Alignment: {profile.phi_alignment:.3f}
+
+Task: {contract.input.objective}
+Context: {contract.input.context}
+
+Provide a concise response that addresses the objective."""
+
+    def _create_error_output(
+        self,
+        profile: AgentProfile,
+        contract: AgentContract,
+        error_message: str,
+        start_time: float,
+    ) -> AgentOutputSchema:
+        """Create an error output for failed execution.
+
+        Args:
+            profile: Agent profile
+            contract: Agent contract
+            error_message: Error message
+            start_time: Execution start time
+
+        Returns:
+            Error agent output
+        """
+        return AgentOutputSchema(
+            task_id=contract.input.task_id,
+            agent_id=profile.agent_id,
+            agent_name=profile.agent_name,
+            agent_role=profile.agent_role,
+            result={"status": "error", "error": error_message},
+            summary=f"Error: {error_message}",
+            confidence=0.0,
+            resonance_score=0.0,
+            fitness_contribution=0.0,
+            status=HandoffStatus.FAILED,
+            errors=[error_message],
+            processing_time_ms=(time.time() - start_time) * 1000,
+        )
 
     def _get_agent_id_by_role(self, role: AgentRole) -> int:
         """Get agent ID by role.

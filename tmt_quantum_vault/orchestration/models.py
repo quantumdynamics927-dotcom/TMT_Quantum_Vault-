@@ -173,6 +173,9 @@ class AgentOutputSchema(BaseModel):
     processing_time_ms: float = Field(default=0.0, ge=0.0)
     timestamp: datetime = Field(default_factory=utcnow)
 
+    # Hardware provenance (for quantum execution)
+    evidence: dict[str, Any] | None = None
+
     # Handoff
     handoff: HandoffDirective | None = None
 

@@ -2,8 +2,8 @@
   "circuit": "sierpinski_depth3",
   "source_file": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\results\\job-d6vh2i2tnsts73et75b0-result.json",
   "ingested_at": "20260321_214647",
-  "job_id": "manual",
-  "backend": "unknown",
+  "job_id": "job-d6vh2i2tnsts73et75b0",
+  "backend": "ibm_torino",
   "shots": 3584,
   "fingerprint": "95bcc6fa8d13",
   "counts_sample": {
@@ -39,5 +39,13 @@
     ]
   },
   "status": "INGESTED",
-  "agent_ready": true
+  "agent_ready": true,
+  "depth": 3,
+  "provenance": {
+    "job_id": "job-d6vh2i2tnsts73et75b0",
+    "backend": "ibm_torino",
+    "source_file": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\results\\job-d6vh2i2tnsts73et75b0-result.json",
+    "backfilled_at": "2026-05-11T00:00:00Z",
+    "provenance_status": "LINKED"
+  }
 }

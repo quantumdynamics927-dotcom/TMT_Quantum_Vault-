@@ -163,8 +163,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--space-name",
-        default="Quantum927/tmt-quantum-vault",
-        help="HF Space name (default: Quantum927/tmt-quantum-vault)",
+        default="Quantum927/quantumvault",
+        help="HF Space name (default: Quantum927/quantumvault)",
     )
     parser.add_argument(
         "--private",

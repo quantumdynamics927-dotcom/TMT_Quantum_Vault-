@@ -66,12 +66,12 @@ jobs:
           git config --global user.name "github-actions[bot]"
           
           # Clone or create the Space
-          git clone "https://Quantum927:${HF_TOKEN}@huggingface.co/spaces/Quantum927/tmt-quantum-vault" hf-space 2>/dev/null || {
+          git clone "https://Quantum927:${HF_TOKEN}@huggingface.co/spaces/Quantum927/quantumvault" hf-space 2>/dev/null || {
             echo "Creating new Space..."
             mkdir -p hf-space
             cd hf-space
             git init
-            git remote add origin "https://Quantum927:${HF_TOKEN}@huggingface.co/spaces/Quantum927/tmt-quantum-vault"
+            git remote add origin "https://Quantum927:${HF_TOKEN}@huggingface.co/spaces/Quantum927/quantumvault"
             cd ..
           }
           
@@ -97,7 +97,7 @@ jobs:
         run: |
           echo "## ✅ Docker Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Space URL**: https://huggingface.co/spaces/Quantum927/tmt-quantum-vault" >> $GITHUB_STEP_SUMMARY
+          echo "**Space URL**: https://huggingface.co/spaces/Quantum927/quantumvault" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**SDK**: Docker" >> $GITHUB_STEP_SUMMARY
           echo "**Port**: 7860" >> $GITHUB_STEP_SUMMARY

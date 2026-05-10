@@ -76,4 +76,5 @@ MIT License — See [LICENSE](LICENSE) for details.
 ## Links
 
 - [GitHub Repository](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-)
+- [Hugging Face Space](https://huggingface.co/spaces/Quantum927/quantumvault)
 - [Documentation](https://github.com/quantumdynamics927-dotcom/TMT_Quantum_Vault-/tree/main/docs)

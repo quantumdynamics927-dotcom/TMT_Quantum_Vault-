@@ -3525,7 +3525,9 @@ def orchestration_run_matrix(
     matrix = TMTBenchmarkMatrix(vault_path=root)
     runner = BenchmarkRunner(matrix, output_dir, execution_mode=execution_mode)
     policy = RoutingPolicy(policy_name="benchmark_matrix")
-    orchestrator = AgentOrchestrator(vault_path=root, policy=policy)
+    orchestrator = AgentOrchestrator(
+        vault_path=root, policy=policy, execution_mode=execution_mode
+    )
 
     # Run benchmark
     results = runner.run_baseline(

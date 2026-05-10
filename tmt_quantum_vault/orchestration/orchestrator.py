@@ -989,6 +989,7 @@ class AgentOrchestrator:
             self._update_metrics(trace)
 
         except Exception:
+            logger.exception("Orchestration execution failed")
             trace.finalize(
                 status=HandoffStatus.FAILED,
                 confidence=0.0,
@@ -1085,7 +1086,7 @@ class AgentOrchestrator:
             return self._simulate_agent(profile, contract, start_time)
 
         except Exception as e:
-            logger.error(f"Agent execution failed: {e}")
+            logger.error(f"Agent execution failed: {e}", exc_info=True)
             return self._create_error_output(profile, contract, str(e), start_time)
 
         finally:
@@ -1380,11 +1381,7 @@ Provide a concise response that addresses the objective."""
         """
         self._metrics.tasks_completed += 1
         self._metrics.measured_at = datetime.now(UTC)
-
-        # Update success rate
-        total = self._metrics.tasks_completed + self._metrics.tasks_failed
-        if total > 0:
-            self._metrics.success_rate = self._metrics.tasks_completed / total
+        # Note: success_rate is a computed property, no need to set it
 
     # =========================================================================
     # Conflict Resolution

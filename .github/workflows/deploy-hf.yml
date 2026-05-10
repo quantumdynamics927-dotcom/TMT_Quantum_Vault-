@@ -1,0 +1,87 @@
+name: Deploy to Hugging Face Spaces
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install huggingface-hub
+
+      - name: Deploy to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -c "
+          from huggingface_hub import HfApi
+          import os
+          
+          api = HfApi()
+          
+          # Create Space if it doesn't exist
+          try:
+              api.create_repo(
+                  repo_id='quantumdynamics927/tmt-quantum-vault',
+                  repo_type='space',
+                  space_sdk='static',
+                  private=True,
+                  exist_ok=True
+              )
+          except Exception as e:
+              print(f'Repo creation: {e}')
+          
+          # Upload static files
+          static_files = [
+              'index.html',
+              'dashboard.js',
+              'research-status.html',
+              'README_HF.md'
+          ]
+          
+          for file in static_files:
+              if os.path.exists(file):
+                  api.upload_file(
+                      path_or_fileobj=file,
+                      path_in_repo=file,
+                      repo_id='quantumdynamics927/tmt-quantum-vault',
+                      repo_type='space',
+                      token=os.environ.get('HF_TOKEN')
+                  )
+                  print(f'Uploaded {file}')
+          
+          # Upload README as README.md
+          if os.path.exists('README_HF.md'):
+              api.upload_file(
+                  path_or_fileobj='README_HF.md',
+                  path_in_repo='README.md',
+                  repo_id='quantumdynamics927/tmt-quantum-vault',
+                  repo_type='space',
+                  token=os.environ.get('HF_TOKEN')
+              )
+              print('Uploaded README.md')
+          
+          print('Deployment complete!')
+          "
+
+      - name: Deployment summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed to: https://huggingface.co/spaces/quantumdynamics927/tmt-quantum-vault" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Note: Space is private. Only accessible to authorized users." >> $GITHUB_STEP_SUMMARY

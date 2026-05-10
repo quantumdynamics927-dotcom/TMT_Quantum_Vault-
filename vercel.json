@@ -6,5 +6,6 @@
   "outputDirectory": ".",
   "installCommand": null,
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "_comment": "DEPRECATED: This project has been migrated to Hugging Face Spaces. See .github/workflows/deploy-hf.yml for deployment."
 }

@@ -364,6 +364,42 @@ COMBINATION_ABLATIONS: list[AblationConfig] = [
     ),
 ]
 
+# Sierpinski/Fractal topology ablations
+SIERPINSKI_ABLATIONS: list[AblationConfig] = [
+    AblationConfig(
+        ablation_id="ABL-SIERP-001",
+        ablation_type=AblationType.FEATURE,
+        target="sierpinski_topology",
+        description="Disable Sierpinski fractal topology (use standard GHZ)",
+        scope=AblationScope.LOCAL,
+        disabled_components=["sierpinski_entanglement", "phi_phase_rotations"],
+    ),
+    AblationConfig(
+        ablation_id="ABL-SIERP-002",
+        ablation_type=AblationType.FEATURE,
+        target="metatron_overlay",
+        description="Disable Metatron cube geometry overlay",
+        scope=AblationScope.LOCAL,
+        disabled_components=["metatron_entanglement", "sefirah_phases"],
+    ),
+    AblationConfig(
+        ablation_id="ABL-SIERP-003",
+        ablation_type=AblationType.COMBINATION,
+        target="fractal_agent_full",
+        description="Disable Fractal agent with Sierpinski topology",
+        scope=AblationScope.GLOBAL,
+        disabled_components=["fractal", "sierpinski_topology", "phi_routing"],
+    ),
+    AblationConfig(
+        ablation_id="ABL-SIERP-004",
+        ablation_type=AblationType.FEATURE,
+        target="phi_gating",
+        description="Disable φ-gating threshold (0.618) for hardware routing",
+        scope=AblationScope.GLOBAL,
+        disabled_components=["phi_threshold", "resonance_filter"],
+    ),
+]
+
 
 # =============================================================================
 # Ablation Study Runner
@@ -631,6 +667,7 @@ class AblationStudyRunner:
             configs.extend(LAYER_ABLATIONS)
         if AblationType.FEATURE in ablation_types:
             configs.extend(FEATURE_ABLATIONS)
+            configs.extend(SIERPINSKI_ABLATIONS)  # Include Sierpinski topology ablations
         if AblationType.COMBINATION in ablation_types:
             configs.extend(COMBINATION_ABLATIONS)
 

@@ -43,6 +43,7 @@ from .ablation import (
     COMBINATION_ABLATIONS,
     FEATURE_ABLATIONS,
     LAYER_ABLATIONS,
+    SIERPINSKI_ABLATIONS,
     AblationConfig,
     AblationResult,
     AblationScope,
@@ -120,6 +121,21 @@ from .orchestrator import (
     HandoffManager,
     RoutingEngine,
 )
+from .sierpinski_topology import (
+    METATRON_NODES,
+    METATRON_RINGS,
+    SEFIRAH_PHASES,
+    SIERPINSKI_QUBIT_MAP,
+    CircuitDepth,
+    SierpinskiCircuitSpec,
+    SierpinskiConfig,
+    SierpinskiGenerator,
+    SierpinskiNode,
+    SierpinskiTopology,
+    generate_sierpinski_circuit_spec,
+    get_sierpinski_ablation_configs,
+    map_to_metatron_nervous_system,
+)
 
 __all__ = [
     # Benchmark Matrix
@@ -196,7 +212,24 @@ __all__ = [
     "COMBINATION_ABLATIONS",
     "FEATURE_ABLATIONS",
     "LAYER_ABLATIONS",
+    "SIERPINSKI_ABLATIONS",
     "run_ablation_study",
+    # Sierpinski Topology
+    "METATRON_NODES",
+    "METATRON_RINGS",
+    "PHI",
+    "PHI_INVERSE",
+    "SEFIRAH_PHASES",
+    "SIERPINSKI_QUBIT_MAP",
+    "CircuitDepth",
+    "SierpinskiCircuitSpec",
+    "SierpinskiConfig",
+    "SierpinskiGenerator",
+    "SierpinskiNode",
+    "SierpinskiTopology",
+    "generate_sierpinski_circuit_spec",
+    "get_sierpinski_ablation_configs",
+    "map_to_metatron_nervous_system",
     # Orchestrator
     "AgentOrchestrator",
     "AgentProfile",

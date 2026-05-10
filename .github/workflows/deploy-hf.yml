@@ -1,13 +1,11 @@
-name: Deploy to Hugging Face Spaces (Static)
+name: Deploy to Hugging Face Spaces (Docker)
 
 on:
   push:
     branches: [main]
     paths:
-      - 'index.html'
-      - 'dashboard.js'
-      - 'research-status.html'
-      - 'README_HF.md'
+      - 'hf-deploy/**'
+      - 'tmt_quantum_vault/**'
       - '.github/workflows/deploy-hf.yml'
   workflow_dispatch:
 
@@ -19,6 +17,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Configure git
         run: |
@@ -35,12 +38,22 @@ jobs:
             git remote add origin https://Quantum927:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Quantum927/quantumvault
           }
 
-      - name: Copy static files
+      - name: Copy Docker deployment files
         run: |
           cd hf-space
-          cp ../index.html . 2>/dev/null || echo "index.html not found"
-          cp ../dashboard.js . 2>/dev/null || echo "dashboard.js not found"
-          cp ../research-status.html . 2>/dev/null || echo "research-status.html not found"
+          # Copy Dockerfile and app
+          cp ../hf-deploy/Dockerfile .
+          cp ../hf-deploy/hf_app.py .
+          
+          # Copy source code
+          cp -r ../tmt_quantum_vault .
+          
+          # Copy Agent directories for DNA files
+          for dir in Agent_Archivist Agent_Auditor Agent_Bio Agent_BitNet Agent_Bronze Agent_Data Agent_Federation Agent_Fractal Agent_Harmonic Agent_Mirror Agent_Observer Agent_Stealth Agent_Strategic Agent_Synthesizer Agent_Validator Agent_Visual Agent_Workflow Agent_Wormhole; do
+            if [ -d "../$dir" ]; then
+              cp -r "../$dir" .
+            fi
+          done
 
       - name: Create Space config
         run: |
@@ -62,6 +75,13 @@ jobs:
           # TMT Quantum Vault
           
           Multi-agent orchestration framework for quantum computing workflows with phi-resonance alignment.
+          
+          ## Features
+          
+          - **17-Agent Orchestration**: Coordinated multi-agent system
+          - **Three-Lane Routing**: Simulation, Quantum (ibm_kingston), LLM (Ollama)
+          - **Phi-Resonance Alignment**: Sacred geometry coordination patterns
+          - **Real-time Visualization**: Live orchestration traces
           EOF
 
       - name: Push to Hugging Face

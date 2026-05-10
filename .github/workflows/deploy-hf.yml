@@ -32,11 +32,12 @@ jobs:
           import os
           
           api = HfApi()
+          REPO_ID = 'Quantum927/tmt-quantum-vault-dashboard'
           
           # Create Space if it doesn't exist
           try:
               api.create_repo(
-                  repo_id='quantumdynamics927/tmt-quantum-vault',
+                  repo_id=REPO_ID,
                   repo_type='space',
                   space_sdk='static',
                   private=True,
@@ -58,7 +59,7 @@ jobs:
                   api.upload_file(
                       path_or_fileobj=file,
                       path_in_repo=file,
-                      repo_id='quantumdynamics927/tmt-quantum-vault',
+                      repo_id=REPO_ID,
                       repo_type='space',
                       token=os.environ.get('HF_TOKEN')
                   )
@@ -69,7 +70,7 @@ jobs:
               api.upload_file(
                   path_or_fileobj='README_HF.md',
                   path_in_repo='README.md',
-                  repo_id='quantumdynamics927/tmt-quantum-vault',
+                  repo_id=REPO_ID,
                   repo_type='space',
                   token=os.environ.get('HF_TOKEN')
               )
@@ -82,6 +83,6 @@ jobs:
         run: |
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Deployed to: https://huggingface.co/spaces/quantumdynamics927/tmt-quantum-vault" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed to: https://huggingface.co/spaces/Quantum927/tmt-quantum-vault-dashboard" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Note: Space is private. Only accessible to authorized users." >> $GITHUB_STEP_SUMMARY

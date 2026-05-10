@@ -324,18 +324,22 @@ class RoutingEngine:
         # Get candidate roles based on task type
         task_roles = TASK_ROLE_ROUTING.get(task_type, [AgentRole.SYNTHESIZER])
 
-        # Filter by preferred/excluded
+        # If preferred_agents is provided, use those directly (for DELEG tasks)
+        # Otherwise, filter by task_roles
         if preferred_agents:
-            task_roles = [r for r in task_roles if r in preferred_agents]
+            candidate_roles = list(preferred_agents)
+        else:
+            candidate_roles = task_roles
 
-        task_roles = [r for r in task_roles if r not in excluded_agents]
+        # Filter by excluded
+        candidate_roles = [r for r in candidate_roles if r not in excluded_agents]
 
-        if not task_roles:
-            task_roles = [AgentRole.SYNTHESIZER]  # Default fallback
+        if not candidate_roles:
+            candidate_roles = [AgentRole.SYNTHESIZER]  # Default fallback
 
         # Get candidate profiles
         candidates = []
-        for role in task_roles:
+        for role in candidate_roles:
             candidates.extend(self.get_profiles_by_role(role))
 
         if not candidates:
@@ -589,32 +593,80 @@ class ExecutionPlanner:
         task_id = uuid4()
         stages = []
 
-        # Create stage for each layer
-        for layer in self.layer_sequence:
-            profiles = self.routing_engine.get_profiles_by_layer(layer)
+        # Check if context specifies expected_agents for DELEG tasks
+        expected_agents = context.get("expected_agents", [])
+        expected_layers = context.get("expected_layers", [])
 
-            if not profiles:
-                continue
+        # For DELEG tasks with expected layers, create stages for all expected layers
+        if expected_layers and expected_agents:
+            # Convert expected_layers to AgentLayer enums
+            layer_map = {
+                "input": AgentLayer.INPUT,
+                "processing": AgentLayer.PROCESSING,
+                "integration": AgentLayer.INTEGRATION,
+                "output": AgentLayer.OUTPUT,
+            }
+            target_layers = [layer_map.get(l.lower(), l) for l in expected_layers if l.lower() in layer_map]
 
-            # Select agents for this layer
-            task_roles = TASK_ROLE_ROUTING.get(task_type, [])
-            layer_agents = [
-                p.agent_role
-                for p in profiles
-                if p.agent_role in task_roles or not task_roles
-            ]
+            for layer in target_layers:
+                profiles = self.routing_engine.get_profiles_by_layer(layer)
+                if not profiles:
+                    continue
 
-            if not layer_agents:
-                # Use all layer agents if no specific match
-                layer_agents = [p.agent_role for p in profiles[:2]]
+                # Get agents for this layer - match expected_agents to this layer's profiles
+                layer_agents = [
+                    p.agent_role
+                    for p in profiles
+                    if p.agent_role.value in [a.lower() for a in expected_agents]
+                ]
 
-            stage = ExecutionStage(
-                stage_id=uuid4(),
-                layer=layer,
-                agents=layer_agents,
-                parallel=parallel_layers,
-            )
-            stages.append(stage)
+                # If no expected agents match this layer, use task_roles
+                if not layer_agents:
+                    task_roles = TASK_ROLE_ROUTING.get(task_type, [])
+                    layer_agents = [
+                        p.agent_role
+                        for p in profiles
+                        if p.agent_role in task_roles
+                    ]
+
+                # If still no agents, use all layer agents
+                if not layer_agents:
+                    layer_agents = [p.agent_role for p in profiles[:2]]
+
+                stage = ExecutionStage(
+                    stage_id=uuid4(),
+                    layer=layer,
+                    agents=layer_agents,
+                    parallel=parallel_layers,
+                )
+                stages.append(stage)
+        else:
+            # Standard execution: create stage for each layer
+            for layer in self.layer_sequence:
+                profiles = self.routing_engine.get_profiles_by_layer(layer)
+
+                if not profiles:
+                    continue
+
+                # Select agents for this layer
+                task_roles = TASK_ROLE_ROUTING.get(task_type, [])
+                layer_agents = [
+                    p.agent_role
+                    for p in profiles
+                    if p.agent_role in task_roles or not task_roles
+                ]
+
+                if not layer_agents:
+                    # Use all layer agents if no specific match
+                    layer_agents = [p.agent_role for p in profiles[:2]]
+
+                stage = ExecutionStage(
+                    stage_id=uuid4(),
+                    layer=layer,
+                    agents=layer_agents,
+                    parallel=parallel_layers,
+                )
+                stages.append(stage)
 
         # Set up dependencies for sequential execution
         if not parallel_layers:

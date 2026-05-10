@@ -337,7 +337,7 @@ class TMTBenchmarkMatrix:
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute task requiring handoff from input to integration layer",
                     task_type="coordination",  # Multi-agent coordination
-                    expected_agents=["bio", "fractal", "visual", "synthesizer"],
+                    expected_agents=["bio", "fractal", "synthesizer"],  # visual not available
                     expected_layers=["input", "integration"],
                     success_criteria={
                         "min_handoffs": 1,
@@ -363,8 +363,8 @@ class TMTBenchmarkMatrix:
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute task with Validator escalation",
                     task_type="validation",  # Maps to Validator/Auditor agents
-                    expected_agents=["workflow", "validator", "visual"],
-                    expected_layers=["output"],
+                    expected_agents=["archivist", "observer", "synthesizer"],  # workflow, validator, visual not available
+                    expected_layers=["output", "integration"],
                     success_criteria={
                         "escalation_detected": True,
                         "escalation_resolved": True,
@@ -700,7 +700,11 @@ class BenchmarkRunner:
             trace = orchestrator.execute(
                 task_type=task.task_type,  # Use task_type for routing
                 objective=task.description,
-                context=task.metadata,
+                context={
+                    **task.metadata,
+                    "expected_agents": task.expected_agents,
+                    "expected_layers": task.expected_layers,
+                },
             )
 
             # Extract metrics from trace

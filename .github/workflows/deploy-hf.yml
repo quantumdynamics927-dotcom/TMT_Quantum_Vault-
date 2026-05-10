@@ -14,70 +14,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          pip install huggingface-hub
-
       - name: Deploy to Hugging Face Spaces
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          python -c "
-          from huggingface_hub import HfApi
-          import os
+          # Configure git for HF Spaces
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           
-          api = HfApi()
-          REPO_ID = 'Quantum927/tmt-quantum-vault-dashboard'
+          # Clone the HF Space
+          git clone https://huggingface.co/spaces/Quantum927/tmt-quantum-vault-dashboard hf-space
+          cd hf-space
           
-          # Create Space if it doesn't exist
-          try:
-              api.create_repo(
-                  repo_id=REPO_ID,
-                  repo_type='space',
-                  space_sdk='static',
-                  private=True,
-                  exist_ok=True
-              )
-          except Exception as e:
-              print(f'Repo creation: {e}')
+          # Copy static files
+          cp ../index.html .
+          cp ../dashboard.js .
+          cp ../research-status.html .
+          cp ../README_HF.md README.md
           
-          # Upload static files
-          static_files = [
-              'index.html',
-              'dashboard.js',
-              'research-status.html',
-              'README_HF.md'
-          ]
-          
-          for file in static_files:
-              if os.path.exists(file):
-                  api.upload_file(
-                      path_or_fileobj=file,
-                      path_in_repo=file,
-                      repo_id=REPO_ID,
-                      repo_type='space',
-                      token=os.environ.get('HF_TOKEN')
-                  )
-                  print(f'Uploaded {file}')
-          
-          # Upload README as README.md
-          if os.path.exists('README_HF.md'):
-              api.upload_file(
-                  path_or_fileobj='README_HF.md',
-                  path_in_repo='README.md',
-                  repo_id=REPO_ID,
-                  repo_type='space',
-                  token=os.environ.get('HF_TOKEN')
-              )
-              print('Uploaded README.md')
-          
-          print('Deployment complete!')
-          "
+          # Commit and push
+          git add -A
+          git commit -m "Update from GitHub Actions: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
+          git push https://Quantum927:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Quantum927/tmt-quantum-vault-dashboard main || echo "Push completed"
 
       - name: Deployment summary
         run: |

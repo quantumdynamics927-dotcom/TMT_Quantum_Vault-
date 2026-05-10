@@ -1313,6 +1313,14 @@ class AgentOrchestrator:
                 temperature=0.7,
             )
 
+            # Parse structured JSON response
+            parsed_result = self._parse_llm_response(response.response)
+
+            # Calculate resonance score based on response quality
+            resonance_score = self._calculate_resonance_score(
+                parsed_result, profile.phi_alignment
+            )
+
             return AgentOutputSchema(
                 task_id=contract.input.task_id,
                 agent_id=profile.agent_id,
@@ -1322,10 +1330,11 @@ class AgentOrchestrator:
                     "status": "completed",
                     "backend": "ollama_local",
                     "response": response.response,
+                    "parsed": parsed_result,
                 },
-                summary=f"Processed by {profile.agent_name} via Ollama",
-                confidence=0.82,  # Default confidence for Ollama
-                resonance_score=profile.phi_alignment,
+                summary=parsed_result.get("summary", f"Processed by {profile.agent_name} via Ollama"),
+                confidence=parsed_result.get("confidence", 0.82),
+                resonance_score=resonance_score,
                 fitness_contribution=profile.fitness * 0.1,
                 status=HandoffStatus.COMPLETED,
             )
@@ -1336,6 +1345,79 @@ class AgentOrchestrator:
         except Exception as e:
             logger.warning(f"Ollama execution failed: {e}")
             return None
+
+    def _parse_llm_response(self, response: str) -> dict[str, Any]:
+        """Parse LLM response to extract structured fields.
+
+        Args:
+            response: Raw LLM response string
+
+        Returns:
+            Parsed result dictionary
+        """
+        import json
+        import re
+
+        # Try to extract JSON from response
+        json_match = re.search(r'\{[^{}]*\}', response, re.DOTALL)
+        if json_match:
+            try:
+                parsed = json.loads(json_match.group())
+                return {
+                    "summary": parsed.get("summary", response[:200]),
+                    "analysis": parsed.get("analysis", ""),
+                    "recommendations": parsed.get("recommendations", []),
+                    "confidence": float(parsed.get("confidence", 0.82)),
+                    "resonance_notes": parsed.get("resonance_notes", ""),
+                    "next_agent": parsed.get("next_agent"),
+                }
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+        # Fallback: use raw response as summary
+        return {
+            "summary": response[:200] if len(response) > 200 else response,
+            "analysis": "",
+            "recommendations": [],
+            "confidence": 0.75,  # Lower confidence for unstructured response
+            "resonance_notes": "",
+            "next_agent": None,
+        }
+
+    def _calculate_resonance_score(
+        self, parsed_result: dict[str, Any], base_phi: float
+    ) -> float:
+        """Calculate resonance score based on response quality.
+
+        Args:
+            parsed_result: Parsed LLM response
+            base_phi: Base phi alignment from agent profile
+
+        Returns:
+            Resonance score (0-1)
+        """
+        score = base_phi  # Start with base phi alignment
+
+        # Boost for structured response
+        if parsed_result.get("summary") and len(parsed_result["summary"]) > 10:
+            score += 0.05
+
+        if parsed_result.get("analysis") and len(parsed_result["analysis"]) > 10:
+            score += 0.05
+
+        if parsed_result.get("recommendations") and len(parsed_result["recommendations"]) > 0:
+            score += 0.05
+
+        if parsed_result.get("resonance_notes") and len(parsed_result["resonance_notes"]) > 10:
+            score += 0.05
+
+        # Boost for high confidence
+        confidence = parsed_result.get("confidence", 0.75)
+        if confidence >= 0.85:
+            score += 0.05
+
+        # Cap at 1.0
+        return min(1.0, score)
 
     def _build_prompt(
         self, profile: AgentProfile, contract: AgentContract
@@ -1357,7 +1439,17 @@ Phi Alignment: {profile.phi_alignment:.3f}
 Task: {contract.input.objective}
 Context: {contract.input.context}
 
-Provide a concise response that addresses the objective."""
+Respond in structured JSON format with the following fields:
+{{
+  "summary": "Brief summary of the response (max 100 words)",
+  "analysis": "Key insights or findings",
+  "recommendations": ["List of actionable recommendations"],
+  "confidence": 0.85,
+  "resonance_notes": "How this relates to phi-alignment",
+  "next_agent": "suggested next agent role or null"
+}}
+
+Keep the response concise and focused. Provide only valid JSON."""
 
     def _create_error_output(
         self,

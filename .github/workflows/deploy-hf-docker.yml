@@ -1,0 +1,104 @@
+name: Deploy to Hugging Face Spaces (Docker)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tmt_quantum_vault/**'
+      - 'hf-deploy/**'
+      - 'pyproject.toml'
+      - 'vault_config.json'
+      - 'metatron_geometry.json'
+      - '.github/workflows/deploy-hf-docker.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install huggingface-hub
+
+      - name: Prepare deployment files
+        run: |
+          mkdir -p deploy_temp
+          
+          # Copy core files
+          cp pyproject.toml deploy_temp/
+          cp vault_config.json deploy_temp/
+          cp metatron_geometry.json deploy_temp/
+          
+          # Copy hf-deploy files
+          cp hf-deploy/Dockerfile deploy_temp/
+          cp hf-deploy/hf_app.py deploy_temp/
+          cp hf-deploy/README.md deploy_temp/
+          cp hf-deploy/.dockerignore deploy_temp/
+          
+          # Copy tmt_quantum_vault package
+          cp -r tmt_quantum_vault deploy_temp/
+          
+          # Copy Agent directories (conscious_dna.json files)
+          for dir in Agent_*/; do
+            mkdir -p "deploy_temp/${dir}"
+            cp "${dir}conscious_dna.json" "deploy_temp/${dir}/" 2>/dev/null || true
+          done
+
+      - name: Deploy to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          cd deploy_temp
+          
+          # Configure git for HF
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          
+          # Clone or create the Space
+          git clone "https://Quantum927:${HF_TOKEN}@huggingface.co/spaces/Quantum927/tmt-quantum-vault" hf-space 2>/dev/null || {
+            echo "Creating new Space..."
+            mkdir -p hf-space
+            cd hf-space
+            git init
+            git remote add origin "https://Quantum927:${HF_TOKEN}@huggingface.co/spaces/Quantum927/tmt-quantum-vault"
+            cd ..
+          }
+          
+          # Sync files
+          cd hf-space
+          rm -rf tmt_quantum_vault Agent_* || true
+          cp -r ../tmt_quantum_vault .
+          cp -r ../Agent_* . 2>/dev/null || true
+          cp ../pyproject.toml .
+          cp ../vault_config.json .
+          cp ../metatron_geometry.json .
+          cp ../Dockerfile .
+          cp ../hf_app.py .
+          cp ../README.md .
+          cp ../.dockerignore .
+          
+          # Commit and push
+          git add -A
+          git commit -m "Update: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || echo "No changes"
+          git push origin main || git push -u origin main
+
+      - name: Deployment summary
+        run: |
+          echo "## ✅ Docker Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Space URL**: https://huggingface.co/spaces/Quantum927/tmt-quantum-vault" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**SDK**: Docker" >> $GITHUB_STEP_SUMMARY
+          echo "**Port**: 7860" >> $GITHUB_STEP_SUMMARY
+          echo "**Visibility**: Private" >> $GITHUB_STEP_SUMMARY

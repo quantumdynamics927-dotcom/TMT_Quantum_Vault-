@@ -1,0 +1,97 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Type checking
+.mypy_cache/
+.pytype/
+
+# Benchmark results (large)
+benchmark_results/
+
+# Node modules (not needed for Docker)
+node_modules/
+
+# Development files
+*.md
+!README.md
+LICENSE
+CHANGELOG.md
+CONTRIBUTING.md
+SECURITY.md
+CODE_OF_CONDUCT.md
+ETHICS.md
+NOTICE
+
+# Config files not needed in container
+.vercel/
+.huggingface/
+.github/
+.claude/
+
+# Large data files
+*.pt
+*.pth
+*.bin
+*.gguf
+*.pkl
+*.gz
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+Resonance_Logs/
+Shadow_Drive/
+Stealth_Logs/
+Stealth_Backups/
+checkpoints/
+
+# Evidence and archives (not needed for demo)
+evidence_ledger/
+Fractal_Archives/
+Cognitive_Nexus/
+entropy_stack/

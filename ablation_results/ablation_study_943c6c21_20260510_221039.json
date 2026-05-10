@@ -1,0 +1,265 @@
+{
+  "study_id": "943c6c21",
+  "study_name": "TMT Ablation Study",
+  "description": "Systematic ablation of TMT Quantum Vault components",
+  "baseline_score": 0.0,
+  "results": [
+    {
+      "ablation_id": "ABL-AGENT-001",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-001",
+        "ablation_type": "agent",
+        "target": "Synthesizer",
+        "description": "Remove Synthesizer (integration center) from ensemble",
+        "scope": "global",
+        "disabled_components": [
+          "synthesizer"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 0,
+      "agents_disabled": 0,
+      "layers_available": 0,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 0,
+      "tasks_total": 0,
+      "duration_ms": 0.0,
+      "timestamp": "2026-05-10T22:10:39.365210+00:00",
+      "error_message": "1 validation error for RoutingPolicy\ndisabled_components\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['synthesizer'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+    },
+    {
+      "ablation_id": "ABL-AGENT-002",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-002",
+        "ablation_type": "agent",
+        "target": "Observer",
+        "description": "Remove Observer (monitoring) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "observer"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 0,
+      "agents_disabled": 0,
+      "layers_available": 0,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 0,
+      "tasks_total": 0,
+      "duration_ms": 0.0,
+      "timestamp": "2026-05-10T22:10:39.365534+00:00",
+      "error_message": "1 validation error for RoutingPolicy\ndisabled_components\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['observer'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+    },
+    {
+      "ablation_id": "ABL-AGENT-003",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-003",
+        "ablation_type": "agent",
+        "target": "Validator",
+        "description": "Remove Validator (output verification) from ensemble",
+        "scope": "global",
+        "disabled_components": [
+          "validator"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 0,
+      "agents_disabled": 0,
+      "layers_available": 0,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 0,
+      "tasks_total": 0,
+      "duration_ms": 0.0,
+      "timestamp": "2026-05-10T22:10:39.365729+00:00",
+      "error_message": "1 validation error for RoutingPolicy\ndisabled_components\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['validator'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+    },
+    {
+      "ablation_id": "ABL-AGENT-004",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-004",
+        "ablation_type": "agent",
+        "target": "Archivist",
+        "description": "Remove Archivist (memory) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "archivist"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 0,
+      "agents_disabled": 0,
+      "layers_available": 0,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 0,
+      "tasks_total": 0,
+      "duration_ms": 0.0,
+      "timestamp": "2026-05-10T22:10:39.365946+00:00",
+      "error_message": "1 validation error for RoutingPolicy\ndisabled_components\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['archivist'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+    },
+    {
+      "ablation_id": "ABL-AGENT-005",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-005",
+        "ablation_type": "agent",
+        "target": "Strategic",
+        "description": "Remove Strategic (planning) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "strategic"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 0,
+      "agents_disabled": 0,
+      "layers_available": 0,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 0,
+      "tasks_total": 0,
+      "duration_ms": 0.0,
+      "timestamp": "2026-05-10T22:10:39.366138+00:00",
+      "error_message": "1 validation error for RoutingPolicy\ndisabled_components\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['strategic'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+    },
+    {
+      "ablation_id": "ABL-AGENT-006",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-006",
+        "ablation_type": "agent",
+        "target": "Federation",
+        "description": "Remove Federation (coordination) from ensemble",
+        "scope": "global",
+        "disabled_components": [
+          "federation"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 0,
+      "agents_disabled": 0,
+      "layers_available": 0,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 0,
+      "tasks_total": 0,
+      "duration_ms": 0.0,
+      "timestamp": "2026-05-10T22:10:39.366269+00:00",
+      "error_message": "1 validation error for RoutingPolicy\ndisabled_components\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['federation'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+    },
+    {
+      "ablation_id": "ABL-AGENT-007",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-007",
+        "ablation_type": "agent",
+        "target": "Bio",
+        "description": "Remove Bio (healing) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "bio"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 0,
+      "agents_disabled": 0,
+      "layers_available": 0,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 0,
+      "tasks_total": 0,
+      "duration_ms": 0.0,
+      "timestamp": "2026-05-10T22:10:39.366455+00:00",
+      "error_message": "1 validation error for RoutingPolicy\ndisabled_components\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['bio'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+    },
+    {
+      "ablation_id": "ABL-AGENT-008",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-008",
+        "ablation_type": "agent",
+        "target": "BitNet",
+        "description": "Remove BitNet (neural) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "bitnet"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 0,
+      "agents_disabled": 0,
+      "layers_available": 0,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 0,
+      "tasks_total": 0,
+      "duration_ms": 0.0,
+      "timestamp": "2026-05-10T22:10:39.366588+00:00",
+      "error_message": "1 validation error for RoutingPolicy\ndisabled_components\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['bitnet'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+    }
+  ],
+  "summary": {
+    "baseline_score": 0.0,
+    "total_experiments": 8,
+    "successful_experiments": 0,
+    "by_type": {},
+    "top_impact": []
+  },
+  "created_at": "2026-05-10T22:10:39.215883+00:00",
+  "completed_at": "2026-05-10T22:10:39.366630+00:00"
+}

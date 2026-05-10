@@ -3894,5 +3894,123 @@ def create_agents(
             console.print(f"  [red]•[/red] {error}")
 
 
+@app.command("ablation")
+def run_ablation(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    output_dir: Path | None = typer.Option(
+        None,
+        "--output-dir",
+        "-o",
+        help="Output directory for ablation results.",
+    ),
+    ablation_types: str | None = typer.Option(
+        None,
+        "--types",
+        "-t",
+        help="Comma-separated ablation types: agent,layer,feature,combination",
+    ),
+    mode: str = typer.Option(
+        "simulation",
+        "--mode",
+        "-m",
+        help="Execution mode: simulation or live",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Run ablation study to measure component contribution.
+
+    Systematically disables components and measures impact on orchestration
+    performance. Supports agent, layer, feature, and combination ablations.
+
+    Examples:
+        python -m tmt_quantum_vault ablation
+        python -m tmt_quantum_vault ablation --types agent,layer
+        python -m tmt_quantum_vault ablation --mode live --output-dir ./results
+    """
+    from .orchestration import (
+        AblationStudyRunner,
+        AblationType,
+        ExecutionMode,
+    )
+
+    # Parse ablation types
+    types_list = None
+    if ablation_types:
+        types_list = [t.strip() for t in ablation_types.split(",")]
+
+    # Parse execution mode
+    exec_mode = ExecutionMode.SIMULATION if mode == "simulation" else ExecutionMode.LIVE
+
+    # Run study
+    runner = AblationStudyRunner(
+        vault_path=root,
+        output_dir=output_dir,
+        execution_mode=exec_mode,
+    )
+
+    study = runner.run_study(ablation_types=types_list)
+
+    if json_out:
+        typer.echo(emit_json_document(study.to_dict()))
+        return
+
+    # Rich output
+    console.print(
+        Panel.fit(
+            f"Study ID: {study.study_id}\n"
+            f"Baseline Score: {study.baseline_score:.4f}\n"
+            f"Experiments: {len(study.results)}\n"
+            f"Successful: {len([r for r in study.results if r.error_message is None])}",
+            title="Ablation Study Complete",
+        )
+    )
+
+    # Results table
+    table = Table(box=box.SIMPLE_HEAVY, title="Ablation Results")
+    table.add_column("ID")
+    table.add_column("Type")
+    table.add_column("Target")
+    table.add_column("Score")
+    table.add_column("Δ")
+    table.add_column("Impact")
+    table.add_column("Status")
+
+    for result in study.results:
+        status = "[green]✓[/green]" if result.error_message is None else "[red]✗[/red]"
+        delta_color = "green" if result.score_delta >= 0 else "red"
+        table.add_row(
+            result.ablation_id,
+            result.config.ablation_type.value,
+            result.config.target,
+            f"{result.orchestration_score:.4f}",
+            f"[{delta_color}]{result.score_delta:+.4f}[/{delta_color}]",
+            f"{result.impact_percentage:+.2f}%",
+            status,
+        )
+
+    console.print(table)
+
+    # Top impact summary
+    if study.summary.get("top_impact"):
+        console.print("\n[bold]Top Impact Ablations:[/bold]")
+        for impact in study.summary["top_impact"]:
+            console.print(
+                f"  • {impact['target']}: {impact['impact']:+.2f}% "
+                f"(score: {impact['score']:.4f})"
+            )
+
+    # Save location
+    if output_dir:
+        console.print(f"\n[blue]Results saved to:[/blue] {output_dir}")
+
+
 if __name__ == "__main__":
     app()

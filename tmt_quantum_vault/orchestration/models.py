@@ -358,6 +358,10 @@ class RoutingPolicy(BaseModel):
     max_concurrent_tasks_per_agent: int = Field(default=5)
     agent_weight_by_fitness: bool = Field(default=True)
 
+    # Ablation support - components to disable
+    disabled_components: list[str] = Field(default_factory=list)
+    # Example: ["synthesizer", "validator", "integration", "consensus"]
+
 
 # =============================================================================
 # Coordination Metrics

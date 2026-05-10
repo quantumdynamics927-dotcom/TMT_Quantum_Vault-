@@ -107,6 +107,19 @@ from .orchestrator import (
     HandoffManager,
     RoutingEngine,
 )
+from .ablation import (
+    AblationConfig,
+    AblationResult,
+    AblationScope,
+    AblationStudy,
+    AblationStudyRunner,
+    AblationType,
+    AGENT_ABLATIONS,
+    COMBINATION_ABLATIONS,
+    FEATURE_ABLATIONS,
+    LAYER_ABLATIONS,
+    run_ablation_study,
+)
 
 __all__ = [
     # Benchmark Matrix
@@ -164,6 +177,26 @@ __all__ = [
     "PHI_INVERSE",
     "RoutingDecision",
     "RoutingPolicy",
+    # Orchestrator
+    "AgentOrchestrator",
+    "AgentProfile",
+    "ExecutionPlan",
+    "ExecutionPlanner",
+    "ExecutionStage",
+    "HandoffManager",
+    "RoutingEngine",
+    # Ablation
+    "AblationConfig",
+    "AblationResult",
+    "AblationScope",
+    "AblationStudy",
+    "AblationStudyRunner",
+    "AblationType",
+    "AGENT_ABLATIONS",
+    "COMBINATION_ABLATIONS",
+    "FEATURE_ABLATIONS",
+    "LAYER_ABLATIONS",
+    "run_ablation_study",
     # Orchestrator
     "AgentOrchestrator",
     "AgentProfile",

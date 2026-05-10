@@ -277,6 +277,18 @@ class RoutingEngine:
         """
         return self._agent_profiles.get(agent_id)
 
+    def _is_disabled(self, component: str) -> bool:
+        """Check if a component is disabled.
+
+        Args:
+            component: Component name (agent role or layer name)
+
+        Returns:
+            True if disabled
+        """
+        disabled = self.policy.disabled_components
+        return component.lower() in [d.lower() for d in disabled]
+
     def get_profiles_by_role(self, role: AgentRole) -> list[AgentProfile]:
         """Get all profiles for a role.
 
@@ -334,6 +346,9 @@ class RoutingEngine:
         # Filter by excluded
         candidate_roles = [r for r in candidate_roles if r not in excluded_agents]
 
+        # Filter by ablation (disabled components)
+        candidate_roles = [r for r in candidate_roles if not self._is_disabled(r.value)]
+
         if not candidate_roles:
             candidate_roles = [AgentRole.SYNTHESIZER]  # Default fallback
 
@@ -342,9 +357,15 @@ class RoutingEngine:
         for role in candidate_roles:
             candidates.extend(self.get_profiles_by_role(role))
 
+        # Filter out disabled agents
+        candidates = [p for p in candidates if not self._is_disabled(p.agent_role.value)]
+
         if not candidates:
-            # Fallback to any available agent
-            candidates = list(self._agent_profiles.values())
+            # Fallback to any available agent (excluding disabled)
+            candidates = [
+                p for p in self._agent_profiles.values()
+                if not self._is_disabled(p.agent_role.value)
+            ]
 
         # Score candidates
         scored_candidates = []

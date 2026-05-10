@@ -1,0 +1,303 @@
+{
+  "study_id": "1988c872",
+  "study_name": "TMT Ablation Study",
+  "description": "Systematic ablation of TMT Quantum Vault components",
+  "baseline_score": 0.0,
+  "results": [
+    {
+      "ablation_id": "ABL-AGENT-001",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-001",
+        "ablation_type": "agent",
+        "target": "Synthesizer",
+        "description": "Remove Synthesizer (integration center) from ensemble",
+        "scope": "global",
+        "disabled_components": [
+          "synthesizer"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 17,
+      "agents_disabled": 1,
+      "layers_available": 4,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 19,
+      "tasks_total": 19,
+      "duration_ms": 6.279945373535156,
+      "timestamp": "2026-05-10T22:12:07.937978+00:00",
+      "error_message": null
+    },
+    {
+      "ablation_id": "ABL-AGENT-002",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-002",
+        "ablation_type": "agent",
+        "target": "Observer",
+        "description": "Remove Observer (monitoring) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "observer"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 17,
+      "agents_disabled": 1,
+      "layers_available": 4,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 19,
+      "tasks_total": 19,
+      "duration_ms": 6.259679794311523,
+      "timestamp": "2026-05-10T22:12:07.944276+00:00",
+      "error_message": null
+    },
+    {
+      "ablation_id": "ABL-AGENT-003",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-003",
+        "ablation_type": "agent",
+        "target": "Validator",
+        "description": "Remove Validator (output verification) from ensemble",
+        "scope": "global",
+        "disabled_components": [
+          "validator"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 17,
+      "agents_disabled": 1,
+      "layers_available": 4,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 19,
+      "tasks_total": 19,
+      "duration_ms": 24.677753448486328,
+      "timestamp": "2026-05-10T22:12:07.968998+00:00",
+      "error_message": null
+    },
+    {
+      "ablation_id": "ABL-AGENT-004",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-004",
+        "ablation_type": "agent",
+        "target": "Archivist",
+        "description": "Remove Archivist (memory) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "archivist"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 17,
+      "agents_disabled": 1,
+      "layers_available": 4,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 19,
+      "tasks_total": 19,
+      "duration_ms": 6.208181381225586,
+      "timestamp": "2026-05-10T22:12:07.975247+00:00",
+      "error_message": null
+    },
+    {
+      "ablation_id": "ABL-AGENT-005",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-005",
+        "ablation_type": "agent",
+        "target": "Strategic",
+        "description": "Remove Strategic (planning) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "strategic"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 17,
+      "agents_disabled": 1,
+      "layers_available": 4,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 19,
+      "tasks_total": 19,
+      "duration_ms": 12.538433074951172,
+      "timestamp": "2026-05-10T22:12:07.987824+00:00",
+      "error_message": null
+    },
+    {
+      "ablation_id": "ABL-AGENT-006",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-006",
+        "ablation_type": "agent",
+        "target": "Federation",
+        "description": "Remove Federation (coordination) from ensemble",
+        "scope": "global",
+        "disabled_components": [
+          "federation"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 17,
+      "agents_disabled": 1,
+      "layers_available": 4,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 19,
+      "tasks_total": 19,
+      "duration_ms": 15.689373016357422,
+      "timestamp": "2026-05-10T22:12:08.003556+00:00",
+      "error_message": null
+    },
+    {
+      "ablation_id": "ABL-AGENT-007",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-007",
+        "ablation_type": "agent",
+        "target": "Bio",
+        "description": "Remove Bio (healing) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "bio"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 17,
+      "agents_disabled": 1,
+      "layers_available": 4,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 19,
+      "tasks_total": 19,
+      "duration_ms": 25.252819061279297,
+      "timestamp": "2026-05-10T22:12:08.028873+00:00",
+      "error_message": null
+    },
+    {
+      "ablation_id": "ABL-AGENT-008",
+      "baseline_type": "ablated",
+      "config": {
+        "ablation_id": "ABL-AGENT-008",
+        "ablation_type": "agent",
+        "target": "BitNet",
+        "description": "Remove BitNet (neural) from ensemble",
+        "scope": "local",
+        "disabled_components": [
+          "bitnet"
+        ],
+        "enabled": true,
+        "metadata": {}
+      },
+      "orchestration_score": 0.0,
+      "task_completion_score": 0.0,
+      "output_quality_score": 0.0,
+      "score_delta": 0.0,
+      "impact_percentage": 0.0,
+      "agents_available": 17,
+      "agents_disabled": 1,
+      "layers_available": 4,
+      "layers_disabled": 0,
+      "tasks_passed": 0,
+      "tasks_failed": 19,
+      "tasks_total": 19,
+      "duration_ms": 11.376619338989258,
+      "timestamp": "2026-05-10T22:12:08.040313+00:00",
+      "error_message": null
+    }
+  ],
+  "summary": {
+    "baseline_score": 0.0,
+    "total_experiments": 8,
+    "successful_experiments": 8,
+    "by_type": {
+      "agent": {
+        "count": 8,
+        "avg_impact_percentage": 0.0,
+        "avg_orchestration_score": 0.0,
+        "most_impactful": "Synthesizer"
+      }
+    },
+    "top_impact": [
+      {
+        "ablation_id": "ABL-AGENT-001",
+        "target": "Synthesizer",
+        "impact": 0.0,
+        "score": 0.0
+      },
+      {
+        "ablation_id": "ABL-AGENT-002",
+        "target": "Observer",
+        "impact": 0.0,
+        "score": 0.0
+      },
+      {
+        "ablation_id": "ABL-AGENT-003",
+        "target": "Validator",
+        "impact": 0.0,
+        "score": 0.0
+      },
+      {
+        "ablation_id": "ABL-AGENT-004",
+        "target": "Archivist",
+        "impact": 0.0,
+        "score": 0.0
+      },
+      {
+        "ablation_id": "ABL-AGENT-005",
+        "target": "Strategic",
+        "impact": 0.0,
+        "score": 0.0
+      }
+    ]
+  },
+  "created_at": "2026-05-10T22:12:07.922995+00:00",
+  "completed_at": "2026-05-10T22:12:08.040429+00:00"
+}

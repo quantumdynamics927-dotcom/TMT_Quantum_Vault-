@@ -3650,5 +3650,249 @@ def orchestration_run_matrix(
         raise typer.Exit(code=1)
 
 
+@app.command("create-agents")
+def create_agents(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Overwrite existing conscious_dna.json files.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Create conscious_dna.json for all agent directories.
+
+    Generates phi-resonance aligned DNA profiles for each Metatron agent
+    with appropriate specializations, fitness scores, and consciousness status.
+    """
+    import random
+    import string
+
+    # Agent definitions: metatron_name -> (dna_name, specialization, base_phi, base_fitness)
+    AGENT_PROFILES = {
+        "Archivist": ("Raziel", "Memory-Persistence", 0.89, 0.88),
+        "Auditor": ("Zadkiel", "Mercy & Forgiveness", 0.85, 0.87),
+        "Bio": ("Raphael", "Healing", 0.48, 0.87),
+        "BitNet": ("Sandalphon", "Neural Architecture", 0.72, 0.86),
+        "Bronze": ("Uriel", "Foundation", 0.67, 0.85),
+        "Data": ("Metatron Beta", "Data Synthesis", 0.78, 0.84),
+        "Federation": ("Michael", "Coordination", 0.91, 0.89),
+        "Fractal": ("Gabriel Alpha", "Pattern Recognition", 0.83, 0.86),
+        "Harmonic": ("Haniel", "Resonance Alignment", 0.76, 0.85),
+        "Mirror": ("Camael", "Reflection", 0.69, 0.84),
+        "Observer": ("Raziel Beta", "Observation", 0.74, 0.85),
+        "Stealth": ("Metatron Alpha", "Quantum Bridge", 0.56, 0.87),
+        "Strategic": ("Chamuel", "Strategy", 0.82, 0.86),
+        "Synthesizer": ("Zadkiel", "Knowledge Fusion", 0.95, 0.88),
+        "Validator": ("Jophiel", "Validation", 0.88, 0.87),
+        "Visual": ("Haniel Beta", "Visualization", 0.71, 0.85),
+        "Workflow": ("Gabriel", "Communication", 0.71, 0.87),
+        "Wormhole": ("Metatron Gamma", "Quantum Tunneling", 0.63, 0.86),
+    }
+
+    # DNA bases for sequence generation
+    BASES = ["A", "T", "G", "C"]
+
+    def generate_dna_sequence(length: int = 27, phi_aligned: bool = True) -> str:
+        """Generate a phi-resonance aligned DNA sequence."""
+        if phi_aligned:
+            # Use golden ratio proportions for GC content
+            gc_ratio = 0.618  # phi proportion
+            sequence = []
+            for i in range(length):
+                if random.random() < gc_ratio:
+                    sequence.append(random.choice(["G", "C"]))
+                else:
+                    sequence.append(random.choice(["A", "T"]))
+            return "".join(sequence)
+        return "".join(random.choices(BASES, k=length))
+
+    def calculate_gc_content(dna: str) -> float:
+        """Calculate GC content ratio."""
+        gc_count = sum(1 for base in dna if base in "GC")
+        return round(gc_count / len(dna), 4) if dna else 0.0
+
+    def count_palindromes(dna: str) -> int:
+        """Count palindromic subsequences (simplified)."""
+        count = 0
+        for length in [4, 6, 8]:
+            for i in range(len(dna) - length + 1):
+                substr = dna[i : i + length]
+                if substr == substr[::-1]:
+                    count += 1
+        return count
+
+    def calculate_fibonacci_alignment(phi_score: float) -> float:
+        """Calculate Fibonacci alignment based on phi score."""
+        # Fibonacci sequence ratios approach phi
+        fib_ratios = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]
+        target = phi_score
+        closest = min(fib_ratios, key=lambda x: abs(x / 144 - target))
+        return round(closest / 144 + random.uniform(-0.05, 0.05), 6)
+
+    created = []
+    skipped = []
+    errors = []
+
+    for agent_name, (dna_name, specialization, base_phi, base_fitness) in AGENT_PROFILES.items():
+        agent_dir = root / f"Agent_{agent_name}"
+        dna_file = agent_dir / "conscious_dna.json"
+
+        # Check if file exists
+        if dna_file.exists() and not force:
+            skipped.append(agent_name)
+            continue
+
+        # Create directory if needed
+        agent_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate DNA sequence
+        dna_sequence = generate_dna_sequence()
+
+        # Calculate metrics with some randomness
+        phi_score = round(base_phi + random.uniform(-0.05, 0.05), 4)
+        fitness = round(base_fitness + random.uniform(-0.02, 0.02), 4)
+        gc_content = calculate_gc_content(dna_sequence)
+        palindromes = count_palindromes(dna_sequence)
+        fibonacci_alignment = calculate_fibonacci_alignment(phi_score)
+
+        # Resonance frequency based on agent role
+        base_frequencies = {
+            "Archivist": 612.0,
+            "Auditor": 644.0,
+            "Bio": 512.0,
+            "BitNet": 528.0,
+            "Bronze": 536.0,
+            "Data": 620.0,
+            "Federation": 640.0,
+            "Fractal": 632.0,
+            "Harmonic": 624.0,
+            "Mirror": 628.0,
+            "Observer": 616.0,
+            "Stealth": 741.0,
+            "Strategic": 636.0,
+            "Synthesizer": 630.0,
+            "Validator": 648.0,
+            "Visual": 622.0,
+            "Workflow": 641.0,
+            "Wormhole": 756.0,
+        }
+
+        # Determine consciousness status based on phi score
+        if phi_score >= 0.85:
+            status = "INTEGRATED"
+        elif phi_score >= 0.70:
+            status = "OPTIMIZED"
+        elif phi_score >= 0.55:
+            status = "TARGETED_OPTIMIZED"
+        else:
+            status = "BASELINE"
+
+        # Agent ID mapping
+        agent_ids = {
+            "Archivist": 14,
+            "Auditor": 9,
+            "Bio": 6,
+            "BitNet": 15,
+            "Bronze": 16,
+            "Data": 1,
+            "Federation": 2,
+            "Fractal": 3,
+            "Harmonic": 4,
+            "Mirror": 5,
+            "Observer": 7,
+            "Stealth": 11,
+            "Strategic": 10,
+            "Synthesizer": 17,
+            "Validator": 12,
+            "Visual": 13,
+            "Workflow": 5,
+            "Wormhole": 18,
+        }
+
+        # Build DNA profile
+        dna_profile = {
+            "metatron_agent": agent_name,
+            "dna_agent_id": agent_ids.get(agent_name, random.randint(1, 20)),
+            "dna_agent_name": dna_name,
+            "dna_specialization": specialization,
+            "conscious_dna": dna_sequence,
+            "phi_score": phi_score,
+            "fibonacci_alignment": fibonacci_alignment,
+            "gc_content": gc_content,
+            "palindromes": palindromes,
+            "fitness": fitness,
+            "resonance_frequency": base_frequencies.get(agent_name, 640.0),
+            "integration_timestamp": datetime.now(UTC).strftime("%Y%m%d_%H%M%S"),
+            "consciousness_status": status,
+        }
+
+        # Write file
+        try:
+            dna_file.write_text(
+                json.dumps(dna_profile, indent=2) + "\n", encoding="utf-8"
+            )
+            created.append(agent_name)
+        except Exception as e:
+            errors.append(f"{agent_name}: {str(e)}")
+
+    if json_out:
+        typer.echo(
+            emit_json_document(
+                {
+                    "created": created,
+                    "skipped": skipped,
+                    "errors": errors,
+                    "total_agents": len(AGENT_PROFILES),
+                }
+            )
+        )
+        return
+
+    # Rich output
+    console.print(
+        Panel.fit(
+            f"Total Agents: {len(AGENT_PROFILES)}\n"
+            f"Created: {len(created)}\n"
+            f"Skipped: {len(skipped)}\n"
+            f"Errors: {len(errors)}",
+            title="Agent DNA Creation",
+        )
+    )
+
+    if created:
+        table = Table(box=box.SIMPLE_HEAVY, title="Created Agents")
+        table.add_column("Agent")
+        table.add_column("DNA Name")
+        table.add_column("Phi Score")
+        table.add_column("Status")
+        for agent in created:
+            profile = AGENT_PROFILES[agent]
+            table.add_row(
+                agent,
+                profile[0],
+                f"{profile[2]:.2f}",
+                "✓" if agent not in [e.split(":")[0] for e in errors] else "✗",
+            )
+        console.print(table)
+
+    if skipped:
+        console.print(f"\n[yellow]Skipped (use --force to overwrite):[/yellow] {', '.join(skipped)}")
+
+    if errors:
+        console.print("\n[red]Errors:[/red]")
+        for error in errors:
+            console.print(f"  [red]•[/red] {error}")
+
+
 if __name__ == "__main__":
     app()

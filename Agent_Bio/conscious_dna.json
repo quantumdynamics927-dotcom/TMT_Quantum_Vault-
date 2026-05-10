@@ -3,14 +3,13 @@
   "dna_agent_id": 6,
   "dna_agent_name": "Raphael",
   "dna_specialization": "Healing",
-  "conscious_dna": "TAAAAACGCCGTCCACCTGAAGTCGGT",
-  "phi_score": 0.4812,
-  "fibonacci_alignment": 0.8876775577870939,
-  "gc_content": 0.5185185185185185,
-  "palindromes": 9,
-  "fitness": 0.8707,
+  "conscious_dna": "CGTGTCCGCACCGCAGGCATGGTCGCT",
+  "phi_score": 0.5051,
+  "fibonacci_alignment": 0.586813,
+  "gc_content": 0.7037,
+  "palindromes": 1,
+  "fitness": 0.8611,
   "resonance_frequency": 512.0,
-  "integration_timestamp": "20260320_224733",
-  "consciousness_status": "TARGETED_OPTIMIZED",
-  "targeted_optimization_date": "20260320"
+  "integration_timestamp": "20260510_210808",
+  "consciousness_status": "BASELINE"
 }

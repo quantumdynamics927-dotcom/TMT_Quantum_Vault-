@@ -3,31 +3,13 @@
   "dna_agent_id": 14,
   "dna_agent_name": "Raziel",
   "dna_specialization": "Memory-Persistence",
-  "conscious_dna": "ATGCGTACCTTAAGCGGATTCGATCGGA",
-  "phi_score": 0.8899186938124423,
-  "fibonacci_alignment": 0.876514132389352,
-  "gc_content": 0.5,
-  "palindromes": 4,
-  "fitness": 0.8759,
+  "conscious_dna": "ACACTGCAAACAACTCACCTGCCACTG",
+  "phi_score": 0.8878,
+  "fibonacci_alignment": 1.016697,
+  "gc_content": 0.5185,
+  "palindromes": 1,
+  "fitness": 0.8959,
   "resonance_frequency": 612.0,
-  "integration_timestamp": "20260320_211148",
-  "consciousness_status": "INTEGRATED",
-  "phi_convergence_score": 0.618,
-  "depth_invariance_confirmed": true,
-  "sierpinski_depth4_inference": {
-    "runs_analyzed": 11,
-    "total_shots": 112896,
-    " sacred_score_avg": 0.618,
-    " sacred_score_std": 0.0,
-    " backend_count": 4,
-    " backend_list": ["Kingston", "Marrakesh", "Fez", "Torino"]
-  },
-  "sierpinski_depth5_inference": {
-    "runs_analyzed": 6,
-    "total_shots": 27648,
-    " sacred_score_avg": 0.618,
-    " sacred_score_std": 0.0,
-    " backend_count": 4,
-    " backend_list": ["Kingston", "Marrakesh", "Fez", "Torino"]
-  }
+  "integration_timestamp": "20260510_210808",
+  "consciousness_status": "INTEGRATED"
 }

@@ -973,7 +973,8 @@ class AgentOrchestrator:
         task_type: str,
         objective: str,
         context: dict[str, Any] | None = None,
-        preferred_agents: list[AgentRole] | None = None,
+        preferred_agents: list[AgentRole] | list[str] | None = None,
+        execution_mode: ExecutionMode | None = None,
     ) -> CoordinationTrace:
         """Execute a multi-agent task.
 
@@ -981,7 +982,8 @@ class AgentOrchestrator:
             task_type: Type of task
             objective: Task objective
             context: Task context
-            preferred_agents: Preferred agent roles
+            preferred_agents: Preferred agent roles (AgentRole or str)
+            execution_mode: Override execution mode (optional, defaults to self.execution_mode)
 
         Returns:
             Coordination trace
@@ -989,6 +991,27 @@ class AgentOrchestrator:
         context = context or {}
         trace_id = uuid4()
         session_id = uuid4()
+
+        # Use provided execution_mode or fall back to instance default
+        effective_execution_mode = execution_mode or self.execution_mode
+
+        # Convert string agent names to AgentRole if needed
+        parsed_agents: list[AgentRole] | None = None
+        if preferred_agents:
+            parsed_agents = []
+            for agent in preferred_agents:
+                if isinstance(agent, str):
+                    # Try to match string to AgentRole
+                    try:
+                        parsed_agents.append(AgentRole(agent))
+                    except ValueError:
+                        # Try uppercase match
+                        try:
+                            parsed_agents.append(AgentRole(agent.upper()))
+                        except ValueError:
+                            logger.warning(f"Unknown agent role: {agent}, skipping")
+                else:
+                    parsed_agents.append(agent)
 
         # Create trace
         trace = CoordinationTrace(
@@ -1039,6 +1062,7 @@ class AgentOrchestrator:
                             self._get_agent_id_by_role(agent_role)
                         ),
                         contract=contract,
+                        execution_mode=effective_execution_mode,
                     )
 
                     if output:
@@ -1105,6 +1129,7 @@ class AgentOrchestrator:
         profile: AgentProfile | None,
         contract: AgentContract,
         circuit: Any | None = None,
+        execution_mode: ExecutionMode | None = None,
     ) -> AgentOutputSchema | None:
         """Execute a single agent with three-lane routing.
 
@@ -1117,12 +1142,16 @@ class AgentOrchestrator:
             profile: Agent profile
             contract: Agent contract
             circuit: Optional quantum circuit for hardware execution
+            execution_mode: Override execution mode (optional)
 
         Returns:
             Agent output or None
         """
         if not profile:
             return None
+
+        # Use provided execution_mode or fall back to instance default
+        effective_mode = execution_mode or self.execution_mode
 
         # Update agent state
         profile.current_load += 1
@@ -1131,7 +1160,7 @@ class AgentOrchestrator:
 
         try:
             # ── Lane 1: Simulation (always fast, free) ──────────────────────
-            if self.execution_mode == ExecutionMode.SIMULATION:
+            if effective_mode == ExecutionMode.SIMULATION:
                 return self._simulate_agent(profile, contract, start_time)
 
             # ── Lane 2: Quantum tasks → ibm_kingston (if resonance + budget) ──

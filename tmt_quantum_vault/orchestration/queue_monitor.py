@@ -84,10 +84,7 @@ class QueueStatus:
     @property
     def is_acceptable(self) -> bool:
         """Check if queue is acceptable for submission."""
-        return (
-            self.status == "available"
-            and self.pending_jobs <= MAX_QUEUE_DEPTH
-        )
+        return self.status == "available" and self.pending_jobs <= MAX_QUEUE_DEPTH
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
@@ -153,7 +150,9 @@ class KingstonQueueMonitor:
         """
         self.phi_threshold = phi_threshold
         self.max_queue_depth = max_queue_depth
-        self.state_path = state_path or Path.home() / ".tmt_quantum" / "budget_state.json"
+        self.state_path = (
+            state_path or Path.home() / ".tmt_quantum" / "budget_state.json"
+        )
 
         # Initialize budget state
         self._budget = BudgetState(total_minutes=budget_minutes)
@@ -170,7 +169,9 @@ class KingstonQueueMonitor:
                 with open(self.state_path, encoding="utf-8") as f:
                     data = json.load(f)
                 self._budget.used_minutes = data.get("used_minutes", 0.0)
-                logger.info(f"Loaded budget state: {self._budget.remaining_minutes:.2f} min remaining")
+                logger.info(
+                    f"Loaded budget state: {self._budget.remaining_minutes:.2f} min remaining"
+                )
             except (json.JSONDecodeError, KeyError) as e:
                 logger.warning(f"Failed to load budget state: {e}")
 
@@ -284,7 +285,9 @@ class KingstonQueueMonitor:
         self._budget.used_minutes += minutes
         self._budget.last_updated = datetime.now(UTC)
         self._save_state()
-        logger.info(f"Recorded {minutes:.2f} min usage, {self.remaining_budget:.2f} min remaining")
+        logger.info(
+            f"Recorded {minutes:.2f} min usage, {self.remaining_budget:.2f} min remaining"
+        )
 
     def get_budget_summary(self) -> dict[str, Any]:
         """Get budget summary for reporting.

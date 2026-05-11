@@ -51,21 +51,21 @@ PHI_INVERSE = 1.0 / PHI  # ≈ 0.618 (φ-gating threshold)
 
 # Sierpinski depth to qubit mapping
 SIERPINSKI_QUBIT_MAP = {
-    1: 3,    # Base: 3-qubit GHZ
-    2: 9,    # 3 GHZ → macro-GHZ
-    3: 27,   # 9 GHZ → meta-GHZ
-    4: 81,   # 27 GHZ → hyper-GHZ
+    1: 3,  # Base: 3-qubit GHZ
+    2: 9,  # 3 GHZ → macro-GHZ
+    3: 27,  # 9 GHZ → meta-GHZ
+    4: 81,  # 27 GHZ → hyper-GHZ
     5: 243,  # Theoretical limit
 }
 
 # Metatron 13-node mapping
 METATRON_NODES = 13
 METATRON_RINGS = {
-    "ring_1": ["Kether"],           # Crown - singularity
-    "ring_2": ["Chokmah", "Binah"], # Wisdom, Understanding
+    "ring_1": ["Kether"],  # Crown - singularity
+    "ring_2": ["Chokmah", "Binah"],  # Wisdom, Understanding
     "ring_3": ["Chesed", "Gevurah", "Tiphereth"],  # Mercy, Strength, Beauty
     "ring_4": ["Netzach", "Hod", "Yesod"],  # Victory, Glory, Foundation
-    "ring_5": ["Malkuth"],          # Kingdom - manifestation
+    "ring_5": ["Malkuth"],  # Kingdom - manifestation
 }
 
 # Sefirah to φ-phase angles
@@ -85,14 +85,16 @@ SEFIRAH_PHASES = {
 
 class SierpinskiTopology(StrEnum):
     """Sierpinski circuit topology types."""
-    GHZ = "ghz"              # Standard GHZ state
-    TREE = "tree"            # Binary tree entanglement
-    TRIANGLE = "triangle"    # Full Sierpinski triangle
-    METATRON = "metatron"    # Metatron cube overlay
+
+    GHZ = "ghz"  # Standard GHZ state
+    TREE = "tree"  # Binary tree entanglement
+    TRIANGLE = "triangle"  # Full Sierpinski triangle
+    METATRON = "metatron"  # Metatron cube overlay
 
 
 class CircuitDepth(StrEnum):
     """Fractal depth levels."""
+
     DEPTH_1 = "depth_1"  # 3 qubits
     DEPTH_2 = "depth_2"  # 9 qubits
     DEPTH_3 = "depth_3"  # 27 qubits
@@ -102,6 +104,7 @@ class CircuitDepth(StrEnum):
 @dataclass
 class SierpinskiNode:
     """A node in the Sierpinski topology."""
+
     node_id: int
     depth: int
     parent_id: int | None = None
@@ -125,6 +128,7 @@ class SierpinskiNode:
 @dataclass
 class SierpinskiConfig:
     """Configuration for Sierpinski circuit generation."""
+
     depth: int = 3
     topology: SierpinskiTopology = SierpinskiTopology.TRIANGLE
     base_qubits: int = 3
@@ -152,6 +156,7 @@ class SierpinskiConfig:
 @dataclass
 class SierpinskiCircuitSpec:
     """Specification for a Sierpinski fractal circuit."""
+
     spec_id: str
     config: SierpinskiConfig
     nodes: list[SierpinskiNode] = field(default_factory=list)
@@ -209,32 +214,32 @@ class SierpinskiCircuitSpec:
     def _to_qasm2(self, n_qubits: int, include_measurements: bool) -> str:
         """Generate OpenQASM 2.0 format."""
         lines = [
-            'OPENQASM 2.0;',
+            "OPENQASM 2.0;",
             'include "qelib1.inc";',
-            f'qreg q[{n_qubits}];',
-            f'creg c[{n_qubits}];',
-            f'// Sierpinski depth-{self.config.depth}: {n_qubits}-qubit fractal',
-            f'// Expected φ-score: {self.expected_phi_score:.4f}',
-            '',
-            '// Initialize superposition (Hadamard layer)',
+            f"qreg q[{n_qubits}];",
+            f"creg c[{n_qubits}];",
+            f"// Sierpinski depth-{self.config.depth}: {n_qubits}-qubit fractal",
+            f"// Expected φ-score: {self.expected_phi_score:.4f}",
+            "",
+            "// Initialize superposition (Hadamard layer)",
         ]
 
         # Hadamard on all qubits
         for i in range(n_qubits):
-            lines.append(f'h q[{i}];')
+            lines.append(f"h q[{i}];")
 
-        lines.append('')
-        lines.append('// Sierpinski entanglement pattern')
+        lines.append("")
+        lines.append("// Sierpinski entanglement pattern")
 
         # Apply entanglement map
         for control, target in self.entanglement_map:
             if control < n_qubits and target < n_qubits:
-                lines.append(f'cx q[{control}], q[{target}];')
+                lines.append(f"cx q[{control}], q[{target}];")
 
         # Apply φ-phase rotations
         if self.config.phi_phase and self.phase_rotations:
-            lines.append('')
-            lines.append('// φ-phase rotations (Sefirah mapping)')
+            lines.append("")
+            lines.append("// φ-phase rotations (Sefirah mapping)")
 
             # Sort by qubit index for cleaner output
             for qubit in sorted(self.phase_rotations.keys()):
@@ -242,68 +247,68 @@ class SierpinskiCircuitSpec:
                     phase = self.phase_rotations[qubit]
                     # Find Sefirah name if available
                     sefirah = self._get_sefirah_for_qubit(qubit)
-                    comment = f'  // {sefirah}' if sefirah else ''
-                    lines.append(f'rz({phase:.6f}) q[{qubit}];{comment}')
+                    comment = f"  // {sefirah}" if sefirah else ""
+                    lines.append(f"rz({phase:.6f}) q[{qubit}];{comment}")
 
         # Metatron overlay enhancement
         if self.config.metatron_overlay:
-            lines.append('')
-            lines.append('// Metatron cube enhancement (13-fold symmetry)')
+            lines.append("")
+            lines.append("// Metatron cube enhancement (13-fold symmetry)")
             angle_step = 2 * np.pi / METATRON_NODES
             for i in range(min(METATRON_NODES, n_qubits)):
-                lines.append(f'rz({angle_step:.6f}) q[{i % n_qubits}];')
+                lines.append(f"rz({angle_step:.6f}) q[{i % n_qubits}];")
 
         # Measurements
         if include_measurements:
-            lines.append('')
-            lines.append('// Measurement')
+            lines.append("")
+            lines.append("// Measurement")
             for i in range(n_qubits):
-                lines.append(f'measure q[{i}] -> c[{i}];')
+                lines.append(f"measure q[{i}] -> c[{i}];")
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def _to_qasm3(self, n_qubits: int, include_measurements: bool) -> str:
         """Generate OpenQASM 3.0 format."""
         lines = [
-            '// Sierpinski Fractal Quantum Circuit',
-            f'// Depth: {self.config.depth}, Qubits: {n_qubits}',
-            f'// Expected φ-score: {self.expected_phi_score:.4f}',
-            '',
-            f'qubit[{n_qubits}] q;',
-            f'bit[{n_qubits}] c;',
-            '',
-            '// Initialize superposition',
+            "// Sierpinski Fractal Quantum Circuit",
+            f"// Depth: {self.config.depth}, Qubits: {n_qubits}",
+            f"// Expected φ-score: {self.expected_phi_score:.4f}",
+            "",
+            f"qubit[{n_qubits}] q;",
+            f"bit[{n_qubits}] c;",
+            "",
+            "// Initialize superposition",
         ]
 
         # Hadamard on all qubits
         for i in range(n_qubits):
-            lines.append(f'h q[{i}];')
+            lines.append(f"h q[{i}];")
 
-        lines.append('')
-        lines.append('// Sierpinski entanglement pattern')
+        lines.append("")
+        lines.append("// Sierpinski entanglement pattern")
 
         # Apply entanglement map
         for control, target in self.entanglement_map:
             if control < n_qubits and target < n_qubits:
-                lines.append(f'cx q[{control}], q[{target}];')
+                lines.append(f"cx q[{control}], q[{target}];")
 
         # Apply φ-phase rotations
         if self.config.phi_phase and self.phase_rotations:
-            lines.append('')
-            lines.append('// φ-phase rotations')
+            lines.append("")
+            lines.append("// φ-phase rotations")
 
             for qubit in sorted(self.phase_rotations.keys()):
                 if qubit < n_qubits:
                     phase = self.phase_rotations[qubit]
-                    lines.append(f'rz({phase:.6f}) q[{qubit}];')
+                    lines.append(f"rz({phase:.6f}) q[{qubit}];")
 
         # Measurements
         if include_measurements:
-            lines.append('')
-            lines.append('// Measurement')
-            lines.append('c = measure q;')
+            lines.append("")
+            lines.append("// Measurement")
+            lines.append("c = measure q;")
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def _get_sefirah_for_qubit(self, qubit: int) -> str | None:
         """Get Sefirah name for a qubit if mapped."""
@@ -451,7 +456,9 @@ class SierpinskiGenerator:
         for node in nodes:
             if not node.children:  # Leaf node
                 # Each leaf gets base_qubits qubits
-                node.qubit_indices = list(range(qubit_idx, qubit_idx + self.config.base_qubits))
+                node.qubit_indices = list(
+                    range(qubit_idx, qubit_idx + self.config.base_qubits)
+                )
                 qubit_idx += self.config.base_qubits
 
     def _map_sefirah(self, nodes: list[SierpinskiNode]) -> None:
@@ -464,7 +471,9 @@ class SierpinskiGenerator:
                 node.sefirah = sefirah_list[sefirah_idx]
                 node.phase = SEFIRAH_PHASES[node.sefirah]
 
-    def _build_entanglement_map(self, nodes: list[SierpinskiNode]) -> list[tuple[int, int]]:
+    def _build_entanglement_map(
+        self, nodes: list[SierpinskiNode]
+    ) -> list[tuple[int, int]]:
         """Generate entanglement connections."""
         entanglement_map: list[tuple[int, int]] = []
 
@@ -513,7 +522,7 @@ class SierpinskiGenerator:
         # Deeper circuits should converge closer to φ
         # Empirical formula: φ_score = 1/φ + (1 - 1/φ) * (1 - 0.9^depth)
         base_score = PHI_INVERSE
-        convergence = (1 - PHI_INVERSE) * (1 - 0.9 ** self.config.depth)
+        convergence = (1 - PHI_INVERSE) * (1 - 0.9**self.config.depth)
         return base_score + convergence
 
 

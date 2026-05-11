@@ -172,7 +172,9 @@ class AblationStudy:
             "results": [r.to_dict() for r in self.results],
             "summary": self.summary,
             "created_at": self.created_at.isoformat(),
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
         }
 
 
@@ -432,7 +434,9 @@ class AblationStudyRunner:
             execution_mode: Execution mode for benchmarks
         """
         self.vault_path = Path(vault_path)
-        self.output_dir = Path(output_dir) if output_dir else self.vault_path / "ablation_results"
+        self.output_dir = (
+            Path(output_dir) if output_dir else self.vault_path / "ablation_results"
+        )
         self.execution_mode = execution_mode
         self.benchmark_matrix = TMTBenchmarkMatrix(vault_path)
 
@@ -467,7 +471,9 @@ class AblationStudyRunner:
         baseline = self._calculate_scores(results, BaselineType.FULL_ORCHESTRATION)
         baseline["results"] = [r.__dict__ for r in results]
 
-        logger.info(f"Baseline orchestration score: {baseline['orchestration_score']:.4f}")
+        logger.info(
+            f"Baseline orchestration score: {baseline['orchestration_score']:.4f}"
+        )
         return baseline
 
     def run_ablation(
@@ -514,16 +520,39 @@ class AblationStudyRunner:
 
         # Calculate impact
         score_delta = scores["orchestration_score"] - baseline_score
-        impact_percentage = (score_delta / baseline_score * 100) if baseline_score > 0 else 0.0
+        impact_percentage = (
+            (score_delta / baseline_score * 100) if baseline_score > 0 else 0.0
+        )
 
         # Count available/disabled
-        all_agents = ["synthesizer", "observer", "validator", "archivist", "strategic",
-                      "federation", "bio", "bitnet", "harmonic", "wormhole", "mirror",
-                      "bronze", "fractal", "visual", "workflow", "auditor", "data", "stealth"]
+        all_agents = [
+            "synthesizer",
+            "observer",
+            "validator",
+            "archivist",
+            "strategic",
+            "federation",
+            "bio",
+            "bitnet",
+            "harmonic",
+            "wormhole",
+            "mirror",
+            "bronze",
+            "fractal",
+            "visual",
+            "workflow",
+            "auditor",
+            "data",
+            "stealth",
+        ]
         all_layers = ["input", "processing", "integration", "output"]
 
-        agents_disabled = len([a for a in all_agents if a in config.disabled_components])
-        layers_disabled = len([layer for layer in all_layers if layer in config.disabled_components])
+        agents_disabled = len(
+            [a for a in all_agents if a in config.disabled_components]
+        )
+        layers_disabled = len(
+            [layer for layer in all_layers if layer in config.disabled_components]
+        )
 
         return AblationResult(
             ablation_id=config.ablation_id,
@@ -667,7 +696,9 @@ class AblationStudyRunner:
             configs.extend(LAYER_ABLATIONS)
         if AblationType.FEATURE in ablation_types:
             configs.extend(FEATURE_ABLATIONS)
-            configs.extend(SIERPINSKI_ABLATIONS)  # Include Sierpinski topology ablations
+            configs.extend(
+                SIERPINSKI_ABLATIONS
+            )  # Include Sierpinski topology ablations
         if AblationType.COMBINATION in ablation_types:
             configs.extend(COMBINATION_ABLATIONS)
 
@@ -719,11 +750,16 @@ class AblationStudyRunner:
         task_scores = [r.task_completion_score for r in results]
         quality_scores = [r.output_quality_score for r in results]
 
-        passed = sum(1 for r in results if r.structural_status == StructuralStatus.PASSED)
-        failed = sum(1 for r in results if r.structural_status == StructuralStatus.FAILED)
+        passed = sum(
+            1 for r in results if r.structural_status == StructuralStatus.PASSED
+        )
+        failed = sum(
+            1 for r in results if r.structural_status == StructuralStatus.FAILED
+        )
 
         return {
-            "orchestration_score": sum(orchestration_scores) / len(orchestration_scores),
+            "orchestration_score": sum(orchestration_scores)
+            / len(orchestration_scores),
             "task_completion_score": sum(task_scores) / len(task_scores),
             "output_quality_score": sum(quality_scores) / len(quality_scores),
             "structural_passed": passed,
@@ -750,14 +786,20 @@ class AblationStudyRunner:
             if not valid_results:
                 continue
 
-            avg_impact = sum(r.impact_percentage for r in valid_results) / len(valid_results)
-            avg_score = sum(r.orchestration_score for r in valid_results) / len(valid_results)
+            avg_impact = sum(r.impact_percentage for r in valid_results) / len(
+                valid_results
+            )
+            avg_score = sum(r.orchestration_score for r in valid_results) / len(
+                valid_results
+            )
 
             type_stats[atype] = {
                 "count": len(valid_results),
                 "avg_impact_percentage": round(avg_impact, 2),
                 "avg_orchestration_score": round(avg_score, 4),
-                "most_impactful": max(valid_results, key=lambda r: abs(r.impact_percentage)).config.target,
+                "most_impactful": max(
+                    valid_results, key=lambda r: abs(r.impact_percentage)
+                ).config.target,
             }
 
         # Find most impactful ablations
@@ -770,7 +812,9 @@ class AblationStudyRunner:
         return {
             "baseline_score": round(study.baseline_score, 4),
             "total_experiments": len(study.results),
-            "successful_experiments": len([r for r in study.results if r.error_message is None]),
+            "successful_experiments": len(
+                [r for r in study.results if r.error_message is None]
+            ),
             "by_type": type_stats,
             "top_impact": [
                 {
@@ -820,7 +864,11 @@ def run_ablation_study(
     Returns:
         Completed ablation study
     """
-    mode = ExecutionMode.SIMULATION if execution_mode == "simulation" else ExecutionMode.LIVE
+    mode = (
+        ExecutionMode.SIMULATION
+        if execution_mode == "simulation"
+        else ExecutionMode.LIVE
+    )
 
     types = None
     if ablation_types:

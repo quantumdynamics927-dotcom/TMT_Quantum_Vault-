@@ -37,7 +37,7 @@ COPY Agent_Workflow/ ./Agent_Workflow/
 COPY Agent_Wormhole/ ./Agent_Wormhole/
 
 # Install TMT Quantum Vault
-RUN pip install --no-cache-dir -e ".[all]" && \
+RUN pip install --no-cache-dir -e . && \
     pip install --no-cache-dir gradio fastapi uvicorn
 
 # HF Spaces requires port 7860

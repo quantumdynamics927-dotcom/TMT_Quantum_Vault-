@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import secrets
 import subprocess
 import sys
 import tempfile
@@ -3742,7 +3744,12 @@ def create_agents(
     skipped = []
     errors = []
 
-    for agent_name, (dna_name, specialization, base_phi, base_fitness) in AGENT_PROFILES.items():
+    for agent_name, (
+        dna_name,
+        specialization,
+        base_phi,
+        base_fitness,
+    ) in AGENT_PROFILES.items():
         agent_dir = root / f"Agent_{agent_name}"
         dna_file = agent_dir / "conscious_dna.json"
 
@@ -3814,7 +3821,7 @@ def create_agents(
             "Synthesizer": 17,
             "Validator": 12,
             "Visual": 13,
-            "Workflow": 5,
+            "Workflow": 8,
             "Wormhole": 18,
         }
 
@@ -3885,7 +3892,9 @@ def create_agents(
         console.print(table)
 
     if skipped:
-        console.print(f"\n[yellow]Skipped (use --force to overwrite):[/yellow] {', '.join(skipped)}")
+        console.print(
+            f"\n[yellow]Skipped (use --force to overwrite):[/yellow] {', '.join(skipped)}"
+        )
 
     if errors:
         console.print("\n[red]Errors:[/red]")
@@ -4008,6 +4017,389 @@ def run_ablation(
     # Save location
     if output_dir:
         console.print(f"\n[blue]Results saved to:[/blue] {output_dir}")
+
+
+# =============================================================================
+# Quantum-Secure Encryption Commands
+# =============================================================================
+
+
+def _default_key_dir() -> Path:
+    """Default location for secret keys: outside the repo, per-user.
+
+    On Unix, this is ``~/.tmt-vault/keys/``. On Windows it is
+    ``%USERPROFILE%\\.tmt-vault\\keys\\``. Storing keys inside the repo is
+    explicitly avoided to prevent accidental commits.
+    """
+    return Path.home() / ".tmt-vault" / "keys"
+
+
+def _harden_secret_key_permissions(path: Path) -> None:
+    """Tighten filesystem permissions on a freshly-written secret key.
+
+    - POSIX: chmod 600 (owner read/write only). Also chmod 700 the parent
+      directory if it was just created.
+    - Windows: icacls to remove inheritance and grant the current user Full
+      Control only. Failures are silent (best-effort); the caller is still
+      responsible for the file's lifetime.
+    """
+    try:
+        if os.name != "nt":
+            # 0o600 = owner rw; group/other nothing.
+            os.chmod(path, 0o600)
+            # Also tighten the parent dir if it was created by us this call.
+            parent_mode = path.parent.stat().st_mode & 0o777
+            if parent_mode & 0o077:
+                os.chmod(path.parent, 0o700)
+        else:
+            # Remove inheritance, grant current user Full only.
+            user = os.environ.get("USERNAME") or os.environ.get("USER") or ""
+            if user:
+                subprocess.run(
+                    [
+                        "icacls",
+                        str(path),
+                        "/inheritance:r",
+                        "/grant:r",
+                        f"{user}:F",
+                    ],
+                    check=False,
+                    capture_output=True,
+                )
+    except OSError:
+        # Best-effort hardening. The file is still written; we just couldn't
+        # tighten permissions (e.g. on a network share).
+        pass
+
+
+@app.command("encrypt-ledger")
+def encrypt_ledger(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    output_dir: Path | None = typer.Option(
+        None,
+        "--output-dir",
+        "-o",
+        help="Output directory for the encrypted artifact. "
+        "Defaults to evidence_ledger/ inside the vault root.",
+    ),
+    key_dir: Path | None = typer.Option(
+        None,
+        "--key-dir",
+        "-k",
+        help=(
+            "Directory for the secret key. Defaults to ~/.tmt-vault/keys/ "
+            "so the key is never stored inside the repo. The directory is "
+            "created (mode 0o700) if it does not exist."
+        ),
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Encrypt the hardware evidence ledger using quantum-secure cryptography.
+
+    Uses ML-KEM-768 (Kyber) for key encapsulation and AES-256-GCM for
+    symmetric encryption. The QRNG entropy from entropy_stack/ seeds the
+    key generation for enhanced security.
+
+    The encrypted artifact is saved as hardware_evidence_ledger_v2.enc.json.
+    The ML-KEM-768 secret key is saved as <artifact-stem>.bin in the
+    --key-dir directory (default: ~/.tmt-vault/keys/). Keep the secret
+    key secure and never commit it to version control.
+    """
+    from .crypto import VaultEncryptor
+
+    encryptor = VaultEncryptor(root.resolve())
+
+    try:
+        enc_path, sk = encryptor.encrypt_evidence_ledger()
+    except FileNotFoundError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(code=1)
+
+    # Determine output paths
+    if output_dir:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        final_enc_path = output_dir / enc_path.name
+        enc_path.rename(final_enc_path)
+        enc_path = final_enc_path
+
+    # Resolve key directory (default: outside the repo at ~/.tmt-vault/keys/)
+    if key_dir is None:
+        key_dir = _default_key_dir()
+    key_dir.mkdir(parents=True, exist_ok=True)
+
+    # Derive a stable key filename from the encrypted artifact's stem.
+    key_stem = enc_path.stem
+    if key_stem.endswith(".enc"):
+        key_stem = key_stem[:-4]
+    sk_path = key_dir / f"{key_stem}.bin"
+    sk_path.write_bytes(sk)
+    _harden_secret_key_permissions(sk_path)
+
+    if json_out:
+        typer.echo(
+            emit_json_document(
+                {
+                    "encrypted_path": str(enc_path),
+                    "secret_key_path": str(sk_path),
+                    "algorithm": "ML-KEM-768+AES-256-GCM",
+                    "entropy_source": "IBM_QRNG",
+                }
+            )
+        )
+        return
+
+    console.print(
+        Panel.fit(
+            f"Algorithm: ML-KEM-768 + AES-256-GCM\n"
+            f"Entropy: IBM QRNG (Casablanca QTRG)\n"
+            f"Encrypted: {enc_path}\n"
+            f"Secret Key: {sk_path}",
+            title="Evidence Ledger Encrypted",
+        )
+    )
+    console.print(
+        "\n[yellow]WARNING:[/yellow] Keep the secret key secure and never commit it!"
+    )
+
+
+@app.command("decrypt-ledger")
+def decrypt_ledger(
+    encrypted_path: Path = typer.Argument(
+        ...,
+        help="Path to the encrypted ledger file (.enc.json).",
+    ),
+    secret_key_path: Path = typer.Argument(
+        ...,
+        help=(
+            "Path to the secret key file (.bin). By default, secret keys "
+            "live in ~/.tmt-vault/keys/ — pass the path explicitly to override."
+        ),
+    ),
+    output_path: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Output path for decrypted ledger.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Decrypt an encrypted evidence ledger.
+
+    Requires the secret key file generated during encryption. The
+    decrypted ledger is written to the specified output path
+    or alongside the encrypted file.
+    """
+    from .crypto import VaultDecryptor
+
+    if not encrypted_path.exists():
+        console.print(f"[red]Error:[/red] Encrypted file not found: {encrypted_path}")
+        raise typer.Exit(code=1)
+
+    if not secret_key_path.exists():
+        console.print(f"[red]Error:[/red] Secret key not found: {secret_key_path}")
+        raise typer.Exit(code=1)
+
+    decryptor = VaultDecryptor()
+    secret_key = secret_key_path.read_bytes()
+
+    try:
+        result_path = decryptor.decrypt_file(
+            encrypted_path,
+            secret_key,
+            output_path,
+        )
+    except Exception as e:
+        console.print(f"[red]Decryption failed:[/red] {e}")
+        raise typer.Exit(code=1)
+
+    if json_out:
+        typer.echo(
+            emit_json_document(
+                {
+                    "decrypted_path": str(result_path),
+                    "source": str(encrypted_path),
+                }
+            )
+        )
+        return
+
+    console.print(
+        Panel.fit(
+            f"Source: {encrypted_path}\n" f"Decrypted: {result_path}",
+            title="Evidence Ledger Decrypted",
+        )
+    )
+
+
+# =============================================================================
+# Merkaba Fingerprint Commands
+# =============================================================================
+
+
+@app.command("generate-fingerprint")
+def generate_fingerprint(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        help="Path to the vault root directory.",
+    ),
+    seed_from_qrng: bool = typer.Option(
+        True,
+        "--seed-from-qrng/--seed-random",
+        help="Use QRNG entropy from entropy_stack/ for seed bytes.",
+    ),
+    backend: str = typer.Option(
+        "qasm_simulator",
+        "--backend",
+        "-b",
+        help="Backend for execution: qasm_simulator or IBM backend name.",
+    ),
+    shots: int = typer.Option(
+        1024,
+        "--shots",
+        "-s",
+        help="Number of shots for measurement.",
+    ),
+    output_path: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Output path for fingerprint JSON.",
+    ),
+    json_out: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit structured JSON instead of Rich output.",
+    ),
+) -> None:
+    """Generate a Merkaba quantum fingerprint.
+
+    Creates a 6-qubit circuit based on the Merkaba (star tetrahedron)
+    geometry: two interlocked Sierpinski depth-1 GHZ triangles.
+
+    The fingerprint is derived from the measurement probability distribution
+    and compressed to a SHA3-256 hash with φ-weighted aggregation.
+    """
+    from .circuits.merkaba_fingerprint import MerkabaFingerprintGenerator
+
+    generator = MerkabaFingerprintGenerator(root.resolve())
+
+    seed = None
+    seed_source_override = None
+    if seed_from_qrng:
+        seed = generator._load_qrng_seed(6)
+        seed_source_override = "IBM_QRNG"
+
+    try:
+        fingerprint = generator.generate_fingerprint(
+            seed=seed,
+            backend=backend,
+            shots=shots,
+            seed_source=seed_source_override,
+        )
+    except ImportError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(code=1)
+
+    output = generator.save_fingerprint(
+        fingerprint,
+        output_path,
+    )
+
+    if json_out:
+        typer.echo(emit_json_document(fingerprint.to_dict()))
+        return
+
+    console.print(
+        Panel.fit(
+            f"Hash: {fingerprint.fingerprint_hash[:32]}...\n"
+            f"φ-score: {fingerprint.phi_score:.6f}\n"
+            f"Dominant state: {fingerprint.dominant_state}\n"
+            f"Entropy: {fingerprint.entropy_bits:.4f} bits\n"
+            f"Backend: {fingerprint.backend}\n"
+            f"Seed source: {fingerprint.seed_source}",
+            title="Merkaba Quantum Fingerprint",
+        )
+    )
+    console.print(f"\n[blue]Saved to:[/blue] {output}")
+
+
+@app.command("merkaba-circuit")
+def merkaba_circuit(
+    seed_hex: str | None = typer.Option(
+        None,
+        "--seed",
+        "-s",
+        help=(
+            "Seed bytes as hex string (12 hex chars = 6 bytes). "
+            "If omitted, a CSPRNG-seeded random seed is used so the "
+            "generated circuit differs across runs."
+        ),
+    ),
+    output_format: str = typer.Option(
+        "qasm",
+        "--format",
+        "-f",
+        help="Output format: qasm, qiskit, or json.",
+    ),
+    output_path: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Output file path.",
+    ),
+) -> None:
+    """Generate Merkaba circuit in specified format.
+
+    Outputs the 6-qubit Merkaba fingerprint circuit as OpenQASM 2.0,
+    Qiskit Python code, or JSON circuit specification.
+    """
+    from .circuits.merkaba_fingerprint import (
+        create_merkaba_circuit_openqasm,
+        create_merkaba_fingerprint_circuit,
+    )
+
+    # Resolve seed: explicit --seed wins; otherwise draw 6 random bytes from
+    # the OS CSPRNG so successive invocations produce distinct circuits
+    # (and the output is never a degenerate all-zero fingerprint).
+    if seed_hex is None:
+        seed = secrets.token_bytes(6)
+    else:
+        try:
+            seed = bytes.fromhex(seed_hex)
+        except ValueError:
+            console.print(f"[red]Error:[/red] Invalid hex string: {seed_hex}")
+            raise typer.Exit(code=1)
+
+    if output_format == "qasm":
+        result = create_merkaba_circuit_openqasm(seed)
+    elif output_format == "qiskit":
+        circuit = create_merkaba_fingerprint_circuit(seed)
+        result = str(circuit.draw(output="text"))
+    elif output_format == "json":
+        circuit = create_merkaba_fingerprint_circuit(seed)
+        result = circuit.qasm()
+    else:
+        console.print(f"[red]Error:[/red] Unknown format: {output_format}")
+        raise typer.Exit(code=1)
+
+    if output_path:
+        output_path.write_text(result, encoding="utf-8")
+        console.print(f"[green]Wrote circuit to:[/green] {output_path}")
+    else:
+        print(result)
 
 
 if __name__ == "__main__":

@@ -322,8 +322,10 @@ class AgentChannel:
         if handler:
             try:
                 handler(message)
-            except Exception:
-                pass  # Handler errors are logged but don't break channel
+            except Exception as e:
+                logger.error(
+                    f"Handler error for message type {message.message_type}: {e}"
+                )
 
     # =========================================================================
     # Handler Registration

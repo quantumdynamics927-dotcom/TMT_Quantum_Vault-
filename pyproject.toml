@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tmt-quantum-vault"
 version = "0.4.0"
-description = "Toroidal Merkaba Topology - A 17-node resonant intelligence lattice grounded in real IBM quantum hardware DNA circuits and sacred geometry mathematics"
+description = "Toroidal Resonance Topology - An 18-node multi-agent coordination network grounded in real IBM quantum hardware DNA circuits and coordination geometry mathematics"
 readme = "README.md"
 license = "GPL-3.0-only"
 authors = [
@@ -43,6 +43,7 @@ dependencies = [
     "requests>=2.32,<3.0",
     "rich>=14,<15",
     "typer>=0.15,<1.0",
+    "cryptography>=42.0,<44.0",
 ]
 
 [project.optional-dependencies]
@@ -53,6 +54,7 @@ dev = [
     "mypy>=1.0",
     "black>=24.0",
     "ruff>=0.1.0",
+    "numpy>=1.26,<3.0",
 ]
 qiskit = [
     "qiskit>=1.0",

@@ -2,6 +2,44 @@
 
 All notable changes to TMT Quantum Vault will be documented in this file.
 
+## [0.4.0] - 2026-06-28
+
+### Fixed
+
+- **Test collection: `tests/test_orchestration.py`** — added a
+  `pytest.importorskip("numpy")` gate at module level. The file previously
+  failed pytest collection with `ModuleNotFoundError: No module named 'numpy'`
+  in any environment without numpy, masking the 13 orchestration tests from
+  CI and breaking the README's "13 passed" claim. With this gate, the file
+  is cleanly skipped (not a collection error) when numpy is unavailable, and
+  the 13 tests run when it is. `numpy` has also been added to the `[dev]`
+  optional dependency group in `pyproject.toml`.
+- **`pyproject.toml` description** — replaced the legacy
+  "Toroidal Merkaba Topology / sacred geometry" wording with the current
+  "Toroidal Resonance Topology / coordination geometry" terminology, matching
+  the README's terminology note.
+
+### Documentation
+
+- **README "Last updated" footer** — bumped from 2026-03-31 to 2026-06-28.
+- **README runtime requirements** — added a "Cloud runs" note documenting
+  that the `OLLAMA_API_KEY` environment variable is required for cloud-mode
+  CLI commands (`smoke-cloud`, `release-gate-cloud`). The variable is read by
+  `tmt_quantum_vault/runner.py` and attached as a Bearer token to Ollama cloud
+  requests; commands exit early with a clear error if it is missing.
+- **CONTRIBUTING validation commands** — added the `make audit`, `make test`,
+  and `make test-audit` shortcuts. `make test` runs the full pytest discovery
+  (not just `test_regression.py`).
+
+### Notes
+
+- This patch does **not** land the in-flight post-quantum encryption
+  (`tmt_quantum_vault/crypto/`), Merkaba fingerprint
+  (`tmt_quantum_vault/circuits/`), deterministic audit tool (`tools/audit.py`),
+  or related CLI commands (`encrypt-ledger`, `decrypt-ledger`,
+  `generate-fingerprint`, `merkaba-circuit`). Those remain on disk and
+  untracked pending a separate v0.5.0-dev landing PR.
+
 ## [v0.4.0-dev] - 2026-03-22
 
 ### New Features

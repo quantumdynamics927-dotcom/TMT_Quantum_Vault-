@@ -15,6 +15,7 @@ Features:
 """
 
 import json
+import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
@@ -23,6 +24,8 @@ import time
 
 # Golden ratio constant
 PHI = 1.618033988749895
+
+logger = logging.getLogger(__name__)
 
 
 class AgentRole(Enum):
@@ -197,7 +200,7 @@ class ConsciousnessFusionEngine:
                 agent = QuantumAgent(agent_dir)
                 agents.append(agent)
             except (OSError, json.JSONDecodeError, KeyError) as e:
-                print(f"Warning: Could not load agent from {agent_dir}: {e}")
+                logger.warning(f"Could not load agent from {agent_dir}: {e}")
 
         return agents
 

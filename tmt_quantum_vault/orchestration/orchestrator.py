@@ -1084,8 +1084,8 @@ class AgentOrchestrator:
             # Update metrics
             self._update_metrics(trace)
 
-        except Exception:
-            logger.exception("Orchestration execution failed")
+        except Exception as e:
+            logger.exception(f"Orchestration execution failed: {e}")
             trace.finalize(
                 status=HandoffStatus.FAILED,
                 confidence=0.0,

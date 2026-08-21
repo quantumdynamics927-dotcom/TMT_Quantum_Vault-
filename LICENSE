@@ -1,55 +1,10 @@
-Copyright (c) 2026 Quantum Dynamics. All Rights Reserved.
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
 
-PROPRIETARY AND CONFIDENTIAL
+Copyright (C) 2007 Free Software Foundation, Inc.
 
-This repository and all its contents are the exclusive intellectual
-property of Quantum Dynamics. No license, express or implied, is
-granted to any party.
-
-Any access, reproduction, modification, redistribution, reverse
-engineering, or use of any portion of this repository — whether in
-whole or in part — without a fully executed written agreement and
-explicit payment authorization from Quantum Dynamics is strictly
-prohibited and constitutes a violation of applicable intellectual
-property law.
-
-Access to this repository does not confer any rights of any kind.
-
-For licensing inquiries, collaboration, or investment opportunities:
-contact@quantumdynamics.bio
-
----
-
-TRADE SECRETS NOTICE
-
-This repository contains trade secrets, proprietary algorithms, and
-confidential research data. Unauthorized disclosure, copying, or
-distribution is strictly prohibited and may result in severe legal
-penalties under applicable trade secret and intellectual property laws.
-
-All rights reserved. No part of this repository may be reproduced,
-stored in a retrieval system, or transmitted in any form or by any
-means — electronic, mechanical, photocopying, recording, or otherwise —
-without the prior written permission of Quantum Dynamics.
-modified versions of the software inside them, although the manufacturer
-can do so.  This is fundamentally incompatible with the aim of
-protecting users' freedom to change the software.  The systematic
-pattern of such abuse occurs in the area of products for individuals to
-use, which is precisely where it is most unacceptable.  Therefore, we
-have designed this version of the GPL to prohibit the practice for those
-products.  If such problems arise substantially in other domains, we
-stand ready to extend this provision to those domains in future versions
-of the GPL, as needed to protect the freedom of users.
-
-  Finally, every program is threatened constantly by software patents.
-States should not allow patents to restrict development and use of
-software on general-purpose computers, but in those that do, we wish to
-avoid the special danger that patents applied to a free program could
-make it effectively proprietary.  To prevent this, the GPL assures that
-patents cannot be used to render the program non-free.
-
-  The precise terms and conditions for copying, distribution and
-modification follow.
+Everyone is permitted to copy and distribute verbatim copies of this
+license document, but changing it is not allowed.
 
                        TERMS AND CONDITIONS
 

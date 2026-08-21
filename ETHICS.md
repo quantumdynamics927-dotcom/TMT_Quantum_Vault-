@@ -64,10 +64,10 @@ By using TMT Quantum Vault, you agree **NOT** to:
 
 Any derivative work **MUST**:
 
-1. **Preserve Guardian Agents**: Maintain at least one Guardian-class agent (ID 20-21) for anomaly detection
-2. **Maintain Observer Coverage**: Include Observer-class agents (ID 16-17) for resonance monitoring
-3. **Respect Phi-Resonance**: Do not deliberately disrupt golden ratio alignment mechanisms
-4. **Enable Rollback**: Provide checkpoint/rollback capability for safety
+1. **Preserve Agent Diversity**: Maintain the full agent ensemble to ensure balanced coordination
+2. **Respect Phi-Resonance**: Do not deliberately disrupt golden ratio alignment mechanisms
+3. **Enable Rollback**: Provide checkpoint/rollback capability for safety
+4. **Validate DNA Integrity**: Ensure all agent DNA profiles pass validation checks
 
 ---
 

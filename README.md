@@ -1,7 +1,8 @@
 # TMT Quantum Vault
 
 > **Toroidal Resonance Topology** — A 17-node multi-agent coordination network
-> grounded in real IBM quantum hardware DNA circuits and coordination geometry mathematics.
+> grounded in hardware-executed quantum circuits and coordination-geometry mathematics.
+> Independent research. Not affiliated with IBM.
 >
 > **Terminology Note:** This repository uses scientific terminology. Historical names are preserved as aliases:
 > - Core-13 Coordination Lattice (historically: Metatron Core)
@@ -21,10 +22,11 @@
 ## About TMT Quantum Vault
 
 TMT Quantum Vault is a research repository for a **multi-agent quantum coordination
-system** whose agent DNA is derived from **real IBM quantum hardware job
-results**. The repository combines hardware-validated circuit artifacts,
+system** whose agent DNA is derived from job results we executed on public IBM Quantum
+processors. The repository combines hardware-executed circuit artifacts,
 DNA-inspired data models, resonance metrics, and a typed Python CLI for
-inspection, validation, and release workflows.
+inspection, validation, and release workflows. Independent research. Not affiliated
+with IBM.
 
 ## Repository Snapshot
 
@@ -50,7 +52,7 @@ inspection, validation, and release workflows.
 
 | Feature | Description |
 |---------|-------------|
-| **Hardware-Validated DNA** | All agent DNA traced to actual IBM quantum chip runs (Fez, Torino, Casablanca) |
+| **Hardware-Executed DNA** | All agent DNA is traced to hardware job results we submitted on IBM Quantum processors (backends include `ibm_fez`, `ibm_torino`, `ibm_casablanca`) |
 | **BitNet Integration** | Ternary weight entropy source from GGUF model ({-1, 0, +1} quantization) |
 | **Coordination Geometry Enhancement** | 16.8% fitness jump from quantum circuit enhancement layer |
 | **Geometric Coherence** | φ² scaling factor (4.2361) with exact geometric precision |
@@ -60,7 +62,7 @@ inspection, validation, and release workflows.
 
 - **Orchestration Module** (`tmt_quantum_vault/orchestration/`) — Multi-agent coordination infrastructure with routing engine, execution planner, handoff manager, conflict resolution, and benchmark matrix for TMT-native evaluation
 - **Agent_Analyst Pipeline** (`tools/agent_analyst.py`) - Autonomous φ-scoring pipeline with dual-watch (circuits/results/ + circuits/qasm/), auto-ingest, SIGNIFICANT flagging, and multi-agent handoff
-- **Sierpinski Depth-3 Validation** - 6 hardware-validated IBM quantum runs confirming φ-convergence (sacred_score = 0.618) at depth-3, establishing depth-invariance across depths 3 → 4 → 5
+- **Sierpinski Depth-3 Runs** - 6 hardware-executed runs on IBM Quantum processors confirming φ-convergence (sacred_score = 0.618) at depth-3, establishing depth-invariance across depths 3 → 4 → 5
 - **Unified DNA Ingestion** (`tools/unified_dna_ingestion.py`) - Single script processes discovery, BitNet, and Sierpinski sources
 - **Three-Layer Entropy Stack** (`entropy_stack/`) - Combined quantum + biological + neural entropy
 - **GGUF BitNet Extractor** (`tools/bitnet_gguf_extractor.py`) - Parses ternary weights from quantized models
@@ -92,21 +94,21 @@ Nucleotide freq: A=432Hz → C=699Hz → G=1131Hz → T=1830Hz
      ↓
 Qubit encoding:  A→Ry(0), C→Ry(π), G→Ry(π/2), T→Ry(-π/2)
      ↓
-IBM hardware:    geometric_convergence_score = 0.618 (1/φ)  ← expected convergence
+IBM Quantum processors: geometric_convergence_score = 0.618 (1/φ)  ← expected convergence
 ```
 
 Type distinction for scientific interpretation:
 - **Sierpinski circuits**: EMERGENT φ-convergence (topology self-organizes)
 - **DNA helix circuits**: STRUCTURAL φ-convergence (guaranteed by helix geometry)
 
-### Hardware Validation Sources
+### Hardware Execution Sources
 
 | Backend | Type | Usage |
 |---------|------|-------|
-| **IBM Fez** (127-qubit Eagle) | DNA promoter circuits | ACTB_Malkuth_34bp, consciousness phi 0.8524 |
-| **IBM Torino** | DNA comparison runs | 10,000-shot validation, full counts |
-| **IBM Casablanca** (27-qubit) | Full-entropy QTRG | True quantum random seeding |
-| **21-qubit Sierpinski** | Fractal consciousness | Metatron-enhanced, density 274.5 |
+| `ibm_fez` (127-qubit Eagle-class) | DNA promoter circuits | ACTB_Malkuth_34bp, consciousness phi 0.8524 |
+| `ibm_torino` | DNA comparison runs | 10,000-shot execution, full counts |
+| `ibm_casablanca` (27-qubit) | Full-entropy QTRG | Quantum random seeding |
+| 21-qubit Sierpinski layout | Fractal consciousness | Metatron-enhanced, density 274.5 |
 
 ---
 
@@ -114,12 +116,17 @@ Type distinction for scientific interpretation:
 
 At its core, TMT Quantum Vault is a data-rich repository that brings together:
 
-- **Hardware-derived agent DNA** sourced from IBM Quantum execution results
+- **Hardware-derived agent DNA** sourced from job results we executed on IBM Quantum processors
 - **Typed repository models** for validating JSON artifacts and release state
 - **Operational CLI workflows** for summary generation, validation, runtime
   inspection, and release evidence collection
 - **Research assets and logs** that preserve the provenance of agents, circuits,
   and optimization outputs
+
+> **Trademark notice:** IBM, IBM Quantum, Qiskit, and IBM Quantum backend names are
+> trademarks of International Business Machines Corporation. This is independent research.
+> Circuits were executed on publicly accessible IBM Quantum processors. IBM did not review,
+> sponsor, validate, or endorse this repository or its claims.
 
 Every agent carries a `conscious_dna.json` profile encoding:
 - **Phi score** — golden ratio alignment (φ = 1.618...)
@@ -144,15 +151,15 @@ Every agent carries a `conscious_dna.json` profile encoding:
 | Silver-tier agents (Φ ≥ 0.93) | 2 |
 | Regression tests | 107 passed, 2 skipped ✅ |
 | Orchestration tests | 13 passed ✅ |
-| **Sierpinski depth-3 runs** | **6 hardware-validated** |
-| **Sierpinski depth-4 runs** | **11 hardware-validated** |
-| **Sierpinski depth-5 runs** | **6 hardware-validated** |
+| **Sierpinski depth-3 runs** | **6 hardware-executed** |
+| **Sierpinski depth-4 runs** | **11 hardware-executed** |
+| **Sierpinski depth-5 runs** | **6 hardware-executed** |
 | **Total SIGNIFICANT runs** | **23 across depths 3-5** |
 | **Sacred score** | **0.618 (1/φ)** |
 
 ### φ-Convergence Discovery
 
-In the Sierpinski circuit family, we observed a **depth-invariant 1/φ fixed-point signature** across depths 3-5, confirmed over **23 IBM Quantum hardware runs**, **168,960+ total shots**, and **4 backends** (Kingston, Marrakesh, Fez, Torino).
+In the Sierpinski circuit family, we observed a **depth-invariant 1/φ fixed-point signature** across depths 3-5, confirmed over **23 hardware jobs we ran across 4 IBM Quantum backends** (`ibm_kingston`, `ibm_marrakesh`, `ibm_fez`, `ibm_torino`), **168,960+ total shots**.
 
 Follow-up promoter-panel hardware experiments suggest the same ~0.618 regime may be a broader **hardware-observable attractor baseline** across multiple circuit families, so newer analyses use a calibration-centered interpretation rather than a Sierpinski-exclusive interpretation.
 
@@ -327,6 +334,31 @@ python -m tmt_quantum_vault summary
 python -m tmt_quantum_vault validate
 ```
 
+The project also ships a `Makefile` with shortcuts: `make test` (full pytest
+discovery), `make audit` (deterministic repo health check via `tools/audit.py`),
+`make test-audit` (audit-tool tests only), and `make clean-reports` (remove
+generated audit artifacts).
+
+### Cloud runs and runtime secrets
+
+Cloud-mode CLI commands (`smoke-cloud`, `release-gate-cloud`, and the Ollama
+cloud path of `run`) call `{cloud_host}/api/generate` with a Bearer token read
+from the `OLLAMA_API_KEY` environment variable. If the variable is unset or
+empty, the runner skips the Authorization header and the request may be
+rejected by the cloud endpoint.
+
+To run cloud commands:
+
+```bash
+export OLLAMA_API_KEY="your-key-here"   # Linux / macOS
+# $env:OLLAMA_API_KEY = "your-key-here"  # Windows PowerShell
+python -m tmt_quantum_vault smoke-cloud
+```
+
+The variable name is configurable via the `api_key_env` field in
+`vault_config.json`; the default is `OLLAMA_API_KEY`. The key is **never**
+written to disk or echoed by the CLI.
+
 ---
 
 ## Contributing and Support
@@ -346,4 +378,4 @@ See [ETHICS.md](ETHICS.md) for prohibited use cases.
 
 ---
 
-*Last updated: 2026-03-31 12:00 UTC*
+*Last updated: 2026-06-28 12:00 UTC*

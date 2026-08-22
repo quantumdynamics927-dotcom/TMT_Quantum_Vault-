@@ -1,4 +1,4 @@
-name: Deploy to Hugging Face Spaces (Docker)
+name: Deploy to Hugging Face Spaces
 
 on:
   push:
@@ -6,7 +6,11 @@ on:
     paths:
       - 'hf-deploy/**'
       - 'tmt_quantum_vault/**'
+      - 'pyproject.toml'
+      - 'vault_config.json'
+      - 'metatron_geometry.json'
       - '.github/workflows/deploy-hf.yml'
+      - 'scripts/deploy_hf.py'
   workflow_dispatch:
 
 jobs:
@@ -23,76 +27,21 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Configure git
+      - name: Install dependencies
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+          python -m pip install --upgrade pip
+          python -m pip install "huggingface-hub>=0.20"
 
-      - name: Clone HF Space
+      - name: Deploy to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git clone https://Quantum927:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Quantum927/quantumvault hf-space 2>/dev/null || {
-            echo "Creating new Space..."
-            mkdir -p hf-space
-            cd hf-space
-            git init
-            git remote add origin https://Quantum927:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Quantum927/quantumvault
-          }
-
-      - name: Copy Docker deployment files
-        run: |
-          cd hf-space
-          # Copy Dockerfile and app
-          cp ../hf-deploy/Dockerfile .
-          cp ../hf-deploy/hf_app.py .
-          
-          # Copy source code
-          cp -r ../tmt_quantum_vault .
-          
-          # Copy Agent directories for DNA files
-          for dir in Agent_Archivist Agent_Auditor Agent_Bio Agent_BitNet Agent_Bronze Agent_Data Agent_Federation Agent_Fractal Agent_Harmonic Agent_Mirror Agent_Observer Agent_Stealth Agent_Strategic Agent_Synthesizer Agent_Validator Agent_Visual Agent_Workflow Agent_Wormhole; do
-            if [ -d "../$dir" ]; then
-              cp -r "../$dir" .
-            fi
-          done
-
-      - name: Create Space config
-        run: |
-          cd hf-space
-          cat > README.md << 'EOF'
-          ---
-          title: TMT Quantum Vault
-          emoji: ⚛️
-          colorFrom: blue
-          colorTo: purple
-          sdk: docker
-          app_port: 7860
-          pinned: false
-          private: true
-          license: mit
-          short_description: 17-agent resonant intelligence lattice with phi-alignment
-          ---
-          
-          # TMT Quantum Vault
-          
-          Multi-agent orchestration framework for quantum computing workflows with phi-resonance alignment.
-          
-          ## Features
-          
-          - **17-Agent Orchestration**: Coordinated multi-agent system
-          - **Three-Lane Routing**: Simulation, Quantum (ibm_kingston), LLM (Ollama)
-          - **Phi-Resonance Alignment**: Sacred geometry coordination patterns
-          - **Real-time Visualization**: Live orchestration traces
-          EOF
-
-      - name: Push to Hugging Face
-        run: |
-          cd hf-space
-          git add -A
-          git commit -m "Update: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || echo "No changes"
-          git push origin main || git push -u origin main
+          python scripts/deploy_hf.py \
+            --space-name Quantum927/quantumvault \
+            --private
 
       - name: Summary
         run: |
-          echo "## ✅ Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Hugging Face Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**URL**: https://huggingface.co/spaces/Quantum927/quantumvault" >> $GITHUB_STEP_SUMMARY

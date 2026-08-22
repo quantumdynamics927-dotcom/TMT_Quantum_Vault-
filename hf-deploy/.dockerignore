@@ -67,7 +67,6 @@ ETHICS.md
 NOTICE
 
 # Config files not needed in container
-.vercel/
 .huggingface/
 .github/
 .claude/

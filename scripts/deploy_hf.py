@@ -58,19 +58,19 @@ def create_space(space_name: str, private: bool = True) -> bool:
     ])
     
     if code == 0:
-        print(f"✅ Created Space: {space_name}")
+        print(f"[DONE] Created Space: {space_name}")
         return True
     elif "already exists" in stderr.lower() or "already exists" in stdout.lower():
-        print(f"ℹ️  Space already exists: {space_name}")
+        print(f"[INFO] Space already exists: {space_name}")
         return True
     else:
-        print(f"❌ Failed to create Space: {stderr}")
+        print(f"[ERR] Failed to create Space: {stderr}")
         return False
 
 
 def prepare_deployment_files(source_dir: Path, deploy_dir: Path) -> None:
     """Prepare files for deployment."""
-    print("📦 Preparing deployment files...")
+    print("[PACK] Preparing deployment files...")
     
     # Create deploy directory
     deploy_dir.mkdir(parents=True, exist_ok=True)
@@ -87,7 +87,7 @@ def prepare_deployment_files(source_dir: Path, deploy_dir: Path) -> None:
         if src.exists():
             dst = deploy_dir / file
             dst.write_bytes(src.read_bytes())
-            print(f"  ✓ {file}")
+            print(f"  [OK] {file}")
     
     # HF deploy files
     hf_files = [
@@ -102,7 +102,7 @@ def prepare_deployment_files(source_dir: Path, deploy_dir: Path) -> None:
         if src.exists():
             dst = deploy_dir / src.name
             dst.write_bytes(src.read_bytes())
-            print(f"  ✓ {src.name}")
+            print(f"  [OK] {src.name}")
     
     # tmt_quantum_vault package
     package_src = source_dir / "tmt_quantum_vault"
@@ -113,7 +113,7 @@ def prepare_deployment_files(source_dir: Path, deploy_dir: Path) -> None:
         if package_dst.exists():
             shutil.rmtree(package_dst)
         shutil.copytree(package_src, package_dst)
-        print(f"  ✓ tmt_quantum_vault/")
+        print(f"  [OK] tmt_quantum_vault/")
     
     # Agent directories (conscious_dna.json only)
     for agent_dir in source_dir.glob("Agent_*"):
@@ -124,21 +124,21 @@ def prepare_deployment_files(source_dir: Path, deploy_dir: Path) -> None:
                 dst_agent_dir.mkdir(exist_ok=True)
                 dst_dna_file = dst_agent_dir / "conscious_dna.json"
                 dst_dna_file.write_bytes(dna_file.read_bytes())
-                print(f"  ✓ {agent_dir.name}/conscious_dna.json")
+                print(f"  [OK] {agent_dir.name}/conscious_dna.json")
     
-    print("✅ Deployment files prepared")
+    print("[DONE] Deployment files prepared")
 
 
 def deploy_to_space(space_name: str, deploy_dir: Path, dry_run: bool = False) -> bool:
     """Deploy files to HF Space."""
     if dry_run:
-        print(f"🔍 Dry run - would deploy to: {space_name}")
+        print(f"[DRY] Dry run - would deploy to: {space_name}")
         print(f"   Files in {deploy_dir}:")
         for f in deploy_dir.iterdir():
             print(f"     - {f.name}")
         return True
     
-    print(f"🚀 Deploying to {space_name}...")
+    print(f"[DEPLOY] Deploying to {space_name}...")
     
     # Use huggingface-cli upload
     code, stdout, stderr = run_command([
@@ -150,10 +150,10 @@ def deploy_to_space(space_name: str, deploy_dir: Path, dry_run: bool = False) ->
     ], cwd=deploy_dir)
     
     if code == 0:
-        print(f"✅ Deployed to: https://huggingface.co/spaces/{space_name}")
+        print(f"[DONE] Deployed to: https://huggingface.co/spaces/{space_name}")
         return True
     else:
-        print(f"❌ Deployment failed: {stderr}")
+        print(f"[ERR] Deployment failed: {stderr}")
         return False
 
 
@@ -191,7 +191,7 @@ def main() -> int:
     deploy_dir = source_dir / ".hf_deploy_temp"
     
     print("=" * 60)
-    print("TMT Quantum Vault — HF Spaces Deployment")
+    print("TMT Quantum Vault - HF Spaces Deployment")
     print("=" * 60)
     print(f"Space: {args.space_name}")
     print(f"Private: {args.private}")
@@ -202,11 +202,11 @@ def main() -> int:
     # Check prerequisites
     if not args.dry_run:
         if not check_hf_cli():
-            print("❌ huggingface-cli not found. Install with: pip install huggingface-hub")
+            print("[ERR] huggingface-cli not found. Install with: pip install huggingface-hub")
             return 1
         
         if not check_hf_token():
-            print("❌ Not authenticated. Set HF_TOKEN or run: huggingface-cli login")
+            print("[ERR] Not authenticated. Set HF_TOKEN or run: huggingface-cli login")
             return 1
     
     # Create Space if needed
@@ -223,8 +223,8 @@ def main() -> int:
     
     print()
     print("=" * 60)
-    print("✅ Deployment complete!")
-    print(f"🌐 https://huggingface.co/spaces/{args.space_name}")
+    print("[DONE] Deployment complete!")
+    print(f"[URL] https://huggingface.co/spaces/{args.space_name}")
     print("=" * 60)
     
     return 0

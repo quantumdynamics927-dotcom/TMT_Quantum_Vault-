@@ -55,6 +55,9 @@ dev = [
     "black>=24.0",
     "ruff>=0.1.0",
     "numpy>=1.26,<3.0",
+    "build>=1.0",
+    "twine>=5.0",
+    "huggingface-hub>=0.20",
 ]
 qiskit = [
     "qiskit>=1.0",

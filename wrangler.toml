@@ -1,0 +1,6 @@
+# Cloudflare Pages configuration for TMT Quantum Vault static dashboard.
+# Deploy with: wrangler pages deploy app/ --project-name tmt-quantum-vault
+
+name = "tmt-quantum-vault"
+compatibility_date = "2026-08-22"
+pages_build_output_dir = "app"

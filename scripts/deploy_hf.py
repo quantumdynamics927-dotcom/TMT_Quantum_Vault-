@@ -7,7 +7,7 @@ Usage:
 
 Requirements:
     - huggingface-hub installed
-    - HF_TOKEN environment variable or logged in via huggingface-cli
+    - HF_TOKEN2 environment variable or logged in via huggingface-cli
 """
 
 import argparse
@@ -36,8 +36,8 @@ def check_hf_cli() -> bool:
 
 
 def check_hf_token() -> bool:
-    """Check if HF_TOKEN is set or user is logged in."""
-    if os.environ.get("HF_TOKEN"):
+    """Check if HF_TOKEN2 is set or user is logged in."""
+    if os.environ.get("HF_TOKEN2"):
         return True
     
     # Check if logged in via CLI
@@ -206,7 +206,7 @@ def main() -> int:
             return 1
         
         if not check_hf_token():
-            print("[ERR] Not authenticated. Set HF_TOKEN or run: huggingface-cli login")
+            print("[ERR] Not authenticated. Set HF_TOKEN2 or run: huggingface-cli login")
             return 1
     
     # Create Space if needed

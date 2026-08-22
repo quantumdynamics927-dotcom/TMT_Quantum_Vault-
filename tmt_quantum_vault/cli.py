@@ -4123,7 +4123,7 @@ def encrypt_ledger(
         enc_path, sk = encryptor.encrypt_evidence_ledger()
     except FileNotFoundError as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
 
     # Determine output paths
     if output_dir:
@@ -4224,7 +4224,7 @@ def decrypt_ledger(
         )
     except Exception as e:
         console.print(f"[red]Decryption failed:[/red] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
 
     if json_out:
         typer.echo(
@@ -4313,7 +4313,7 @@ def generate_fingerprint(
         )
     except ImportError as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
 
     output = generator.save_fingerprint(
         fingerprint,
@@ -4383,7 +4383,7 @@ def merkaba_circuit(
             seed = bytes.fromhex(seed_hex)
         except ValueError:
             console.print(f"[red]Error:[/red] Invalid hex string: {seed_hex}")
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from None
 
     if output_format == "qasm":
         result = create_merkaba_circuit_openqasm(seed)

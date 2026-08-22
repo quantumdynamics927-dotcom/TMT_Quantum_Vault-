@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from tmt_quantum_vault.models import VaultConfig
-from tmt_quantum_vault.runtime import RuntimeInspector, RuntimeStatus
+from tmt_quantum_vault.runtime import RuntimeHealth, RuntimeInspector, RuntimeStatus
 
 
 class TestRuntimeStatus:
@@ -24,12 +24,12 @@ class TestRuntimeStatus:
         """Test creating a RuntimeStatus."""
         status = RuntimeStatus(
             name="Test",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="Test detail",
         )
 
         assert status.name == "Test"
-        assert status.status == "ok"
+        assert status.status == RuntimeHealth.OK
         assert status.detail == "Test detail"
         assert status.executable is None
         assert status.version is None
@@ -38,7 +38,7 @@ class TestRuntimeStatus:
         """Test creating a RuntimeStatus with executable."""
         status = RuntimeStatus(
             name="Ollama",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="Found",
             executable=Path("/usr/bin/ollama"),
             version="0.1.0",
@@ -85,13 +85,15 @@ class TestRuntimeInspector:
         ):
 
             mock_ollama.return_value = RuntimeStatus(
-                name="Ollama", status="ok", detail="Found"
+                name="Ollama", status=RuntimeHealth.OK, detail="Found"
             )
             mock_cloud.return_value = RuntimeStatus(
-                name="Ollama Cloud", status="warning", detail="Not configured"
+                name="Ollama Cloud",
+                status=RuntimeHealth.WARNING,
+                detail="Not configured",
             )
             mock_llama.return_value = RuntimeStatus(
-                name="llama.cpp", status="warning", detail="Not found"
+                name="llama.cpp", status=RuntimeHealth.WARNING, detail="Not found"
             )
 
             results = inspector.inspect_all()
@@ -109,7 +111,7 @@ class TestRuntimeInspector:
             result = inspector.inspect_ollama()
 
             assert result.name == "Ollama"
-            assert result.status == "warning"
+            assert result.status == RuntimeHealth.WARNING
             assert "not found" in result.detail.lower()
 
     def test_inspect_ollama_found(self, tmp_path: Path) -> None:
@@ -125,7 +127,7 @@ class TestRuntimeInspector:
             result = inspector.inspect_ollama()
 
             assert result.name == "Ollama"
-            assert result.status == "ok"
+            assert result.status == RuntimeHealth.OK
             assert "5" in result.detail
             assert result.executable == Path("/usr/bin/ollama")
 
@@ -141,7 +143,7 @@ class TestRuntimeInspector:
             result = inspector.inspect_llama_cpp()
 
             assert result.name == "llama.cpp"
-            assert result.status == "warning"
+            assert result.status == RuntimeHealth.WARNING
 
     def test_inspect_llama_cpp_with_models(self, tmp_path: Path) -> None:
         """Test inspect_llama_cpp when models found."""
@@ -164,7 +166,7 @@ class TestRuntimeInspector:
             result = inspector.inspect_llama_cpp()
 
             assert result.name == "llama.cpp"
-            assert result.status == "ok"
+            assert result.status == RuntimeHealth.OK
             assert "2" in result.detail or "model" in result.detail.lower()
 
 
@@ -244,7 +246,7 @@ class TestRuntimeStatusFrozen:
         """Test that RuntimeStatus is frozen (immutable)."""
         status = RuntimeStatus(
             name="Test",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="Test",
         )
 
@@ -255,16 +257,32 @@ class TestRuntimeStatusFrozen:
         """Test RuntimeStatus equality."""
         status1 = RuntimeStatus(
             name="Test",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="Test",
         )
         status2 = RuntimeStatus(
             name="Test",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="Test",
         )
 
         assert status1 == status2
+
+
+class TestRuntimeHealth:
+    """Tests for RuntimeHealth StrEnum."""
+
+    def test_health_members_compare_to_strings(self) -> None:
+        """StrEnum members compare equal to their string values."""
+        assert RuntimeHealth.OK == "ok"
+        assert RuntimeHealth.WARNING == "warning"
+        assert RuntimeHealth.ERROR == "error"
+
+    def test_health_serializes_to_plain_string(self) -> None:
+        """JSON serialization yields a plain string, not an enum object."""
+        import json
+
+        assert json.dumps({"status": RuntimeHealth.OK}) == '{"status": "ok"}'
 
 
 def _runtime_config(
@@ -304,7 +322,7 @@ class TestRuntimeInspectorCoveragePaths:
         ):
             result = inspector.inspect_ollama()
 
-        assert result.status == "ok"
+        assert result.status == RuntimeHealth.OK
         assert "could not be read" in result.detail.lower()
         assert result.version == "ollama version is 0.1.0"
 
@@ -336,7 +354,7 @@ class TestRuntimeInspectorCoveragePaths:
         ):
             result = inspector.inspect_llama_cpp()
 
-        assert result.status == "warning"
+        assert result.status == RuntimeHealth.WARNING
         assert "configured model path is missing" in result.detail.lower()
         assert "agent.pkl" in result.detail
         assert "notes.txt" in result.detail
@@ -368,7 +386,7 @@ class TestRuntimeInspectorCoveragePaths:
         ):
             result = inspector.inspect_llama_cpp()
 
-        assert result.status == "warning"
+        assert result.status == RuntimeHealth.WARNING
         assert "Detected 2 GGUF model(s)" in result.detail
         assert "no llama.cpp executable was found" in result.detail
         assert "agent.pkl" in result.detail
@@ -410,7 +428,7 @@ class TestRuntimeInspectorCoveragePaths:
         ):
             result = inspector.inspect_llama_cpp()
 
-        assert result.status == "warning"
+        assert result.status == RuntimeHealth.WARNING
         assert "no GGUF models were found" in result.detail
         assert result.version == "1.2.3 | avx2"
 
@@ -438,20 +456,20 @@ class TestRuntimeInspectorCoveragePaths:
     @pytest.mark.parametrize(
         ("model_list", "expected_status", "expected_detail"),
         [
-            (None, "warning", "Could not read Ollama model inventory."),
+            (None, RuntimeHealth.WARNING, "Could not read Ollama model inventory."),
             (
                 "NAME SIZE\nqwen3.5:397b-cloud 1GB\n",
-                "ok",
+                RuntimeHealth.OK,
                 "Configured cloud model is visible",
             ),
             (
                 "NAME SIZE\nother-cloud 1GB\n",
-                "warning",
+                RuntimeHealth.WARNING,
                 "Visible cloud model(s): other-cloud",
             ),
             (
                 "NAME SIZE\nqwen3:8b 1GB\n",
-                "warning",
+                RuntimeHealth.WARNING,
                 "No cloud-tagged models are visible",
             ),
         ],
@@ -460,7 +478,7 @@ class TestRuntimeInspectorCoveragePaths:
         self,
         tmp_path: Path,
         model_list: str | None,
-        expected_status: str,
+        expected_status: RuntimeHealth,
         expected_detail: str,
     ) -> None:
         inspector = RuntimeInspector(tmp_path, _runtime_config())

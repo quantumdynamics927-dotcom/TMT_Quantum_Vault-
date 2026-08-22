@@ -35,7 +35,7 @@ from .output import (
 )
 from .repository import VaultRepository
 from .runner import RuntimeRunner
-from .runtime import RuntimeInspector
+from .runtime import RuntimeHealth, RuntimeInspector
 
 app = typer.Typer(help="Inspect and validate the TMT Quantum Vault JSON dataset.")
 console = Console()
@@ -101,7 +101,8 @@ def _doctor_payload(
 ) -> dict[str, Any]:
     has_repository_warnings = any(status == "warning" for status, _ in checks)
     has_runtime_warnings = any(
-        runtime_check.status == "warning" for runtime_check in runtime_checks
+        runtime_check.status == RuntimeHealth.WARNING
+        for runtime_check in runtime_checks
     )
     return {
         "repository": [
@@ -116,7 +117,8 @@ def _doctor_payload(
 
 def _runtime_payload(runtime_checks: list[Any]) -> dict[str, Any]:
     all_warnings = all(
-        runtime_check.status == "warning" for runtime_check in runtime_checks
+        runtime_check.status == RuntimeHealth.WARNING
+        for runtime_check in runtime_checks
     )
     return {
         "runtime": [

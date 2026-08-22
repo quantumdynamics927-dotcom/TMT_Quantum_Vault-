@@ -32,7 +32,7 @@ from tmt_quantum_vault.ollama_api import is_available
 from tmt_quantum_vault.ollama_api import run as ollama_run
 from tmt_quantum_vault.repository import VaultRepository
 from tmt_quantum_vault.runner import RunResult, RuntimeRunner
-from tmt_quantum_vault.runtime import RuntimeInspector
+from tmt_quantum_vault.runtime import RuntimeHealth, RuntimeInspector
 
 BRAILLE_SPINNERS = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 ANSI_RE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
@@ -127,7 +127,7 @@ def test_runtime_json_output() -> None:
     mocked_runtime_checks = [
         SimpleNamespace(
             name="Ollama",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="available",
             executable=Path("C:/ollama.exe"),
             version="0.18.0",
@@ -147,7 +147,7 @@ def test_doctor_json_output() -> None:
     mocked_runtime_checks = [
         SimpleNamespace(
             name="Ollama",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="available",
             executable=Path("C:/ollama.exe"),
             version="0.18.0",
@@ -261,7 +261,7 @@ def test_runtime_record_path(tmp_path: Path) -> None:
     mocked_runtime_checks = [
         SimpleNamespace(
             name="Ollama Cloud",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="configured cloud model visible",
             executable=Path("C:/ollama.exe"),
             version=None,
@@ -618,7 +618,7 @@ def test_inspect_ollama_cloud_ok() -> None:
         ):
             status = inspector.inspect_ollama_cloud()
 
-    assert status.status == "ok"
+    assert status.status == RuntimeHealth.OK
     assert "qwen3-coder-next:cloud" in status.detail
 
 
@@ -795,7 +795,7 @@ def test_inspect_llama_cpp_reports_missing_model_and_artifacts(
         ):
             status = inspector.inspect_llama_cpp()
 
-    assert status.status == "warning"
+    assert status.status == RuntimeHealth.WARNING
     assert "no GGUF models were found in Models/." in status.detail
     assert "Configured model path is missing:" in status.detail
     assert "qwen3-8b.gguf." in status.detail
@@ -905,7 +905,7 @@ def test_inspect_llama_cpp_reports_serialized_exports_separately(
         ):
             status = inspector.inspect_llama_cpp()
 
-    assert status.status == "warning"
+    assert status.status == RuntimeHealth.WARNING
     assert "Serialized agent artifact(s) present:" in status.detail
     assert "Strategic.pkl" in status.detail
     assert "Strategic.json.gz" in status.detail
@@ -973,7 +973,7 @@ def test_release_evidence_bundle(tmp_path: Path) -> None:
     mocked_runtime_checks = [
         SimpleNamespace(
             name="Ollama Cloud",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="configured cloud model visible",
             executable=Path("C:/ollama.exe"),
             version=None,
@@ -1211,7 +1211,7 @@ def test_release_evidence_bundle_with_compare_to(tmp_path: Path) -> None:
     mocked_runtime_checks = [
         SimpleNamespace(
             name="Ollama Cloud",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail="configured cloud model visible",
             executable=Path("C:/ollama.exe"),
             version=None,

@@ -4,15 +4,24 @@ import re
 import shutil
 import subprocess
 from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
 
 from .models import VaultConfig
 
 
+class RuntimeHealth(StrEnum):
+    """Health level returned by a runtime inspection."""
+
+    OK = "ok"
+    WARNING = "warning"
+    ERROR = "error"
+
+
 @dataclass(frozen=True)
 class RuntimeStatus:
     name: str
-    status: str
+    status: RuntimeHealth
     detail: str
     executable: Path | None = None
     version: str | None = None
@@ -35,7 +44,7 @@ class RuntimeInspector:
         if executable is None:
             return RuntimeStatus(
                 name="Ollama",
-                status="warning",
+                status=RuntimeHealth.WARNING,
                 detail="Ollama executable not found on PATH.",
             )
 
@@ -50,7 +59,7 @@ class RuntimeInspector:
 
         return RuntimeStatus(
             name="Ollama",
-            status="ok",
+            status=RuntimeHealth.OK,
             detail=detail,
             executable=executable,
             version=self._summarize_version("ollama", version),
@@ -87,7 +96,7 @@ class RuntimeInspector:
                 )
             return RuntimeStatus(
                 name="llama.cpp",
-                status="warning",
+                status=RuntimeHealth.WARNING,
                 detail=detail,
             )
 
@@ -109,7 +118,7 @@ class RuntimeInspector:
                 )
             return RuntimeStatus(
                 name="llama.cpp",
-                status="warning",
+                status=RuntimeHealth.WARNING,
                 detail=detail,
             )
 
@@ -162,14 +171,14 @@ class RuntimeInspector:
         if executable is None:
             return RuntimeStatus(
                 name="Ollama Cloud",
-                status="warning",
+                status=RuntimeHealth.WARNING,
                 detail="Ollama executable not found on PATH.",
             )
 
         if self.config is None:
             return RuntimeStatus(
                 name="Ollama Cloud",
-                status="warning",
+                status=RuntimeHealth.WARNING,
                 detail="Vault runtime configuration is not available.",
                 executable=executable,
             )
@@ -178,7 +187,7 @@ class RuntimeInspector:
         if not self._is_cloud_model_tag(cloud_model):
             return RuntimeStatus(
                 name="Ollama Cloud",
-                status="warning",
+                status=RuntimeHealth.WARNING,
                 detail=f"Configured cloud model does not use a cloud tag: {cloud_model}",
                 executable=executable,
             )
@@ -187,7 +196,7 @@ class RuntimeInspector:
         if model_list is None:
             return RuntimeStatus(
                 name="Ollama Cloud",
-                status="warning",
+                status=RuntimeHealth.WARNING,
                 detail="Could not read Ollama model inventory.",
                 executable=executable,
             )
@@ -199,7 +208,7 @@ class RuntimeInspector:
         if cloud_model in visible_cloud_models:
             return RuntimeStatus(
                 name="Ollama Cloud",
-                status="ok",
+                status=RuntimeHealth.OK,
                 detail=(
                     "Configured cloud model is visible in Ollama inventory: "
                     f"{cloud_model}"
@@ -210,7 +219,7 @@ class RuntimeInspector:
         if visible_cloud_models:
             return RuntimeStatus(
                 name="Ollama Cloud",
-                status="warning",
+                status=RuntimeHealth.WARNING,
                 detail=(
                     "Configured cloud model is not visible in Ollama "
                     "inventory. Visible cloud model(s): "
@@ -221,7 +230,7 @@ class RuntimeInspector:
 
         return RuntimeStatus(
             name="Ollama Cloud",
-            status="warning",
+            status=RuntimeHealth.WARNING,
             detail="No cloud-tagged models are visible in Ollama inventory.",
             executable=executable,
         )

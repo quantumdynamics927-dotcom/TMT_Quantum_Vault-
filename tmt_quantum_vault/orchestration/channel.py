@@ -12,6 +12,7 @@ Key Components:
 
 from __future__ import annotations
 
+import logging
 import threading
 from collections import defaultdict
 from collections.abc import Callable
@@ -25,6 +26,8 @@ from .models import (
     AgentRole,
     MessagePriority,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class MessageQueue:

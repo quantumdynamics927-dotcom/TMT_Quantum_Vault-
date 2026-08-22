@@ -277,8 +277,16 @@ class TMTBenchmarkMatrix:
                     layer=BenchmarkLayer.SYSTEM,
                     description="Route a validation task to Validator agent",
                     task_type="validation",  # Maps to Validator/Auditor agents
-                    expected_agents=["validator", "auditor", "observer", "archivist"],  # Fallbacks included
-                    expected_layers=["output", "integration"],  # Validator is output layer
+                    expected_agents=[
+                        "validator",
+                        "auditor",
+                        "observer",
+                        "archivist",
+                    ],  # Fallbacks included
+                    expected_layers=[
+                        "output",
+                        "integration",
+                    ],  # Validator is output layer
                     success_criteria={
                         "primary_agent_in_expected": True,
                         "confidence_threshold": 0.7,
@@ -337,7 +345,11 @@ class TMTBenchmarkMatrix:
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute task requiring handoff from input to integration layer",
                     task_type="coordination",  # Multi-agent coordination
-                    expected_agents=["bio", "fractal", "synthesizer"],  # visual not available
+                    expected_agents=[
+                        "bio",
+                        "fractal",
+                        "synthesizer",
+                    ],  # visual not available
                     expected_layers=["input", "integration"],
                     success_criteria={
                         "min_handoffs": 1,
@@ -363,7 +375,11 @@ class TMTBenchmarkMatrix:
                     layer=BenchmarkLayer.SYSTEM,
                     description="Execute task with Validator escalation",
                     task_type="validation",  # Maps to Validator/Auditor agents
-                    expected_agents=["archivist", "observer", "synthesizer"],  # workflow, validator, visual not available
+                    expected_agents=[
+                        "archivist",
+                        "observer",
+                        "synthesizer",
+                    ],  # workflow, validator, visual not available
                     expected_layers=["output", "integration"],
                     success_criteria={
                         "escalation_detected": True,

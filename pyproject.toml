@@ -43,7 +43,7 @@ dependencies = [
     "requests>=2.32,<3.0",
     "rich>=14,<15",
     "typer>=0.15,<1.0",
-    "cryptography>=42.0,<44.0",
+    "cryptography>=50.0.0,<51.0",
 ]
 
 [project.optional-dependencies]

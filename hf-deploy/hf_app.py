@@ -1,5 +1,5 @@
 """
-TMT Quantum Vault — Hugging Face Spaces Demo
+TMT Quantum Vault - Hugging Face Spaces Demo
 
 Gradio interface for the 17-agent orchestration system with:
 - Three-lane routing (simulation, quantum, LLM)
@@ -7,9 +7,10 @@ Gradio interface for the 17-agent orchestration system with:
 - Real-time orchestration visualization
 """
 
+import inspect
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import gradio as gr
@@ -19,8 +20,8 @@ os.environ.setdefault("TMT_EXECUTION_MODE", "simulation")
 
 from tmt_quantum_vault.orchestration import (
     AgentOrchestrator,
-    RoutingPolicy,
     ExecutionMode,
+    RoutingPolicy,
 )
 from tmt_quantum_vault.repository import VaultRepository
 
@@ -52,6 +53,67 @@ def get_agent_profiles() -> list[dict[str, Any]]:
     ]
 
 
+def _serialize_trace(trace: Any) -> dict[str, Any]:
+    """Serialize a CoordinationTrace defensively across model versions."""
+    decisions = []
+    for decision in getattr(trace, "decisions", []) or []:
+        layer = getattr(decision, "layer", None)
+        agent = getattr(decision, "primary_agent", None)
+
+        confidence = getattr(decision, "confidence", None)
+        if confidence is None:
+            confidence = getattr(decision, "decision_confidence", 0.0)
+
+        reason = getattr(decision, "reasoning", None) or getattr(
+            decision, "primary_reason", ""
+        )
+        reason_text = str(reason)
+        if len(reason_text) > 100:
+            reason_text = reason_text[:100] + "..."
+
+        decisions.append(
+            {
+                "layer": getattr(layer, "value", layer),
+                "primary_agent": getattr(agent, "value", agent),
+                "confidence": round(float(confidence or 0.0), 4),
+                "reasoning": reason_text,
+            }
+        )
+
+    agents_involved = [d["primary_agent"] for d in decisions]
+    layers_traversed = list(dict.fromkeys(d["layer"] for d in decisions))
+
+    average_confidence = round(
+        float(
+            getattr(trace, "average_confidence", None)
+            or getattr(trace, "final_confidence", 0.0)
+            or 0.0
+        ),
+        4,
+    )
+
+    return {
+        "orchestration_score": round(
+            float(getattr(trace, "orchestration_score", 0.0) or 0.0), 4
+        ),
+        "task_completion_score": round(
+            float(getattr(trace, "task_completion_score", 0.0) or 0.0), 4
+        ),
+        "output_quality_score": round(
+            float(getattr(trace, "output_quality_score", 0.0) or 0.0), 4
+        ),
+        "average_confidence": average_confidence,
+        "average_resonance": round(
+            float(getattr(trace, "average_resonance", 0.0) or 0.0), 4
+        ),
+        "agents_involved": agents_involved,
+        "layers_traversed": layers_traversed,
+        "handoff_count": len(decisions),
+        "decisions": decisions,
+        "status": "success",
+    }
+
+
 def run_orchestration(
     task_type: str,
     objective: str,
@@ -62,44 +124,31 @@ def run_orchestration(
     if not objective.strip():
         return {"error": "Please provide an objective"}
 
-    # Parse preferred agents
     agents_list = None
     if preferred_agents.strip():
         agents_list = [a.strip() for a in preferred_agents.split(",") if a.strip()]
 
-    # Set execution mode
-    exec_mode = ExecutionMode.SIMULATION if mode == "simulation" else ExecutionMode.LIVE
+    exec_mode = (
+        ExecutionMode.SIMULATION if mode == "simulation" else ExecutionMode.LIVE
+    )
+    orchestrator.execution_mode = exec_mode
+
+    kwargs: dict[str, Any] = {
+        "task_type": task_type,
+        "objective": objective,
+        "preferred_agents": agents_list,
+    }
+
+    # Backward compatibility: only pass kwargs the running execute() accepts.
+    params = inspect.signature(orchestrator.execute).parameters
+    if "execution_mode" in params:
+        kwargs["execution_mode"] = exec_mode
+    if "context" in params:
+        kwargs["context"] = {"source": "hf_space", "ui_mode": mode}
 
     try:
-        trace = orchestrator.execute(
-            task_type=task_type,
-            objective=objective,
-            execution_mode=exec_mode,
-            preferred_agents=agents_list,
-        )
-
-        # Extract decision chain
-        decisions = []
-        for d in trace.decisions:
-            decisions.append({
-                "layer": d.layer.value,
-                "primary_agent": d.primary_agent.value,
-                "confidence": round(d.confidence, 4),
-                "reasoning": d.reasoning[:100] + "..." if len(d.reasoning) > 100 else d.reasoning,
-            })
-
-        return {
-            "orchestration_score": round(trace.orchestration_score, 4),
-            "task_completion_score": round(trace.task_completion_score, 4),
-            "output_quality_score": round(trace.output_quality_score, 4),
-            "average_confidence": round(trace.average_confidence, 4),
-            "average_resonance": round(trace.average_resonance, 4),
-            "agents_involved": [d.primary_agent.value for d in trace.decisions],
-            "layers_traversed": list(dict.fromkeys(d.layer.value for d in trace.decisions)),
-            "handoff_count": len(trace.decisions),
-            "decisions": decisions,
-            "status": "success",
-        }
+        trace = orchestrator.execute(**kwargs)
+        return _serialize_trace(trace)
     except Exception as e:
         return {"error": str(e), "status": "failed"}
 
@@ -111,7 +160,6 @@ def run_benchmark(task_ids: str) -> dict[str, Any]:
         TMTBenchmarkMatrix,
     )
 
-    # Parse task IDs
     task_id_list = None
     if task_ids.strip():
         task_id_list = [t.strip() for t in task_ids.split(",") if t.strip()]
@@ -152,18 +200,17 @@ with gr.Blocks(
 ) as demo:
     gr.Markdown(
         """
-        # ⚛️ TMT Quantum Vault — Orchestration Demo
-        
+        # TMT Quantum Vault - Orchestration Demo
+
         **17-Agent Resonant Intelligence Lattice** with phi-aligned coordination,
         three-lane routing (simulation/quantum/LLM), and real-time orchestration tracing.
-        
-        > 🔒 **Private Space** — Orchestration runs in simulation mode by default.
+
+        > **Private Space** - Orchestration runs in simulation mode by default.
         """
     )
 
     with gr.Tabs():
-        # Tab 1: Orchestration
-        with gr.TabItem("🎯 Orchestration"):
+        with gr.TabItem("Target"):
             with gr.Row():
                 with gr.Column(scale=2):
                     task_type = gr.Dropdown(
@@ -196,8 +243,8 @@ with gr.Blocks(
                     )
                     preferred_agents = gr.Textbox(
                         label="Preferred Agents (optional)",
-                        placeholder="Synthesizer, Validator, Observer...",
-                        info="Comma-separated list of preferred agents",
+                        placeholder="synthesizer, validator, observer...",
+                        info="Comma-separated list of preferred agents (lowercase role names)",
                     )
                     submit_btn = gr.Button(
                         "Run Orchestration",
@@ -217,12 +264,11 @@ with gr.Blocks(
                 outputs=output,
             )
 
-        # Tab 2: Benchmark
-        with gr.TabItem("📊 Benchmark"):
+        with gr.TabItem("Benchmark"):
             gr.Markdown(
                 """
                 ### TMT Benchmark Matrix
-                
+
                 Run the 19-task benchmark suite to validate orchestration behavior.
                 """
             )
@@ -241,8 +287,7 @@ with gr.Blocks(
                 outputs=benchmark_output,
             )
 
-        # Tab 3: Agents
-        with gr.TabItem("🤖 Agents"):
+        with gr.TabItem("Agents"):
             gr.Markdown("### Registered Agent Profiles")
             agents_table = gr.Dataframe(
                 value=lambda: [
@@ -268,61 +313,60 @@ with gr.Blocks(
                 interactive=False,
             )
 
-        # Tab 4: Architecture
-        with gr.TabItem("📐 Architecture"):
+        with gr.TabItem("Architecture"):
             gr.Markdown(
                 """
                 ### TMT Quantum Vault Architecture
-                
+
                 **Core-13 Coordination Lattice** with **Extended-17 Operational Topology**
-                
+
                 ```
-                              ┌─────────────────────────────────────┐
-                              │         Agent_Synthesizer           │
-                              │         (Knowledge Fusion)          │
-                              │              φ = 0.95               │
-                              └─────────────────────────────────────┘
-                                            │
-                    ┌───────────────────────┼───────────────────────┐
-                    │                       │                       │
-              ┌─────┴─────┐           ┌─────┴─────┐           ┌─────┴─────┐
-              │  Observer │           │  Workflow │           │ Validator │
-              │  (Watch)   │           │  (Route)   │           │  (Check)  │
-              └───────────┘           └───────────┘           └───────────┘
-                    │                       │                       │
-              ┌─────┴─────┐           ┌─────┴─────┐           ┌─────┴─────┐
-              │  Auditor   │           │ Strategic │           │  Archivist│
-              │  (Audit)    │           │ (Plan)     │           │  (Store)  │
-              └───────────┘           └───────────┘           └───────────┘
-                    │                       │                       │
-              ┌─────┴─────┐           ┌─────┴─────┐           ┌─────┴─────┐
-              │   Bio      │           │  Fractal  │           │  Harmonic │
-              │  (Heal)     │           │ (Pattern) │           │ (Resonate)│
-              └───────────┘           └───────────┘           └───────────┘
-                    │                       │                       │
-              ┌─────┴─────┐           ┌─────┴─────┐           ┌─────┴─────┐
-              │  Stealth   │           │  Mirror   │           │ Wormhole  │
-              │  (Bridge)   │           │ (Reflect) │           │  (Tunnel) │
-              └───────────┘           └───────────┘           └───────────┘
-                    │                       │                       │
-              ┌─────┴─────┐           ┌─────┴─────┐           ┌─────┴─────┐
-              │  BitNet    │           │  Bronze   │           │ Federation│
-              │  (Neural)   │           │(Foundation)│           │ (Coord)   │
-              └───────────┘           └───────────┘           └───────────┘
-                                            │
-                                      ┌─────┴─────┐
-                                      │   Data    │
-                                      │ (Synthesize)
-                                      └───────────┘
+                              -------------------------------------
+                              |         Agent_Synthesizer           |
+                              |         (Knowledge Fusion)          |
+                              |              phi = 0.95               |
+                              --------------------------------------
+                                            |
+                    --------------------------|--------------------------
+                    |                       |                       |
+              -------------           -------------           -------------
+              |  Observer |           |  Workflow |           | Validator |
+              |  (Watch)   |           |  (Route)   |           |  (Check)  |
+              -------------           -------------           -------------
+                    |                       |                       |
+              -------------           -------------           -------------
+              |  Auditor   |           | Strategic |           |  Archivist|
+              |  (Audit)    |           | (Plan)     |           |  (Store)  |
+              -------------           -------------           -------------
+                    |                       |                       |
+              -------------           -------------           -------------
+              |   Bio      |           |  Fractal  |           |  Harmonic |
+              |  (Heal)     |           | (Pattern) |           | (Resonate)|
+              -------------           -------------           -------------
+                    |                       |                       |
+              -------------           -------------           -------------
+              |  Stealth   |           |  Mirror   |           | Wormhole  |
+              |  (Bridge)   |           | (Reflect) |           |  (Tunnel) |
+              -------------           -------------           -------------
+                    |                       |                       |
+              -------------           -------------           -------------
+              |  BitNet    |           |  Bronze   |           | Federation|
+              |  (Neural)   |           |(Foundation)|           | (Coord)   |
+              -------------           -------------           -------------
+                                            |
+                                      -------------
+                                      |   Data    |
+                                      | (Synthesize)
+                                      -------------
                 ```
-                
+
                 **Three-Lane Routing:**
                 - **Simulation**: Fast, free, local validation
-                - **Quantum**: IBM Kingston (φ ≥ 0.618 threshold)
+                - **Quantum**: IBM Kingston (phi >= 0.618 threshold)
                 - **LLM**: Ollama qwen2.5:1.5b for synthesis
-                
+
                 **Phi-Resonance Alignment:**
-                - Golden ratio (φ = 1.618...) guides coordination
+                - Golden ratio (phi = 1.618...) guides coordination
                 - GC content targets ~0.618 in DNA sequences
                 - Fibonacci alignment scoring for agent fitness
                 """

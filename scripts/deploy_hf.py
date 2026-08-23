@@ -80,6 +80,15 @@ def prepare_deployment_files(source_dir: Path, deploy_dir: Path) -> None:
             dst.write_bytes(src.read_bytes())
             print(f"  [OK] {src.name}")
 
+    # Write a deploy timestamp to bust HF Spaces Docker build cache.
+    # HF builds the Space from uploaded files, so a fresh timestamp guarantees
+    # the COPY .deploy_timestamp layer invalidates all later layers.
+    import datetime as _dt
+    timestamp = _dt.datetime.now(_dt.UTC).isoformat()
+    (deploy_dir / ".deploy_timestamp").write_text(
+        f"deployed_at={timestamp}\n", encoding="utf-8"
+    )
+    print("  [OK] .deploy_timestamp")
     # tmt_quantum_vault package
     package_src = source_dir / "tmt_quantum_vault"
     package_dst = deploy_dir / "tmt_quantum_vault"

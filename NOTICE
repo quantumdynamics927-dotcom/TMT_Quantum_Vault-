@@ -23,6 +23,15 @@ See requirements.txt for complete dependency list.
 
 ==============================================================================
 
+TRADEMARK DISCLAIMER
+
+IBM, IBM Quantum, Qiskit, and IBM Quantum backend names are trademarks of
+International Business Machines Corporation. This is independent research.
+Circuits were executed on publicly accessible IBM Quantum processors.
+IBM did not review, sponsor, validate, or endorse this repository or its claims.
+
+==============================================================================
+
 CONSCIOUSNESS RESEARCH ACKNOWLEDGMENTS
 
 This project draws inspiration from:

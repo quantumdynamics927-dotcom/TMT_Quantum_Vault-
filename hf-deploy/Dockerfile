@@ -16,6 +16,9 @@ COPY vault_config.json .
 COPY metatron_geometry.json .
 COPY hf_app.py .
 
+# Deploy timestamp forces HF Spaces Docker cache invalidation on every deploy
+COPY .deploy_timestamp .deploy_timestamp
+
 # Copy Agent directories (conscious_dna.json files)
 COPY Agent_Archivist/ ./Agent_Archivist/
 COPY Agent_Auditor/ ./Agent_Auditor/

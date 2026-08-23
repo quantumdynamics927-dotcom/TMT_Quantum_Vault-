@@ -308,14 +308,19 @@ The agent system draws entropy from three sources:
 
 ---
 
-## Hardware Validation Sources
+## Hardware Execution Sources
 
 | Backend | Type | Usage |
 |---------|------|-------|
-| IBM Fez (127-qubit Eagle) | DNA promoter circuits | consciousness_phi: 0.8524 |
-| IBM Torino | DNA comparison | 10,000-shot validation |
-| IBM Casablanca (27-qubit) | Full-entropy QTRG | True random seeding |
-| Sierpinski 21-qubit | Fractal consciousness | 23 SIGNIFICANT runs |
+| `ibm_fez` (127-qubit Eagle-class) | DNA promoter circuits | consciousness_phi: 0.8524 |
+| `ibm_torino` | DNA comparison | 10,000-shot execution |
+| `ibm_casablanca` (27-qubit) | Full-entropy QTRG | Quantum random seeding |
+| 21-qubit Sierpinski layout | Fractal consciousness | 23 SIGNIFICANT runs |
+
+> **Trademark notice:** IBM, IBM Quantum, Qiskit, and IBM Quantum backend names are
+> trademarks of International Business Machines Corporation. This is independent research.
+> Circuits were executed on publicly accessible IBM Quantum processors. IBM did not review,
+> sponsor, validate, or endorse this repository or its claims.
 
 ---
 

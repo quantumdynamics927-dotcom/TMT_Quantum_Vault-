@@ -2,13 +2,13 @@
 title: TMT Quantum Vault
 emoji: ⚛️
 colorFrom: blue
-colorTo: teal
+colorTo: purple
 sdk: docker
 app_port: 7860
 pinned: false
 private: true
 license: mit
-short_description: 17-agent resonant intelligence lattice with phi-aligned coordination
+short_description: 17-agent resonant intelligence lattice with phi-coordination
 ---
 
 # TMT Quantum Vault

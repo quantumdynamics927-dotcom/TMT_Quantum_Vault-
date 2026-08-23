@@ -36,7 +36,7 @@ jobs:
 
       - name: Deploy to Hugging Face Spaces
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_TOKEN2: ${{ secrets.HF_TOKEN2 }}
         run: |
           python scripts/deploy_hf.py \
             --space-name Quantum927/quantumvault \

@@ -60,12 +60,15 @@ logger = logging.getLogger(__name__)
 PHI = 1.618033988749895
 PHI_INVERSE = 1.0 / PHI
 
+
 # Execution modes
 class ExecutionMode(StrEnum):
     """Execution mode for agent tasks."""
+
     SIMULATION = "simulation"
     LIVE = "live"
     HYBRID = "hybrid"  # Simulation with selective live routing
+
 
 # Default routing weights
 DEFAULT_ROUTING_WEIGHTS = {
@@ -110,7 +113,12 @@ ROLE_LAYER_MAP = {
 # Roles are listed in priority order. Fallback to synthesizer if none available.
 TASK_ROLE_ROUTING = {
     # Validation tasks - use observer (monitoring) or archivist (records) as fallback
-    "validation": [AgentRole.VALIDATOR, AgentRole.AUDITOR, AgentRole.OBSERVER, AgentRole.ARCHIVIST],
+    "validation": [
+        AgentRole.VALIDATOR,
+        AgentRole.AUDITOR,
+        AgentRole.OBSERVER,
+        AgentRole.ARCHIVIST,
+    ],
     # Synthesis tasks - primary integration agents
     "synthesis": [AgentRole.SYNTHESIZER, AgentRole.FEDERATION, AgentRole.MIRROR],
     # Analysis tasks - use observer as fallback for strategic
@@ -357,12 +365,15 @@ class RoutingEngine:
             candidates.extend(self.get_profiles_by_role(role))
 
         # Filter out disabled agents
-        candidates = [p for p in candidates if not self._is_disabled(p.agent_role.value)]
+        candidates = [
+            p for p in candidates if not self._is_disabled(p.agent_role.value)
+        ]
 
         if not candidates:
             # Fallback to any available agent (excluding disabled)
             candidates = [
-                p for p in self._agent_profiles.values()
+                p
+                for p in self._agent_profiles.values()
                 if not self._is_disabled(p.agent_role.value)
             ]
 
@@ -626,7 +637,11 @@ class ExecutionPlanner:
                 "integration": AgentLayer.INTEGRATION,
                 "output": AgentLayer.OUTPUT,
             }
-            target_layers = [layer_map.get(layer_name.lower(), layer_name) for layer_name in expected_layers if layer_name.lower() in layer_map]
+            target_layers = [
+                layer_map.get(layer_name.lower(), layer_name)
+                for layer_name in expected_layers
+                if layer_name.lower() in layer_map
+            ]
 
             for layer in target_layers:
                 profiles = self.routing_engine.get_profiles_by_layer(layer)
@@ -644,9 +659,7 @@ class ExecutionPlanner:
                 if not layer_agents:
                     task_roles = TASK_ROLE_ROUTING.get(task_type, [])
                     layer_agents = [
-                        p.agent_role
-                        for p in profiles
-                        if p.agent_role in task_roles
+                        p.agent_role for p in profiles if p.agent_role in task_roles
                     ]
 
                 # If still no agents, use all layer agents
@@ -1205,14 +1218,19 @@ class AgentOrchestrator:
         """
         task_type = contract.input.task_type.lower()
         quantum_types = {
-            "quantum", "circuit", "entanglement", "superposition",
-            "teleportation", "qrng", "bell_state", "grover", "shor",
+            "quantum",
+            "circuit",
+            "entanglement",
+            "superposition",
+            "teleportation",
+            "qrng",
+            "bell_state",
+            "grover",
+            "shor",
         }
         return any(qt in task_type for qt in quantum_types)
 
-    def _is_llm_task(
-        self, agent_role: AgentRole, contract: AgentContract
-    ) -> bool:
+    def _is_llm_task(self, agent_role: AgentRole, contract: AgentContract) -> bool:
         """Check if task should be routed to LLM.
 
         Args:
@@ -1324,7 +1342,9 @@ class AgentOrchestrator:
             )
 
         except ImportError:
-            logger.warning("qiskit-ibm-runtime not installed, falling back to simulation")
+            logger.warning(
+                "qiskit-ibm-runtime not installed, falling back to simulation"
+            )
             return None
         except Exception as e:
             logger.warning(f"IBM Quantum execution failed: {e}")
@@ -1381,7 +1401,9 @@ class AgentOrchestrator:
                     "response": response.response,
                     "parsed": parsed_result,
                 },
-                summary=parsed_result.get("summary", f"Processed by {profile.agent_name} via Ollama"),
+                summary=parsed_result.get(
+                    "summary", f"Processed by {profile.agent_name} via Ollama"
+                ),
                 confidence=parsed_result.get("confidence", 0.82),
                 resonance_score=resonance_score,
                 fitness_contribution=profile.fitness * 0.1,
@@ -1408,7 +1430,7 @@ class AgentOrchestrator:
         import re
 
         # Try to extract JSON from response
-        json_match = re.search(r'\{[^{}]*\}', response, re.DOTALL)
+        json_match = re.search(r"\{[^{}]*\}", response, re.DOTALL)
         if json_match:
             try:
                 parsed = json.loads(json_match.group())
@@ -1454,10 +1476,16 @@ class AgentOrchestrator:
         if parsed_result.get("analysis") and len(parsed_result["analysis"]) > 10:
             score += 0.05
 
-        if parsed_result.get("recommendations") and len(parsed_result["recommendations"]) > 0:
+        if (
+            parsed_result.get("recommendations")
+            and len(parsed_result["recommendations"]) > 0
+        ):
             score += 0.05
 
-        if parsed_result.get("resonance_notes") and len(parsed_result["resonance_notes"]) > 10:
+        if (
+            parsed_result.get("resonance_notes")
+            and len(parsed_result["resonance_notes"]) > 10
+        ):
             score += 0.05
 
         # Boost for high confidence
@@ -1468,9 +1496,7 @@ class AgentOrchestrator:
         # Cap at 1.0
         return min(1.0, score)
 
-    def _build_prompt(
-        self, profile: AgentProfile, contract: AgentContract
-    ) -> str:
+    def _build_prompt(self, profile: AgentProfile, contract: AgentContract) -> str:
         """Build prompt for LLM execution.
 
         Args:

@@ -1,0 +1,7 @@
+{
+  "name": "tmt-quantum-vault-web",
+  "private": true,
+  "devDependencies": {
+    "wrangler": "^4.125.0"
+  }
+}

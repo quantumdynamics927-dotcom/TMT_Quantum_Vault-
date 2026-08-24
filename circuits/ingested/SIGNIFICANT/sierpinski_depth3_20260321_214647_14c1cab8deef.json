@@ -1,6 +1,6 @@
 {
   "circuit": "sierpinski_depth3",
-  "source_file": "D:\\AGI-GH-REPO-11326\\TMT_Quantum_Vault-\\circuits\\results\\job-d6vh2rqtnsts73et75ng-result.json",
+  "source_file": "circuits/results/job-d6vh2rqtnsts73et75ng-result.json",
   "ingested_at": "20260321_214647",
   "job_id": "job-d6vh2rqtnsts73et75ng",
   "backend": "ibm_fez",

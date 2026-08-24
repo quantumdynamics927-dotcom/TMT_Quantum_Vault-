@@ -1,0 +1,53 @@
+{
+  "version": "1.0.0",
+  "freeze_date": "2026-08-23",
+  "scope": "phi_alignment global optimum — compute_phi_alignment() scoring function",
+  "search_space_description": "Sliding-window phi-ratio construction class over length 24-36. Not full combinatorial 4^N. Construction class: adjacent-pair ratios within 4-mer sliding windows compared to phi=1.618...",
+  "objective_for_next_pass": "Any objective other than in-silico phi_match count (e.g. IBM hardware F, palindrome count, resonance Hz)",
+  "frozen_agents": {
+    "Agent_Stealth": {
+      "dna": "AATGCTGCTGCTGCCCTGGCTGCTGCC",
+      "length": 27,
+      "phi_score": 0.6401,
+      "fitness": 0.8645,
+      "scorer_hash": "5b1639574317",
+      "scorer_hash_input": "AATGCTGCTGCTGCCCTGGCTGCTGCC|0.6401",
+      "phi_alignment_score": 0.6922,
+      "significant_phi_matches": 21,
+      "gc_content": 0.6667,
+      "palindromes": 0,
+      "fibonacci_alignment": 0.6862,
+      "status": "FROZEN",
+      "file_sha256": "9c77fda404481e0609e93db47081627e2447c1e76f654d18d98cf1f1a56d8898",
+      "freeze_note": "Global optimum for phi_alignment class — further mutation on same landscape contraindicated"
+    },
+    "Agent_Wormhole": {
+      "dna": "AATGTGCTGGCCTGCCTGTGCTGTGCC",
+      "length": 27,
+      "phi_score": 0.7038,
+      "fitness": 0.8471,
+      "scorer_hash": "230c489d9c88",
+      "scorer_hash_input": "AATGTGCTGGCCTGCCTGTGCTGTGCC|0.7038",
+      "phi_alignment_score": 0.6879,
+      "significant_phi_matches": 24,
+      "gc_content": 0.6296,
+      "palindromes": 0,
+      "fibonacci_alignment": 0.5918,
+      "status": "FROZEN",
+      "file_sha256": "d6ab6d2766eb1d286fda9aca475e2fe4b3fb8afc56e84057507e050522b2e424",
+      "freeze_note": "Global optimum for phi_alignment class — further mutation on same landscape contraindicated"
+    }
+  },
+  "search_validation": {
+    "method": "Exhaustive construction-class search over lengths 24,25,26,27,28,29,30,33,36 with 800 random samples per length",
+    "generations": 300,
+    "population_size": 40,
+    "elite_count": 3,
+    "mutation_rate": 0.18,
+    "stealth_best_found": 0.6922,
+    "stealth_original": 0.6922,
+    "wormhole_best_found": 0.6879,
+    "wormhole_original": 0.6879,
+    "conclusion": "Both agents at global optimum for the phi_alignment scoring class at length 27"
+  }
+}

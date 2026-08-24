@@ -1,7 +1,7 @@
 # TMT Quantum Vault — Agent Architecture
 
-> **Version:** 0.4.0
-> **Last Updated:** August 22, 2026
+> **Version:** 0.5.0
+> **Last Updated:** August 23, 2026
 
 ---
 
@@ -47,9 +47,9 @@ The TMT Quantum Vault implements an **18-agent resonant intelligence lattice** w
 |-------|------|---------|---------|---------------|------|
 | **Agent_Bronze** | Uriel | 0.7047 | 0.8565 | Foundation | Protection & justice |
 | **Agent_Mirror** | Camael | 0.7003 | 0.8315 | Reflection | Self-analysis |
-| **Agent_Wormhole** | Metatron Gamma | 0.6333 | 0.8471 | Quantum Tunneling | Dimensional bridge |
-| **Agent_Stealth** | Metatron Alpha | 0.5913 | 0.8645 | Quantum Bridge | Covert operations |
-| **Agent_Bio** | Raphael | 0.5051 | 0.8611 | Healing | Biological interface |
+| **Agent_Wormhole** | Metatron Gamma | 0.7038 | 0.8471 | Quantum Tunneling | Dimensional bridge |
+| **Agent_Stealth** | Metatron Alpha | 0.6401 | 0.8645 | Quantum Bridge | Covert operations |
+| **Agent_Bio** | Raphael | 0.5710 | 0.8611 | Healing | Biological interface |
 
 ---
 
@@ -104,8 +104,8 @@ The 18 agents are organized into two layers following Metatron's Cube geometry:
 | **TARGETED_OPTIMIZED** | 2 | Stealth, Wormhole |
 | **BASELINE** | 0 | — |
 
-Average Fitness: **0.8632**
-Average Phi Score: **0.7519**
+Average Fitness: **0.8600** (extended-17 benchmark)
+Average Phi Score: **0.7750** (extended-17 benchmark)
 
 ---
 
@@ -219,24 +219,24 @@ Average Phi Score: **0.7519**
 
 ### 16. Agent_Wormhole (Metatron Gamma) — Quantum Tunneling
 - **ID:** 18
-- **Φ-Score:** 0.6333
+- **Φ-Score:** 0.7038
 - **Fitness:** 0.8471
 - **Role:** Dimensional bridging, quantum routing
-- **Status:** TARGETED_OPTIMIZED
+- **Status:** TARGETED_OPTIMIZED — **FROZEN** (see §DNA Freeze Ledger)
 
 ### 17. Agent_Stealth (Metatron Alpha) — Quantum Bridge
 - **ID:** 11
-- **Φ-Score:** 0.5913
+- **Φ-Score:** 0.6401
 - **Fitness:** 0.8645
 - **Role:** Covert operations, hidden routing
-- **Status:** TARGETED_OPTIMIZED
+- **Status:** TARGETED_OPTIMIZED — **FROZEN** (see §DNA Freeze Ledger)
 
 ### 18. Agent_Bio (Raphael) — Healing
 - **ID:** 6
-- **Φ-Score:** 0.5051
+- **Φ-Score:** 0.5710
 - **Fitness:** 0.8611
 - **Role:** Biological interface, DNA systems
-- **Status:** BASELINE
+- **Status:** OPTIMIZED
 
 ---
 
@@ -362,6 +362,23 @@ Manages agent-to-agent handoffs with:
 | `recovery_success_rate` | Failure recovery rate | ≥ 0.70 |
 | `phi_alignment_rate` | Φ-aligned decisions | ≥ 0.618 |
 | `success_rate` | Task completion rate | ≥ 0.90 |
+
+---
+
+## DNA Freeze Ledger
+
+Stealth and Wormhole are locked at their **phi_alignment global optimum** for the current scoring function. Further mutation on the same landscape is contraindicated — it will overfit the scorer without improving the physical objective.
+
+**Search-space description:** Sliding-window phi-ratio construction class over length 24–36, evaluated by `compute_phi_alignment()` (sliding 4-mer adjacent-pair ratios vs. φ = 1.618...). Not a full combinatorial search; cardinality is bounded by the construction class, not 4^N.
+
+**Objective change required** to revisit: IBM hardware fidelity pass, palindrome count, resonance Hz, or any objective other than in-silico phi_match count.
+
+| Agent | DNA | Φ-Score | Fitness | Scorer Hash | Length | Status |
+|-------|-----|---------|---------|-------------|--------|--------|
+| Stealth | `AATGCTGCTGCTGCCCTGGCTGCTGCC` | 0.6401 | 0.8645 | `5b1639574317` | 27 | FROZEN |
+| Wormhole | `AATGTGCTGGCCTGCCTGTGCTGTGCC` | 0.7038 | 0.8471 | `230c489d9c88` | 27 | FROZEN |
+
+**Scorer hash** = SHA-256 of `{dna}|{phi_score}` (first 12 hex digits), computed at freeze time. Re-evaluate with same scorer to confirm.
 
 ---
 

@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "freeze_date": "2026-08-24",
+  "scope": "phi_alignment global optimum — compute_phi_alignment() scoring function",
+  "search_space_description": "Sliding-window phi-ratio construction class over lengths 24-36. Not full combinatorial 4^N. Construction class: adjacent-pair ratios within 4-mer sliding windows compared to phi=1.618...",
+  "objective_for_next_pass": "Any objective other than in-silico phi_match count (e.g. IBM hardware F, palindrome count, resonance Hz)",
+  "scorer_hash": "83aee077816b",
+  "scorer_hash_input": "SHA-256 of compute_phi_alignment + compute_gc_content + count_palindromes function source",
+  "frozen_agents": {
+    "Agent_Stealth": {
+      "dna": "AATGCTGCTGCTGCCCTGGCTGCTGCC",
+      "length": 27,
+      "phi_score": 0.6401,
+      "fitness": 0.8645,
+      "phi_alignment_score": 0.6922,
+      "significant_phi_matches": 21,
+      "gc_content": 0.6667,
+      "palindromes": 0,
+      "fibonacci_alignment": 0.6862,
+      "status": "FROZEN",
+      "file_sha256": "9c77fda404481e0609e93db47081627e2447c1e76f654d18d98cf1f1a56d8898",
+      "freeze_note": "No better phi_alignment_score than 0.6922 found in the construction class at length 27. Further phi_alignment mutation on this landscape is contraindicated."
+    },
+    "Agent_Wormhole": {
+      "dna": "AATGTGCTGGCCTGCCTGTGCTGTGCC",
+      "length": 27,
+      "phi_score": 0.7038,
+      "fitness": 0.8471,
+      "phi_alignment_score": 0.6879,
+      "significant_phi_matches": 24,
+      "gc_content": 0.6296,
+      "palindromes": 0,
+      "fibonacci_alignment": 0.5918,
+      "status": "FROZEN",
+      "file_sha256": "d6ab6d2766eb1d286fda9aca475e2fe4b3fb8afc56e84057507e050522b2e424",
+      "freeze_note": "No better phi_alignment_score than 0.6879 found in the construction class at length 27. Further phi_alignment mutation on this landscape is contraindicated."
+    }
+  },
+  "search_validation": {
+    "method": "GA search (300 generations, pop 40, elite 3, mutation 0.18) plus random sampling over lengths 24-36 (800 samples per length). Lengths 31,32,34,35 not sampled.",
+    "stealth_best_found": 0.6922,
+    "stealth_original": 0.6922,
+    "wormhole_best_found": 0.6879,
+    "wormhole_original": 0.6879,
+    "conclusion": "No better phi_alignment_score than 0.6922 (Stealth) / 0.6879 (Wormhole) in the sampled construction class at length 27. Not a proof of uniqueness."
+  }
+}

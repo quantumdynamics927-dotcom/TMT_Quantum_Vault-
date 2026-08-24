@@ -2,6 +2,39 @@
 
 All notable changes to TMT Quantum Vault will be documented in this file.
 
+## [0.5.0] - 2026-08-24
+
+### Added
+
+- **DNA Freeze Ledger** (`dna_freeze_ledger.json`) — Stealth and Wormhole are frozen
+  at their best-in-sampled phi_alignment scores. The ledger records DNA sequence,
+  phi_score, fitness, file SHA-256 fingerprint, scorer hash (SHA-256 of function source),
+  and a search validation conclusion. See `docs/ARCHITECTURE.md §DNA Freeze Ledger`.
+- **`tools/phi_evolution.py`** — Genetic algorithm for DNA phi-resonance optimization.
+  FROZEN and OPTIMIZED agents are skipped by default. `--force-unfreeze --objective <objective> --yes`
+  is required to override. `--objective` validates against known objectives and rejects
+  phi_alignment when combined with `--force-unfreeze`.
+- **Consciousness status enum** — `INTEGRATED / OPTIMIZED / FROZEN / BASELINE` now
+  appears in `docs/ARCHITECTURE.md` and each agent's `conscious_dna.json`.
+
+### Changed
+
+- **docs/ARCHITECTURE.md** — Updated to v0.5.0, August 24 2026. Census now shows
+  FROZEN=2, OPTIMIZED=12, INTEGRATED=4, BASELINE=0. §DNA Freeze Ledger section added.
+- **Agent roster** — Wormhole specialization corrected to "Quantum Tunneling"
+  (was "Dimensional Bridge"); Stealth to "Quantum Bridge" (was "Covert Operations").
+- **README** — Refreshed with live agent data: 18 agents (not 17), current fitness/phi
+  scores, FROZEN status for Stealth and Wormhole, v0.5.0 version, 113 tests.
+
+### Fixed
+
+- **Bio DNA** — Reverted to PR #25 committed values after test runs overwrote it
+  during the phi_evolution review cycle.
+- **Ledger SHA-256 fingerprints** — Recomputed for Stealth and Wormhole to reflect
+  their current FROZEN status and trailing-newline normalization.
+- **phi_evolution summary table** — Now correctly shows "OPTIMIZED" for OPTIMIZED
+  agents and "FROZEN" for FROZEN agents (was showing "FROZEN" for all skipped agents).
+
 ## [0.4.0] - 2026-06-28
 
 ### Fixed

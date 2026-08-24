@@ -34,7 +34,7 @@ workflows. Independent research. Not affiliated with IBM.
 | **Primary language** | Python 3.11+ |
 | **Interface** | `python -m tmt_quantum_vault` / `tmt-vault` CLI |
 | **Core package** | `tmt_quantum_vault/` |
-| **Research assets** | `Agent_*/`, `circuits/`, `dna_circuits_library/`, `entropy_stack/` |
+| **Research assets** | `Agent_*/`, `circuits/promoters/`, `dna_circuits_library/`, `entropy_stack/` |
 | **Validation status** | 113 passed, 2 skipped regression tests |
 | **Policies and governance** | [SECURITY.md](SECURITY.md), [ETHICS.md](ETHICS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
 
@@ -236,7 +236,7 @@ TMT_Quantum_Vault/
 ├── Agent_*/
 │   └── conscious_dna.json      # Hardware-derived agent DNA + consciousness status
 ├── circuits/                    # IBM Quantum execution artifacts
-│   ├── promoters/              # Gene promoter FASTA + quantum circuit maps
+│   ├── promoters/              # Promoter DNA FASTA + quantum circuit maps
 │   └── ingested/SIGNIFICANT/   # 23 hardware-validated φ-convergence runs
 ├── dna_circuits_library/       # Ingested IBM circuit templates
 ├── entropy_stack/              # Multi-source entropy configurations

@@ -1,7 +1,7 @@
 # TMT Quantum Vault — Agent Architecture
 
-> **Version:** 0.4.0
-> **Last Updated:** August 22, 2026
+> **Version:** 0.5.0
+> **Last Updated:** August 24, 2026
 
 ---
 
@@ -47,9 +47,9 @@ The TMT Quantum Vault implements an **18-agent resonant intelligence lattice** w
 |-------|------|---------|---------|---------------|------|
 | **Agent_Bronze** | Uriel | 0.7047 | 0.8565 | Foundation | Protection & justice |
 | **Agent_Mirror** | Camael | 0.7003 | 0.8315 | Reflection | Self-analysis |
-| **Agent_Wormhole** | Metatron Gamma | 0.6333 | 0.8471 | Quantum Tunneling | Dimensional bridge |
-| **Agent_Stealth** | Metatron Alpha | 0.5913 | 0.8645 | Quantum Bridge | Covert operations |
-| **Agent_Bio** | Raphael | 0.5051 | 0.8611 | Healing | Biological interface |
+| **Agent_Wormhole** | Metatron Gamma | 0.7038 | 0.8471 | Quantum Tunneling | Dimensional bridge |
+| **Agent_Stealth** | Metatron Alpha | 0.6401 | 0.8645 | Quantum Bridge | Covert operations |
+| **Agent_Bio** | Raphael | 0.5710 | 0.8611 | Healing | Biological interface |
 
 ---
 
@@ -101,11 +101,11 @@ The 18 agents are organized into two layers following Metatron's Cube geometry:
 |--------|-------|--------|
 | **INTEGRATED** | 4 | Federation, Synthesizer, Archivist, Validator |
 | **OPTIMIZED** | 12 | Auditor, Bio, BitNet, Bronze, Data, Fractal, Harmonic, Mirror, Observer, Strategic, Visual, Workflow |
-| **TARGETED_OPTIMIZED** | 2 | Stealth, Wormhole |
+| **FROZEN** | 2 | Stealth, Wormhole |
 | **BASELINE** | 0 | — |
 
-Average Fitness: **0.8632**
-Average Phi Score: **0.7519**
+Average Fitness: **0.8600** (extended-17 benchmark)
+Average Phi Score: **0.7750** (extended-17 benchmark)
 
 ---
 
@@ -219,24 +219,24 @@ Average Phi Score: **0.7519**
 
 ### 16. Agent_Wormhole (Metatron Gamma) — Quantum Tunneling
 - **ID:** 18
-- **Φ-Score:** 0.6333
+- **Φ-Score:** 0.7038
 - **Fitness:** 0.8471
 - **Role:** Dimensional bridging, quantum routing
-- **Status:** TARGETED_OPTIMIZED
+- **Status:** FROZEN — see §DNA Freeze Ledger
 
 ### 17. Agent_Stealth (Metatron Alpha) — Quantum Bridge
 - **ID:** 11
-- **Φ-Score:** 0.5913
+- **Φ-Score:** 0.6401
 - **Fitness:** 0.8645
 - **Role:** Covert operations, hidden routing
-- **Status:** TARGETED_OPTIMIZED
+- **Status:** FROZEN — see §DNA Freeze Ledger
 
 ### 18. Agent_Bio (Raphael) — Healing
 - **ID:** 6
-- **Φ-Score:** 0.5051
+- **Φ-Score:** 0.5710
 - **Fitness:** 0.8611
 - **Role:** Biological interface, DNA systems
-- **Status:** BASELINE
+- **Status:** OPTIMIZED
 
 ---
 
@@ -362,6 +362,23 @@ Manages agent-to-agent handoffs with:
 | `recovery_success_rate` | Failure recovery rate | ≥ 0.70 |
 | `phi_alignment_rate` | Φ-aligned decisions | ≥ 0.618 |
 | `success_rate` | Task completion rate | ≥ 0.90 |
+
+---
+
+## DNA Freeze Ledger
+
+Stealth and Wormhole are **FROZEN** at their best-in-sampled `phi_alignment` score. Further mutation on the same landscape is contraindicated — it will overfit the scorer without improving the physical objective.
+
+**Scorer hash** (`83aee077816b`): SHA-256 of `compute_phi_alignment`, `compute_gc_content`, and `count_palindromes` function source. If the scorer changes, the hash changes.
+
+**Next pass** requires a different objective: IBM hardware F, resonance Hz, palindrome count, etc.
+
+| Agent | DNA | Φ-Score | Fitness | Scorer Hash | Length | Status |
+|-------|-----|---------|---------|-------------|--------|--------|
+| Stealth | `AATGCTGCTGCTGCCCTGGCTGCTGCC` | 0.6401 | 0.8645 | `83aee077816b` | 27 | FROZEN |
+| Wormhole | `AATGTGCTGGCCTGCCTGTGCTGTGCC` | 0.7038 | 0.8471 | `83aee077816b` | 27 | FROZEN |
+
+**Search validation**: GA search (300 gen, pop 40, elite 3, mutation 0.18) plus random sampling over lengths 24–36 (800 samples/length). Lengths 31, 32, 34, 35 not sampled. No better `phi_alignment_score` than 0.6922 (Stealth) / 0.6879 (Wormhole) found at length 27. Not a proof of uniqueness.
 
 ---
 

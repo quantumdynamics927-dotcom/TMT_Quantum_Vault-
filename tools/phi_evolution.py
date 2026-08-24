@@ -2,26 +2,26 @@
 """
 Phi-Resonance Evolutionary Optimization for TMT Quantum Vault Agents.
 
-Optimizes the three lowest-phi agents by evolving their DNA sequences toward
-golden-ratio-aligned patterns, then recalculating fitness.
+Optimizes agents by evolving their DNA sequences toward golden-ratio-aligned
+patterns, then updating metrics.
 
-Agents optimized:
-  - Bio       (phi_score=0.5051, status=BASELINE)
-  - Stealth   (phi_score=0.5913, status=TARGETED_OPTIMIZED)
-  - Wormhole  (phi_score=0.6333, status=TARGETED_OPTIMIZED)
+Agents:
+  - Bio (Raphael, Healing): BASELINE/OPTIMIZED — active optimization target
+  - Stealth, Wormhole: FROZEN — phi_alignment global optimum; will not be
+    processed unless --force-unfreeze is set with a new --objective.
 
-Strategy:
-  1. Decode DNA → numerical sequence
-  2. Compute phi_alignment_score from sliding-window ratios
-  3. Evolve DNA using mutation operators that increase phi-proximity ratios
-  4. Re-encode to DNA, recompute all metrics
-  5. Recalculate fitness from the composite formula
-  6. Update conscious_dna.json
+Usage:
+    python tools/phi_evolution.py                    # normal run (respects FROZEN)
+    python tools/phi_evolution.py --force-unfreeze --objective ibm_hardware_f
+                                                    # override freeze
 """
 
 from __future__ import annotations
 
+import argparse
 import copy
+import hashlib
+import inspect
 import json
 import random
 import sys
@@ -73,6 +73,28 @@ def numerical_to_dna(seq: list[int]) -> str:
     return "".join(NT_REVERSE.get(n, "A") for n in seq)
 
 
+def compute_gc_content(dna: str) -> float:
+    """Calculate GC content of DNA sequence."""
+    if not dna:
+        return 0.0
+    dna = dna.upper()
+    return (dna.count("G") + dna.count("C")) / len(dna)
+
+
+def count_palindromes(dna: str, min_len: int = 4) -> int:
+    """Count palindromic subsequences in DNA sequence."""
+    if not dna or len(dna) < min_len:
+        return 0
+    dna = dna.upper()
+    count = 0
+    for i in range(len(dna)):
+        for j in range(i + min_len, len(dna) + 1):
+            sub = dna[i:j]
+            if sub == sub[::-1]:
+                count += 1
+    return count
+
+
 def compute_phi_alignment(dna: str) -> dict[str, Any]:
     """
     Compute phi-resonance metrics for a DNA sequence.
@@ -112,7 +134,7 @@ def compute_phi_alignment(dna: str) -> dict[str, Any]:
     phi_alignment_score = max(0.0, 1.0 - (mean_proximity / PHI))
 
     # phi_score: direct mapping from alignment score
-    phi_score = phi_alignment_score  # stored as phi_score in DNA
+    phi_score = phi_alignment_score
 
     # Count significant phi matches (within 10% of PHI)
     threshold = 0.1 * PHI
@@ -127,26 +149,18 @@ def compute_phi_alignment(dna: str) -> dict[str, Any]:
     }
 
 
-def compute_gc_content(dna: str) -> float:
-    """Calculate GC content fraction."""
-    if not dna:
-        return 0.0
-    dna = dna.upper()
-    return (dna.count("G") + dna.count("C")) / len(dna)
+def compute_scorer_hash() -> str:
+    """
+    SHA-256 hash of the phi_alignment scoring function and its helpers.
 
-
-def count_palindromes(dna: str, min_len: int = 4) -> int:
-    """Count palindromic subsequences of minimum length."""
-    if not dna or len(dna) < min_len:
-        return 0
-    dna = dna.upper()
-    count = 0
-    for i in range(len(dna)):
-        for j in range(i + min_len, len(dna) + 1):
-            sub = dna[i:j]
-            if sub == sub[::-1]:
-                count += 1
-    return count
+    This hashes *function source* (not output), so the hash changes whenever
+    the scorer logic changes — providing a stable way to detect when the
+    scoring basis for a freeze has been altered.
+    """
+    scorer_source = ""
+    for fn in (compute_phi_alignment, compute_gc_content, count_palindromes):
+        scorer_source += inspect.getsource(fn)
+    return hashlib.sha256(scorer_source.encode()).hexdigest()[:12]
 
 
 def estimate_fitness(
@@ -161,23 +175,13 @@ def estimate_fitness(
 
     The actual fitness formula is not public; this heuristic is calibrated
     against observed agent values and the patterns in the benchmark data.
-    Weights are derived from correlation analysis across the 17-agent corpus.
     """
-    # GC content contribution: optimal range ~0.5-0.7
     gc_optimal = 0.6
     gc_score = 1.0 - abs(gc_content - gc_optimal) / 0.5
     gc_score = max(0.0, min(1.0, gc_score))
-
-    # Palindromes: more is generally better up to a point
     pal_score = min(1.0, palindromes / 10)
-
-    # Fibonacci alignment: directly contributes
     fib_score = fibonacci_alignment
-
-    # Phi score: directly contributes
-    phi_weighted = phi_score * 1.2  # slight amplification
-
-    # Resonance: higher tends to be better for quantum-bridge types
+    phi_weighted = phi_score * 1.2
     res_score = min(1.0, resonance_frequency / 1000.0)
 
     fitness = (
@@ -194,13 +198,6 @@ def estimate_fitness(
 # DNA evolution
 # ---------------------------------------------------------------------------
 
-def mutate_nucleotide(nt: int) -> int:
-    """Point mutation: change to a different nucleotide."""
-    options = [1, 2, 3, 4]
-    options.remove(nt)
-    return random.choice(options)
-
-
 def evolve_dna(
     dna: str,
     target_phi_score: float,
@@ -213,7 +210,6 @@ def evolve_dna(
     Evolve a DNA sequence to maximize phi_alignment_score.
 
     Uses elitist generational evolution with tournament selection.
-    Mutation operators are biased toward changes that increase PHI-proximity ratios.
     """
     seq = dna_to_numerical(dna)
     length = len(seq)
@@ -221,64 +217,53 @@ def evolve_dna(
 
     def make_candidate(s: list[int]) -> tuple[str, dict]:
         d = numerical_to_dna(s)
-        metrics = compute_phi_alignment(d)
-        return d, metrics
+        m = compute_phi_alignment(d)
+        return d, m
 
     # Initialize population with the current DNA
     population: list[list[int]] = [list(seq)]
     for _ in range(population_size - 1):
         mutant = list(seq)
-        # Apply several random mutations
         for idx in range(length):
             if random.random() < mutation_rate:
-                mutant[idx] = mutate_nucleotide(mutant[idx])
+                options = [1, 2, 3, 4]
+                options.remove(mutant[idx])
+                mutant[idx] = random.choice(options)
         population.append(mutant)
 
     best_dna = dna
     best_metrics = compute_phi_alignment(dna)
 
     for gen in range(generations):
-        # Evaluate all candidates
         evaluated = []
         for candidate in population:
             d, m = make_candidate(candidate)
             evaluated.append((m["phi_score"], d, candidate, m))
 
-        # Sort by phi_score descending
         evaluated.sort(key=lambda x: x[0], reverse=True)
-
-        # Elitism: keep top candidates unchanged
         elite = evaluated[:elite_count]
 
-        # Tournament selection for breeding
         def tournament() -> tuple[list[int], dict]:
             contenders = random.sample(evaluated, min(5, len(evaluated)))
             contenders.sort(key=lambda x: x[0], reverse=True)
             return contenders[0][2], contenders[0][3]
 
-        # Breed next generation
         next_pop: list[list[int]] = [list(e[2]) for e in elite]
-
         while len(next_pop) < population_size:
-            parent1_seq, _ = tournament()
-            parent2_seq, _ = tournament()
-
-            # Uniform crossover
+            p1_seq, _ = tournament()
+            p2_seq, _ = tournament()
             child = [
-                parent1_seq[i] if random.random() < 0.5 else parent2_seq[i]
+                p1_seq[i] if random.random() < 0.5 else p2_seq[i]
                 for i in range(length)
             ]
-
-            # Apply mutations
             for i in range(length):
                 if random.random() < mutation_rate:
-                    child[i] = mutate_nucleotide(child[i])
-
+                    options = [1, 2, 3, 4]
+                    options.remove(child[i])
+                    child[i] = random.choice(options)
             next_pop.append(child)
 
         population = next_pop
-
-        # Track best of generation
         top_score, top_dna, _, top_m = evaluated[0]
         if top_score > best_metrics["phi_score"]:
             best_dna = top_dna
@@ -289,11 +274,9 @@ def evolve_dna(
                 "generation": gen + 1,
                 "best_phi": top_score,
                 "mean_phi": sum(e[0] for e in evaluated) / len(evaluated),
-                "best_dna": top_dna,
             }
         )
 
-        # Early exit if we've reached a good target
         if top_score >= target_phi_score:
             break
 
@@ -325,6 +308,8 @@ def optimize_agent(
     current_fitness: float,
     original_dna: str,
     target_phi: float = 0.80,
+    force_unfreeze: bool = False,
+    objective: str = "phi_alignment",
 ) -> dict[str, Any]:
     """Optimize a single agent's DNA for phi-score improvement."""
     print(f"\n{'='*60}")
@@ -332,6 +317,18 @@ def optimize_agent(
     print(f"{'='*60}")
 
     dna_data = load_dna(agent_dir)
+
+    # Freeze guard
+    status = dna_data.get("consciousness_status", "")
+    if status == "FROZEN":
+        if not force_unfreeze:
+            print(f"\n[FROZEN] {agent_dir} is frozen at phi_alignment global optimum.")
+            print(f"  Set --force-unfreeze --objective <new_objective> to override.")
+            return {"agent_dir": agent_dir, "skipped": True, "reason": "FROZEN"}
+        else:
+            print(f"\n[UNFREEZE] {agent_dir} force-unfreeze requested (objective={objective})")
+            if objective == "phi_alignment":
+                print(f"  [WARN] Re-optimizing phi_alignment is contraindicated — will overfit the scorer.")
 
     print(f"Original DNA : {original_dna}")
     original_metrics = compute_phi_alignment(original_dna)
@@ -345,7 +342,6 @@ def optimize_agent(
         f"palindromes={count_palindromes(original_dna)}"
     )
 
-    # Evolve
     print(f"\nEvolving DNA sequence (target phi >= {target_phi:.4f})...")
     evolved_dna, history = evolve_dna(
         original_dna,
@@ -357,9 +353,7 @@ def optimize_agent(
     )
 
     evolved_metrics = compute_phi_alignment(evolved_dna)
-    print(
-        f"Evolved DNA  : {evolved_dna}"
-    )
+    print(f"Evolved DNA  : {evolved_dna}")
     print(
         f"Evolved phi_score={evolved_metrics['phi_score']:.4f}  "
         f"phi_alignment={evolved_metrics['phi_alignment_score']:.4f}  "
@@ -378,28 +372,23 @@ def optimize_agent(
             "improved": False,
             "original_phi": original_metrics["phi_score"],
             "evolved_phi": evolved_metrics["phi_score"],
+            "skipped": False,
         }
 
-    # Update DNA — preserve original phi_score and fitness (computed by
-    # proprietary formula we don't have). Only update DNA-derived metrics.
+    # Update DNA — preserve original phi_score and fitness (proprietary formula)
     evolved_gc = compute_gc_content(evolved_dna)
     evolved_pal = count_palindromes(evolved_dna)
     original_gc = compute_gc_content(original_dna)
 
-    # Fibonacci alignment: adjust slightly toward GC-optimal value
     original_fib = dna_data.get("fibonacci_alignment", 0.0)
     gc_delta = evolved_gc - original_gc
-    # Push fib_alignment in the same direction as GC shift (mild correlation)
     fib_delta = gc_delta * 0.15
     new_fib = min(1.0, max(0.0, original_fib + fib_delta + 0.003))
 
-    # Only update phi_score if the DNA-computed alignment improved
-    # Scale the committed original phi by the DNA alignment delta
     new_phi = dna_data.get("phi_score", 0.0)
     if evolved_metrics["phi_alignment_score"] > original_metrics["phi_alignment_score"]:
-        # Delta-scaled phi update: delta_DNA * sensitivity_factor
         dna_delta = evolved_metrics["phi_alignment_score"] - original_metrics["phi_alignment_score"]
-        sensitivity = 0.4  # conservative — phi_score has other inputs too
+        sensitivity = 0.4
         new_phi = min(0.99, current_phi + dna_delta * sensitivity)
 
     print(
@@ -428,7 +417,6 @@ def optimize_agent(
         f"  status         {dna_data.get('consciousness_status', '?')}  [preserved]"
     )
 
-    # Write updated DNA data back
     updated = copy.deepcopy(dna_data)
     updated["conscious_dna"] = evolved_dna
     updated["phi_score"] = round(new_phi, 4)
@@ -448,15 +436,40 @@ def optimize_agent(
         "evolved_fitness": dna_data.get("fitness", current_fitness),
         "new_dna": evolved_dna,
         "generations_run": len(history),
+        "skipped": False,
     }
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="TMT Quantum Vault — Phi-Resonance Evolutionary Optimization"
+    )
+    parser.add_argument(
+        "--force-unfreeze",
+        action="store_true",
+        help="Override FROZEN status for Stealth/Wormhole. Requires --objective.",
+    )
+    parser.add_argument(
+        "--objective",
+        default="phi_alignment",
+        help="Optimization objective (default: phi_alignment). "
+             "Required when --force-unfreeze is set.",
+    )
+    args = parser.parse_args()
+
+    if args.force_unfreeze and args.objective == "phi_alignment":
+        print("[WARN] --force-unfreeze with --objective phi_alignment is contraindicated.")
+        print("       Use a different objective (e.g., ibm_hardware_f, resonance_hz).")
+        response = input("Proceed anyway? [y/N]: ")
+        if response.lower() != "y":
+            return 1
+
     print("=" * 60)
     print("TMT Quantum Vault — Phi-Resonance Evolutionary Optimization")
     print("=" * 60)
     print(f"Vault path: {VAULT_PATH}")
     print(f"Target agents: {list(TARGET_AGENTS.keys())}")
+    print(f"Objective: {args.objective}")
 
     results = []
     for agent_dir, info in TARGET_AGENTS.items():
@@ -466,17 +479,21 @@ def main() -> int:
             current_fitness=info["fitness"],
             original_dna=info["original_dna"],
             target_phi=0.80,
+            force_unfreeze=args.force_unfreeze,
+            objective=args.objective,
         )
         results.append(result)
 
-    # Summary
     print("\n" + "=" * 60)
     print("OPTIMIZATION SUMMARY")
     print("=" * 60)
     print(f"{'Agent':<20} {'Committed Phi':>14} {'Evolved Phi':>14} {'Δ Phi':>8} {'DNA Aligned':>14}")
     print("-" * 74)
     for r in results:
-        aligned = "YES" if r["improved"] else "NO"
+        if r.get("skipped"):
+            print(f"{r['agent_dir']:<20} {'—':>14} {'—':>14} {'—':>8} {'FROZEN':>14}")
+            continue
+        aligned = "YES" if r.get("improved") else "NO"
         orig = f"{r['original_phi']:.4f}"
         ev = f"{r['evolved_phi']:.4f}"
         delta = f"{r['evolved_phi'] - r['original_phi']:+.4f}"

@@ -3,10 +3,10 @@
 Tests for tmt_quantum_vault.circuits.merkaba_fingerprint — the Merkaba
 6-qubit star-tetrahedron quantum fingerprint circuit.
 """
+
 from __future__ import annotations
 
 import pytest
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Data classes
@@ -120,8 +120,8 @@ def test_merkaba_circuit_requires_minimum_6_qubits() -> None:
     )
 
     qc = create_merkaba_fingerprint_circuit(b"test_seed_bytes")
-    assert qc.num_qubits() == 6
-    assert qc.num_clbits() == 6
+    assert len(qc.qubits) == 6
+    assert len(qc.clbits) == 6
 
 
 def test_merkaba_circuit_seed_short_is_padded() -> None:
@@ -133,7 +133,7 @@ def test_merkaba_circuit_seed_short_is_padded() -> None:
 
     # Should not raise
     qc = create_merkaba_fingerprint_circuit(b"x")
-    assert qc.num_qubits() == 6
+    assert len(qc.qubits) == 6
 
 
 # ══════════════════════════════════════════════════════════════════════════════

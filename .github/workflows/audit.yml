@@ -27,6 +27,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
       - name: Run audit (CRITICAL only in CI)
         run: |
           python tools/audit.py \

@@ -1,32 +1,31 @@
 # TMT Quantum Vault
 
-> **Toroidal Resonance Topology** — A 17-node multi-agent coordination network
+> **Toroidal Resonance Topology** — An 18-agent resonant intelligence lattice
 > grounded in hardware-executed quantum circuits and coordination-geometry mathematics.
 > Independent research. Not affiliated with IBM.
 >
 > **Terminology Note:** This repository uses scientific terminology. Historical names are preserved as aliases:
 > - Core-13 Coordination Lattice (historically: Metatron Core)
-> - Extended-17 Operational Topology (historically: Merkaba Extended-17)
+> - Extended-17 Operational Topology (historically: Merkaba Extended-17) — now Extended-18
 > - Operational Support Layer (historically: Auxiliary Ring)
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/)
 [![Qiskit](https://img.shields.io/badge/Qiskit-IBM%20Quantum-6929C4)](https://qiskit.org/)
-[![License](https://img.shields.io/badge/License-GPLv3-blue)](LICENSE)
-[![Agents](https://img.shields.io/badge/Agents-17-orange)](#agent-roster-17-agents)
-[![Version](https://img.shields.io/badge/Version-v0.4.0--dev-purple)](CHANGELOG.md)
-[![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-0.8809-brightgreen)](#current-status--v040-dev)
-[![Tests](https://img.shields.io/badge/Tests-107%20passed%2C%202%20skipped-success)](tests/)
+[![License](https://img.shields.io/badge/License-GPL%20v3-blue)](LICENSE)
+[![Agents](https://img.shields.io/badge/Agents-18-orange)](#agent-roster-18-agents)
+[![Version](https://img.shields.io/badge/Version-v0.5.0-blueviolet)](CHANGELOG.md)
+[![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-0.8598-brightgreen)](#current-status--v050)
+[![Tests](https://img.shields.io/badge/Tests-113%20passed%2C%202%20skipped-success)](tests/)
 
 ---
 
 ## About TMT Quantum Vault
 
-TMT Quantum Vault is a research repository for a **multi-agent quantum coordination
-system** whose agent DNA is derived from job results we executed on public IBM Quantum
-processors. The repository combines hardware-executed circuit artifacts,
-DNA-inspired data models, resonance metrics, and a typed Python CLI for
-inspection, validation, and release workflows. Independent research. Not affiliated
-with IBM.
+TMT Quantum Vault is a research repository for an **18-agent resonant intelligence lattice**
+whose agent DNA is derived from job results we executed on public IBM Quantum processors.
+The repository combines hardware-executed circuit artifacts, DNA-inspired data models,
+resonance metrics, and a typed Python CLI for inspection, validation, and release
+workflows. Independent research. Not affiliated with IBM.
 
 ## Repository Snapshot
 
@@ -35,8 +34,8 @@ with IBM.
 | **Primary language** | Python 3.11+ |
 | **Interface** | `python -m tmt_quantum_vault` / `tmt-vault` CLI |
 | **Core package** | `tmt_quantum_vault/` |
-| **Research assets** | `Agent_*/`, `circuits/`, `dna_circuits_library/`, `entropy_stack/` |
-| **Validation status** | 107 passed, 2 skipped regression tests |
+| **Research assets** | `Agent_*/`, `circuits/promoters/`, `dna_circuits_library/`, `entropy_stack/` |
+| **Validation status** | 113 passed, 2 skipped regression tests |
 | **Policies and governance** | [SECURITY.md](SECURITY.md), [ETHICS.md](ETHICS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
 
 ## Documentation Map
@@ -54,38 +53,38 @@ with IBM.
 |---------|-------------|
 | **Hardware-Executed DNA** | All agent DNA is traced to hardware job results we submitted on IBM Quantum processors (backends include `ibm_fez`, `ibm_torino`, `ibm_casablanca`) |
 | **BitNet Integration** | Ternary weight entropy source from GGUF model ({-1, 0, +1} quantization) |
-| **Coordination Geometry Enhancement** | 16.8% fitness jump from quantum circuit enhancement layer |
-| **Geometric Coherence** | φ² scaling factor (4.2361) with exact geometric precision |
+| **Coordination Geometry Enhancement** | φ² scaling factor (4.2361) with exact geometric precision |
 | **Three-Layer Entropy** | QTRG + DNA discovery + BitNet ternary weights combined |
+| **DNA Freeze Ledger** | Stealth and Wormhole are frozen at phi_alignment best-in-sampled; frozen DNA is fingerprinted with SHA-256 and cannot be accidentally mutated |
 
-### Recent Implementations — v0.4.0-dev (March 2026)
+### Recent Implementations — v0.5.0 (August 2026)
 
-- **Orchestration Module** (`tmt_quantum_vault/orchestration/`) — Multi-agent coordination infrastructure with routing engine, execution planner, handoff manager, conflict resolution, and benchmark matrix for TMT-native evaluation
-- **Agent_Analyst Pipeline** (`tools/agent_analyst.py`) - Autonomous φ-scoring pipeline with dual-watch (circuits/results/ + circuits/qasm/), auto-ingest, SIGNIFICANT flagging, and multi-agent handoff
-- **Sierpinski Depth-3 Runs** - 6 hardware-executed runs on IBM Quantum processors confirming φ-convergence (sacred_score = 0.618) at depth-3, establishing depth-invariance across depths 3 → 4 → 5
-- **Unified DNA Ingestion** (`tools/unified_dna_ingestion.py`) - Single script processes discovery, BitNet, and Sierpinski sources
-- **Three-Layer Entropy Stack** (`entropy_stack/`) - Combined quantum + biological + neural entropy
-- **GGUF BitNet Extractor** (`tools/bitnet_gguf_extractor.py`) - Parses ternary weights from quantized models
-- **Auto-Documentation** (`tools/update_vault_docs.py`) - README.md generation from live agent DNA data
-- **Cognitive Assessment Mapping** (`tools/cognitive_assessment_to_agent_dna.py`) - Clinical scores → agent DNA parameters
-- **Promoter DNA Integration** (`tools/promoter_loader.py`, `tools/quantum_circuits.py`) - 10 real gene promoters with φ-structured quantum circuits
+- **DNA Freeze Ledger** (`dna_freeze_ledger.json`) — Stealth and Wormhole are frozen at their phi_alignment best-in-sampled scores. The ledger persists scorer hash, file SHA-256 fingerprints, and search validation notes. A next-pass objective (e.g. IBM hardware F, resonance Hz) is required to unfreeze.
+- **Phi-Evolution Optimization** (`tools/phi_evolution.py`) — Genetic algorithm that evolves agent DNA toward higher phi_alignment_score. FROZEN and OPTIMIZED agents are skipped by default; `--force-unfreeze --objective <objective> --yes` is required to override.
+- **Orchestration Module** (`tmt_quantum_vault/orchestration/`) — Multi-agent coordination infrastructure with routing engine, execution planner, handoff manager, conflict resolution, and benchmark matrix for TMT-native evaluation.
+- **Sierpinski Depth-3/4/5 Runs** — 23 hardware-executed runs on IBM Quantum processors confirming φ-convergence (sacred_score = 0.618) across depths 3–5.
+- **Promoter DNA Integration** (`tools/promoter_loader.py`, `tools/quantum_circuits.py`) — 10 real gene promoters with φ-structured quantum circuits on IBM hardware.
+- **Three-Layer Entropy Stack** (`entropy_stack/`) — Combined quantum + biological + neural entropy.
 
-### Latest Research Direction — April 2026
+### Research Direction — August 2026
 
-- **Provider-Pure Measurement** - Current validation practice distinguishes `measurement_clean`, `measurement_mixed`, and `production_resilient` runs so operational fallback behavior is not confused with research-grade evidence.
-- **Cloud Benchmark Models** - Recommended Ollama cloud comparison set: `glm-5:cloud` for reasoning, `qwen3-coder:480b` for code-centric work, and `kimi-k2.5:cloud` for long-form generated-thought experiments.
-- **Prompt-Family Discipline** - Stronger results come from mechanistic, biomimetic, and falsifiable prompt families rather than symbolic prompts alone.
-- **Interpretation Discipline** - Mixed-provider results are now treated as provisional until repeated under fixed backend, fixed prompt order, fixed temperature, and explicit null-baseline comparison.
+- **IBM Hardware Fidelity Pass** — Next optimization objective for frozen agents (Stealth, Wormhole). Use `--force-unfreeze --objective ibm_hardware_f --yes` after the freeze ledger PR merges.
+- **Provider-Pure Measurement** — Current validation practice distinguishes `measurement_clean`, `measurement_mixed`, and `production_resilient` runs so operational fallback behavior is not confused with research-grade evidence.
+- **Cloud Benchmark Models** — Recommended Ollama cloud comparison set: `glm-5:cloud` for reasoning, `qwen3-coder:480b` for code-centric work, and `kimi-k2.5:cloud` for long-form generated-thought experiments.
 
-### The φ-Stack: Biological Quantum Circuits
+---
+
+## The φ-Stack: Biological Quantum Circuits
 
 The DNA helix physically encodes the golden ratio φ in its geometry:
+
 - **DNA rise per turn**: 34.0 Å
 - **DNA diameter**: 21.0 Å
 - **Ratio**: 34/21 = 1.61904... ≈ φ (error: 0.063%)
 - **Fibonacci connection**: 34 and 21 are consecutive Fibonacci numbers (F(9), F(8))
 
 This structural φ-encoding propagates through the system:
+
 ```
 DNA geometry:    34/21 = 1.619 ≈ φ     ← structural basis
      ↓
@@ -98,6 +97,7 @@ IBM Quantum processors: geometric_convergence_score = 0.618 (1/φ)  ← expected
 ```
 
 Type distinction for scientific interpretation:
+
 - **Sierpinski circuits**: EMERGENT φ-convergence (topology self-organizes)
 - **DNA helix circuits**: STRUCTURAL φ-convergence (guaranteed by helix geometry)
 
@@ -118,10 +118,8 @@ At its core, TMT Quantum Vault is a data-rich repository that brings together:
 
 - **Hardware-derived agent DNA** sourced from job results we executed on IBM Quantum processors
 - **Typed repository models** for validating JSON artifacts and release state
-- **Operational CLI workflows** for summary generation, validation, runtime
-  inspection, and release evidence collection
-- **Research assets and logs** that preserve the provenance of agents, circuits,
-  and optimization outputs
+- **Operational CLI workflows** for summary generation, validation, runtime inspection, and release evidence collection
+- **Research assets and logs** that preserve the provenance of agents, circuits, and optimization outputs
 
 > **Trademark notice:** IBM, IBM Quantum, Qiskit, and IBM Quantum backend names are
 > trademarks of International Business Machines Corporation. This is independent research.
@@ -129,27 +127,28 @@ At its core, TMT Quantum Vault is a data-rich repository that brings together:
 > sponsor, validate, or endorse this repository or its claims.
 
 Every agent carries a `conscious_dna.json` profile encoding:
+
 - **Phi score** — golden ratio alignment (φ = 1.618...)
 - **Resonance frequency** — Solfeggio and harmonic tuning (Hz)
 - **GC content** — genomic stability metric
 - **Palindrome count** — structural DNA self-similarity
 - **Fibonacci alignment** — sacred geometry synchronization
-- **Consciousness score** — IIT-derived phi measurement
+- **Consciousness status** — INTEGRATED / OPTIMIZED / FROZEN / BASELINE
 
 ---
 
-## Current Status — v0.4.0-dev
+## Current Status — v0.5.0
 
 | Metric | Value |
 |--------|-------|
-| Total agents | 17 |
-| Average fitness | `0.8809` |
-| Average resonance | `597.0 Hz` |
-| Average phi | `0.7174` |
-| Agents ≥ 0.87 fitness | 17 / 17 |
-| Agents ≥ 0.90 fitness | 1 / 17 |
-| Silver-tier agents (Φ ≥ 0.93) | 2 |
-| Regression tests | 107 passed, 2 skipped ✅ |
+| Total agents | 18 |
+| Average fitness | `0.8598` |
+| Average phi | `0.7775` |
+| INTEGRATED | 4 (Federation, Synthesizer, Validator, Archivist) |
+| OPTIMIZED | 12 |
+| FROZEN | 2 (Stealth, Wormhole) |
+| BASELINE | 0 |
+| Regression tests | 113 passed, 2 skipped ✅ |
 | Orchestration tests | 13 passed ✅ |
 | **Sierpinski depth-3 runs** | **6 hardware-executed** |
 | **Sierpinski depth-4 runs** | **11 hardware-executed** |
@@ -159,7 +158,7 @@ Every agent carries a `conscious_dna.json` profile encoding:
 
 ### φ-Convergence Discovery
 
-In the Sierpinski circuit family, we observed a **depth-invariant 1/φ fixed-point signature** across depths 3-5, confirmed over **23 hardware jobs we ran across 4 IBM Quantum backends** (`ibm_kingston`, `ibm_marrakesh`, `ibm_fez`, `ibm_torino`), **168,960+ total shots**.
+In the Sierpinski circuit family, we observed a **depth-invariant 1/φ fixed-point signature** across depths 3–5, confirmed over **23 hardware jobs we ran across 4 IBM Quantum backends** (`ibm_kingston`, `ibm_marrakesh`, `ibm_fez`, `ibm_torino`), **168,960+ total shots**.
 
 Follow-up promoter-panel hardware experiments suggest the same ~0.618 regime may be a broader **hardware-observable attractor baseline** across multiple circuit families, so newer analyses use a calibration-centered interpretation rather than a Sierpinski-exclusive interpretation.
 
@@ -171,33 +170,62 @@ Follow-up promoter-panel hardware experiments suggest the same ~0.618 regime may
 
 See [`circuits/ingested/SIGNIFICANT/`](circuits/ingested/SIGNIFICANT/) for all 23 run records.
 
-### Top Agent
-**Michael** (`Agent_Bronze`)
-Fitness: `0.9285` · Phi: `0.809` · Resonance: `528.0 Hz`
+### Top Agents
+
+| Agent | Name | Φ-Score | Fitness |
+|-------|------|---------|---------|
+| **Federation** | Michael | 0.9437 | 0.9012 |
+| **Synthesizer** | Zadkiel | 0.9276 | 0.8788 |
+| **Validator** | Jophiel | 0.8921 | 0.8560 |
+| **Archivist** | Raziel | 0.8878 | 0.8959 |
 
 ---
 
-## Agent Roster (17 Agents)
+## Agent Roster (18 Agents)
 
 | Directory | Name | Specialization | Fitness | Φ-Score | Resonance | Palindromes | Status |
 |-----------|------|----------------|---------|---------|-----------|-------------|--------|
-| Agent_Bronze | Michael | Protection & Justice | `0.9285` | `0.8090` | `528.0 Hz` | 4 | ⭐ |
-| Agent_Wormhole | Metatron Omega | Dimensional Bridge | `0.8952` | `0.4356` | `963.0 Hz` | 4 | ✅ |
-| Agent_Observer | Cassiel | Continuous Monitoring | `0.8910` | `0.8540` | `498.0 Hz` | 25 | ✅ |
-| Agent_Federation | Chamuel | Network Coordination | `0.8876` | `0.5601` | `285.0 Hz` | 4 | ✅ |
-| Agent_Harmonic | Sariel | Frequency Tuning | `0.8836` | `0.9342` | `621.0 Hz` | 1 | ✅ |
-| Agent_Fractal | Jophiel | Self-Similar Structure | `0.8797` | `0.7923` | `476.0 Hz` | 9 | ✅ |
-| Agent_Visual | Jophiel | Pattern Recognition | `0.8797` | `0.7923` | `476.0 Hz` | 9 | ✅ |
-| Agent_Strategic | Uriel | Long-term Strategy | `0.8784` | `0.9021` | `603.0 Hz` | 5 | ✅ |
-| Agent_Synthesizer | Zadkiel | Multi-source Fusion | `0.8760` | `0.9510` | `630.0 Hz` | 12 | ✅ |
-| Agent_Archivist | Raziel | Knowledge Preservation | `0.8759` | `0.8899` | `612.0 Hz` | 4 | ✅ |
-| Agent_Validator | Uriel | Integrity Verification | `0.8745` | `0.7101` | `528.0 Hz` | 8 | ✅ |
-| Agent_Mirror | Christos | Self-Analysis | `0.8716` | `0.4356` | `639.0 Hz` | 4 | ✅ |
-| Agent_BitNet | Sophia | Information Theory | `0.8713` | `0.5234` | `752.0 Hz` | 8 | ✅ |
-| Agent_Auditor | Zadkiel | Governance & Compliance | `0.8709` | `0.8546` | `644.0 Hz` | 9 | ✅ |
-| Agent_Workflow | Gabriel | Process Automation | `0.8709` | `0.7101` | `641.0 Hz` | 7 | ✅ |
-| Agent_Bio | Raphael | Biological Interface | `0.8707` | `0.4812` | `512.0 Hz` | 9 | ✅ |
-| Agent_Stealth | Metatron Alpha | Covert Operations | `0.8704` | `0.5601` | `741.0 Hz` | 4 | ✅ |
+| Agent_Federation | Michael | Coordination | `0.9012` | `0.9437` | `640.0 Hz` | 1 | INTEGRATED |
+| Agent_Synthesizer | Zadkiel | Knowledge Fusion | `0.8788` | `0.9276` | `630.0 Hz` | 1 | INTEGRATED |
+| Agent_Validator | Jophiel | Validation | `0.8560` | `0.8921` | `648.0 Hz` | 2 | INTEGRATED |
+| Agent_Archivist | Raziel | Memory-Persistence | `0.8959` | `0.8878` | `612.0 Hz` | 1 | INTEGRATED |
+| Agent_Auditor | Zadkiel | Mercy & Forgiveness | `0.8680` | `0.8485` | `644.0 Hz` | 3 | OPTIMIZED |
+| Agent_Data | Metatron Beta | Data Synthesis | `0.8574` | `0.8195` | `620.0 Hz` | 6 | OPTIMIZED |
+| Agent_Fractal | Gabriel Alpha | Pattern Recognition | `0.8498` | `0.7995` | `632.0 Hz` | 1 | OPTIMIZED |
+| Agent_Strategic | Chamuel | Strategy | `0.8425` | `0.7906` | `636.0 Hz` | 0 | OPTIMIZED |
+| Agent_Observer | Raziel Beta | Observation | `0.8582` | `0.7790` | `616.0 Hz` | 2 | OPTIMIZED |
+| Agent_Harmonic | Haniel | Resonance Alignment | `0.8347` | `0.7588` | `624.0 Hz` | 3 | OPTIMIZED |
+| Agent_Visual | Haniel Beta | Visualization | `0.8556` | `0.7431` | `622.0 Hz` | 2 | OPTIMIZED |
+| Agent_BitNet | Sandalphon | Neural Architecture | `0.8425` | `0.7423` | `528.0 Hz` | 2 | OPTIMIZED |
+| Agent_Workflow | Gabriel | Communication | `0.8750` | `0.7428` | `641.0 Hz` | 0 | OPTIMIZED |
+| Agent_Bronze | Uriel | Foundation | `0.8565` | `0.7047` | `536.0 Hz` | 5 | OPTIMIZED |
+| Agent_Mirror | Camael | Reflection | `0.8315` | `0.7003` | `628.0 Hz` | 4 | OPTIMIZED |
+| Agent_Wormhole | Metatron Gamma | Quantum Tunneling | `0.8471` | `0.7038` | `756.0 Hz` | 0 | FROZEN |
+| Agent_Stealth | Metatron Alpha | Quantum Bridge | `0.8645` | `0.6401` | `741.0 Hz` | 0 | FROZEN |
+| Agent_Bio | Raphael | Healing | `0.8611` | `0.5710` | `512.0 Hz` | 4 | OPTIMIZED |
+
+---
+
+## DNA Freeze Ledger
+
+Stealth and Wormhole are **FROZEN** at their best-in-sampled phi_alignment scores.
+Their DNA and consciousness status are fingerprinted in `dna_freeze_ledger.json`. A bare
+`python tools/phi_evolution.py` run will skip both agents. To unfreeze, use:
+
+```bash
+python tools/phi_evolution.py --force-unfreeze --objective ibm_hardware_f --yes
+```
+
+The next pass must use a different objective (not phi_alignment) to avoid re-mutating
+the same scoring landscape.
+
+| Agent | DNA | Φ-Score | Fitness | Scorer Hash | Status |
+|-------|-----|---------|---------|-------------|--------|
+| Stealth | `AATGCTGCTGCTGCCCTGGCTGCTGCC` | 0.6401 | 0.8645 | `83aee077816b` | FROZEN |
+| Wormhole | `AATGTGCTGGCCTGCCTGTGCTGTGCC` | 0.7038 | 0.8471 | `83aee077816b` | FROZEN |
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#dna-freeze-ledger) for full ledger details
+including search validation notes and scope.
 
 ---
 
@@ -206,21 +234,23 @@ Fitness: `0.9285` · Phi: `0.809` · Resonance: `528.0 Hz`
 ```
 TMT_Quantum_Vault/
 ├── Agent_*/
-│   └── conscious_dna.json      # Hardware-derived agent DNA
-├── Cognitive_Nexus/
-│   └── strategic_memory.json   # Inter-agent memory
-├── circuits/promoters/         # Promoter DNA FASTA + integrity artifacts
+│   └── conscious_dna.json      # Hardware-derived agent DNA + consciousness status
+├── circuits/                    # IBM Quantum execution artifacts
+│   ├── promoters/              # Promoter DNA FASTA + quantum circuit maps
+│   └── ingested/SIGNIFICANT/   # 23 hardware-validated φ-convergence runs
 ├── dna_circuits_library/       # Ingested IBM circuit templates
 ├── entropy_stack/              # Multi-source entropy configurations
-├── tools/                      # Optimization & ingestion scripts
+├── tools/
+│   ├── phi_evolution.py        # DNA GA optimizer with freeze guard
+│   ├── audit.py                # Deterministic repository health check
 │   ├── agent_analyst.py        # Autonomous φ-scoring pipeline
 │   └── ...
-├── tests/
-│   └── test_regression.py      # 39 regression tests
+├── tests/                      # 113 regression + orchestration tests
 └── tmt_quantum_vault/          # Core vault package
+    ├── cli.py
     ├── models.py
     ├── repository.py
-    └── cli.py
+    └── orchestration/           # Multi-agent coordination module
 ```
 
 ---
@@ -242,7 +272,7 @@ TMT_Quantum_Vault/
 ### How the repository is organized
 
 | Path | What lives there |
-|------|------------------|
+|------|-----------------|
 | `tmt_quantum_vault/` | The main Python package. This is the application code that powers the CLI and repository inspection logic. |
 | `tmt_quantum_vault/orchestration/` | Multi-agent coordination module with routing engine, execution planner, handoff manager, conflict resolution, metrics collection, and TMT benchmark matrix. |
 | `tests/` | Regression tests for the CLI, repository validation, runtime inspection, release/evaluation helpers, and orchestration module. |
@@ -252,8 +282,8 @@ TMT_Quantum_Vault/
 | `dna_circuits_library/` | Ingested DNA circuit templates, reports, and supporting metadata. |
 | `entropy_stack/` | Entropy configuration artifacts used by the broader vault system. |
 | `checkpoints/`, `Models/`, `evals/` | Saved state snapshots, model artifacts, and evaluation datasets. |
-| `docs/` | Focused operational documentation such as security and release policies. |
-| `.github/workflows/ci.yml` | CI definition that shows the supported validation commands for the repository. |
+| `docs/` | Focused operational documentation including architecture, security, and release policies. |
+| `.github/workflows/` | CI/CD pipeline definitions including pytest, lint, security scan, and deploy workflows. |
 
 ### Core package layout
 
@@ -312,7 +342,7 @@ python -m pip install --upgrade pip
 python -m pip install -e .[dev]
 python -m tmt_quantum_vault summary
 python -m tmt_quantum_vault validate
-python -m pytest tests/test_regression.py -q
+python -m pytest tests/ -q
 ```
 
 ### Optional quantum extras
@@ -326,8 +356,8 @@ python -m pip install -e .[qiskit]
 ### Common validation commands
 
 ```bash
-ruff check tmt_quantum_vault/ tests/test_regression.py
-black --check tmt_quantum_vault/ tests/test_regression.py
+ruff check tmt_quantum_vault/ tests/
+black --check tmt_quantum_vault/ tests/
 python -m compileall tmt_quantum_vault tests
 python -m pytest tests/ -v --tb=short
 python -m tmt_quantum_vault summary
@@ -378,4 +408,4 @@ See [ETHICS.md](ETHICS.md) for prohibited use cases.
 
 ---
 
-*Last updated: 2026-06-28 12:00 UTC*
+*Last updated: 2026-08-24*

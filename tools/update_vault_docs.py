@@ -30,9 +30,9 @@ from typing import Any
 VAULT_ROOT = Path(__file__).parent.parent
 NOW        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 DATE_SHORT = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-CURRENT_VERSION = "v0.4.0-dev"
-REGRESSION_TEST_BADGE = "107%20passed%2C%202%20skipped"
-REGRESSION_TEST_SUMMARY = "107 passed, 2 skipped ✅"
+CURRENT_VERSION = "v0.5.0"
+REGRESSION_TEST_BADGE = "113%20passed%2C%202%20skipped"
+REGRESSION_TEST_SUMMARY = "113 passed, 2 skipped ✅"
 
 # Hardware sources discovered in TMT-OS
 HARDWARE_SOURCES = {

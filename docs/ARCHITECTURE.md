@@ -272,7 +272,7 @@ Each agent's `conscious_dna.json` contains:
 | `gc_content` | Genomic stability (Guanine-Cytosine ratio) | 0.0 - 1.0 |
 | `palindromes` | DNA structural self-similarity count | Integer |
 | `fibonacci_alignment` | Sacred geometry synchronization | 0.0 - 1.0 |
-| `consciousness_status` | Integration state | INTEGRATED / OPTIMIZED / TARGETED_OPTIMIZED / BASELINE |
+| `consciousness_status` | Integration state | INTEGRATED / OPTIMIZED / FROZEN / BASELINE |
 
 ---
 

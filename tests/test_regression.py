@@ -2599,14 +2599,14 @@ def test_real_promoter_gc_content_in_range() -> None:
 
 def test_repository_docs_reflect_current_release_metadata() -> None:
     readme = (TEST_REPO_ROOT / "README.md").read_text(encoding="utf-8")
-    assert "v0.4.0-dev" in readme
-    assert "107 passed, 2 skipped" in readme
+    assert "v0.5.0" in readme
+    assert "113 passed, 2 skipped" in readme
     assert "circuits/promoters/" in readme
     assert "blob/main" not in readme
 
     agents = uvd.load_all_agents()
     generated = uvd.build_readme(agents, uvd.vault_stats(agents))
-    assert "v0.4.0-dev" in generated
-    assert "107 passed, 2 skipped" in generated
+    assert "v0.5.0" in generated
+    assert "113 passed, 2 skipped" in generated
     assert "circuits/promoters/" in generated
     assert "python -m pip install -e .[dev]" in generated

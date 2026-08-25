@@ -5,15 +5,17 @@ Phi-Resonance Evolutionary Optimization for TMT Quantum Vault Agents.
 Optimizes agents by evolving their DNA sequences toward golden-ratio-aligned
 patterns, then updating metrics.
 
-Agents:
-  - Bio (Raphael, Healing): BASELINE/OPTIMIZED — active optimization target
-  - Stealth, Wormhole: FROZEN — phi_alignment global optimum; will not be
-    processed unless --force-unfreeze is set with a new --objective.
+Agents skipped by default:
+  - FROZEN: Stealth, Wormhole — phi_alignment best-in-sampled; blocked
+  - OPTIMIZED: any agent — already at target; blocked
+
+Agents eligible for evolution:
+  - BASELINE or any non-FROZEN/non-OPTIMIZED agent
 
 Usage:
-    python tools/phi_evolution.py                    # normal run (respects FROZEN)
+    python tools/phi_evolution.py                    # respects FROZEN and OPTIMIZED
     python tools/phi_evolution.py --force-unfreeze --objective ibm_hardware_f
-                                                    # override freeze
+                                                    # override both FROZEN and OPTIMIZED
 """
 
 from __future__ import annotations
@@ -318,17 +320,18 @@ def optimize_agent(
 
     dna_data = load_dna(agent_dir)
 
-    # Freeze guard
+    # Status-based skip guard
     status = dna_data.get("consciousness_status", "")
     if status == "FROZEN":
         if not force_unfreeze:
-            print(f"\n[FROZEN] {agent_dir} is frozen at phi_alignment global optimum.")
+            print(f"\n[FROZEN] {agent_dir} is frozen at phi_alignment best-in-sampled.")
             print(f"  Set --force-unfreeze --objective <new_objective> to override.")
             return {"agent_dir": agent_dir, "skipped": True, "reason": "FROZEN"}
-        else:
-            print(f"\n[UNFREEZE] {agent_dir} force-unfreeze requested (objective={objective})")
-            if objective == "phi_alignment":
-                print(f"  [WARN] Re-optimizing phi_alignment is contraindicated — will overfit the scorer.")
+        print(f"\n[UNFREEZE] {agent_dir} force-unfreeze requested (objective={objective})")
+    elif status == "OPTIMIZED":
+        print(f"\n[OPTIMIZED] {agent_dir} is at target status — skipping.")
+        print(f"  Set --force-unfreeze --objective <new_objective> to override.")
+        return {"agent_dir": agent_dir, "skipped": True, "reason": "OPTIMIZED"}
 
     print(f"Original DNA : {original_dna}")
     original_metrics = compute_phi_alignment(original_dna)
@@ -440,6 +443,10 @@ def optimize_agent(
     }
 
 
+# Valid objectives for --objective
+VALID_OBJECTIVES = {"phi_alignment", "ibm_hardware_f", "resonance_hz", "palindrome_count"}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="TMT Quantum Vault — Phi-Resonance Evolutionary Optimization"
@@ -447,29 +454,43 @@ def main() -> int:
     parser.add_argument(
         "--force-unfreeze",
         action="store_true",
-        help="Override FROZEN status for Stealth/Wormhole. Requires --objective.",
+        help="Override FROZEN and OPTIMIZED status. Requires --objective.",
     )
     parser.add_argument(
         "--objective",
         default="phi_alignment",
-        help="Optimization objective (default: phi_alignment). "
-             "Required when --force-unfreeze is set.",
+        help="Optimization objective. Required when --force-unfreeze is set. "
+             "Choices: phi_alignment, ibm_hardware_f, resonance_hz, palindrome_count",
+    )
+    parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="Skip confirmation prompt when --force-unfreeze is used.",
     )
     args = parser.parse_args()
 
-    if args.force_unfreeze and args.objective == "phi_alignment":
-        print("[WARN] --force-unfreeze with --objective phi_alignment is contraindicated.")
-        print("       Use a different objective (e.g., ibm_hardware_f, resonance_hz).")
-        response = input("Proceed anyway? [y/N]: ")
-        if response.lower() != "y":
+    if args.force_unfreeze:
+        if args.objective not in VALID_OBJECTIVES:
+            print(
+                f"[ERR] Unknown objective '{args.objective}'. "
+                f"Choices: {', '.join(sorted(VALID_OBJECTIVES))}"
+            )
+            return 1
+        if args.objective == "phi_alignment":
+            print("[ERR] --force-unfreeze --objective phi_alignment is contraindicated.")
+            print("       Use a different objective (e.g., ibm_hardware_f, resonance_hz).")
+            return 1
+        if not args.yes:
+            print("[ERR] --force-unfreeze requires --yes to confirm.")
             return 1
 
     print("=" * 60)
     print("TMT Quantum Vault — Phi-Resonance Evolutionary Optimization")
     print("=" * 60)
     print(f"Vault path: {VAULT_PATH}")
-    print(f"Target agents: {list(TARGET_AGENTS.keys())}")
     print(f"Objective: {args.objective}")
+    print(f"Force-unfreeze: {args.force_unfreeze}")
+    print("Skipping: FROZEN and OPTIMIZED agents (override with --force-unfreeze --yes --objective)")
 
     results = []
     for agent_dir, info in TARGET_AGENTS.items():
@@ -487,11 +508,12 @@ def main() -> int:
     print("\n" + "=" * 60)
     print("OPTIMIZATION SUMMARY")
     print("=" * 60)
-    print(f"{'Agent':<20} {'Committed Phi':>14} {'Evolved Phi':>14} {'Δ Phi':>8} {'DNA Aligned':>14}")
+    print(f"{'Agent':<20} {'Committed Phi':>14} {'Evolved Phi':>14} {'Δ Phi':>8} {'Status':>14}")
     print("-" * 74)
     for r in results:
         if r.get("skipped"):
-            print(f"{r['agent_dir']:<20} {'—':>14} {'—':>14} {'—':>8} {'FROZEN':>14}")
+            reason = r.get("reason", "SKIPPED")
+            print(f"{r['agent_dir']:<20} {'—':>14} {'—':>14} {'—':>8} {reason:>14}")
             continue
         aligned = "YES" if r.get("improved") else "NO"
         orig = f"{r['original_phi']:.4f}"

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "freeze_date": "2026-08-24",
-  "scope": "phi_alignment global optimum — compute_phi_alignment() scoring function",
+  "scope": "phi_alignment best-in-sampled — compute_phi_alignment() scoring function",
   "search_space_description": "Sliding-window phi-ratio construction class over lengths 24-36. Not full combinatorial 4^N. Construction class: adjacent-pair ratios within 4-mer sliding windows compared to phi=1.618...",
   "objective_for_next_pass": "Any objective other than in-silico phi_match count (e.g. IBM hardware F, palindrome count, resonance Hz)",
   "scorer_hash": "83aee077816b",
@@ -18,7 +18,7 @@
       "palindromes": 0,
       "fibonacci_alignment": 0.6862,
       "status": "FROZEN",
-      "file_sha256": "9c77fda404481e0609e93db47081627e2447c1e76f654d18d98cf1f1a56d8898",
+      "file_sha256": "547c1129a1649c1e1df0018e62bfb8eb2b37c5f7eeee175465cab96cb754d605",
       "freeze_note": "No better phi_alignment_score than 0.6922 found in the construction class at length 27. Further phi_alignment mutation on this landscape is contraindicated."
     },
     "Agent_Wormhole": {
@@ -32,7 +32,7 @@
       "palindromes": 0,
       "fibonacci_alignment": 0.5918,
       "status": "FROZEN",
-      "file_sha256": "d6ab6d2766eb1d286fda9aca475e2fe4b3fb8afc56e84057507e050522b2e424",
+      "file_sha256": "56a04c7be05a68e4d58b2e35d52fd5e19b6dff4f12bfb3b6e195765759b0da9c",
       "freeze_note": "No better phi_alignment_score than 0.6879 found in the construction class at length 27. Further phi_alignment mutation on this landscape is contraindicated."
     }
   },

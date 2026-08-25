@@ -1,0 +1,48 @@
+name: Deterministic Audit
+
+# Runs the stdlib-only audit tool (tools/audit.py) on every PR and on
+# manual dispatch. Non-blocking by design — the audit is new and may
+# surface false positives that need triage before becoming a gate.
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Run deterministic audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run audit (CRITICAL only in CI)
+        run: |
+          python tools/audit.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output-dir "$GITHUB_WORKSPACE/audit_reports" \
+            --severity-floor CRITICAL \
+            --keep 10
+
+      - name: Run audit tests
+        run: |
+          python -m pytest tests/test_audit.py -v
+
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-reports
+          path: audit_reports/
+          retention-days: 14

@@ -83,6 +83,37 @@ def test_extract_error_message_prefers_json_error_and_falls_back_to_text() -> No
     assert ollama_api.extract_error_message(response) == "HTTP 400"
 
 
+def test_run_returns_failure_response_on_http_error() -> None:
+    error_response = _response_mock(
+        payload={"error": "model not found"},
+        text="model not found",
+        status_code=404,
+    )
+    error_response.raise_for_status.side_effect = requests.HTTPError(
+        "404 Client Error", response=error_response
+    )
+
+    with patch.object(ollama_api.requests, "post", return_value=error_response):
+        result = ollama_api.run(model="qwen3:8b", prompt="Hello")
+
+    assert result.returncode == 404
+    assert "not found" in result.response
+    assert result.done is False
+
+
+def test_run_returns_failure_response_on_connection_error() -> None:
+    with patch.object(
+        ollama_api.requests,
+        "post",
+        side_effect=requests.ConnectionError("Connection refused"),
+    ):
+        result = ollama_api.run(model="qwen3:8b", prompt="Hello")
+
+    assert result.returncode == 1
+    assert "Connection refused" in result.response
+    assert result.done is False
+
+
 def test_is_available_returns_true_and_false_based_on_request_result() -> None:
     with patch.object(ollama_api.requests, "get", return_value=MagicMock()):
         assert ollama_api.is_available() is True

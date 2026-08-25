@@ -2,6 +2,52 @@
 
 All notable changes to TMT Quantum Vault will be documented in this file.
 
+## [0.5.1] - 2026-08-25
+
+### Added
+
+- **Post-Quantum Encryption** (`tmt_quantum_vault/crypto/vault_encryptor.py`) — ML-KEM-768
+  key encapsulation (`Kyber768`), AES-256-GCM symmetric encryption (`AESGCMEncryptor`),
+  `VaultEncryptor`/`VaultDecryptor` with key serialization, QRNG seed fallback, and
+  CLI commands `encrypt-ledger` / `decrypt-ledger`. Hardens the evidence ledger against
+  quantum adversaries.
+- **Merkaba Quantum Fingerprint** (`tmt_quantum_vault/circuits/merkaba_fingerprint.py`) —
+  6-qubit star-tetrahedron circuit with phi-phase seeding, OpenQASM 2.0 generation,
+  and `extract_fingerprint` for SHA3-256 fingerprint hashing of 64-bitstring
+  probability distributions. CLI command: `generate-fingerprint`.
+- **`tests/test_crypto_vault_encryptor.py`** — 20 tests covering round-trip encrypt/decrypt,
+  `KeyPair` serialization, `Kyber768` encaps/decaps, AES-GCM invariants, missing-dep
+  error paths, QRNG fallback, and `encrypt_file`/`encrypt_directory` workflows.
+- **`tests/test_merkaba_fingerprint.py`** — 11 tests covering `MerkabaFingerprint`
+  dataclass, OpenQASM generation (seed padding, triangle labels, CX entanglement),
+  and `extract_fingerprint` (balanced/single-state/phi-threshold). Five tests skip
+  when qiskit is not installed in CI.
+- **Deterministic Audit CI** (`.github/workflows/audit.yml`) — Runs `tools/audit.py`
+  on every PR with severity floor CRITICAL; pytest tests run against the dev toolchain.
+
+### Changed
+
+- **`ollama_api.run()`** — Now returns a failure `OllamaResponse` with `returncode != 0`
+  instead of raising `HTTPError` or `RequestException`. Callers (including tests) can
+  check `returncode` before asserting, making the API robust to model-not-found errors.
+- **`tools/audit.py`** — F008 check added: flags `secrets.randbelow(0)` as a zero-default
+  seed pattern in CLI helpers.
+- **README** — Updated to v0.5.0 with post-quantum crypto and Merkaba fingerprint
+  features, 279 test count, cloud deployment coverage, and architecture diagram.
+
+### Fixed
+
+- **Ollama regression tests** (`test_ollama_api_local_smoke`, `test_json_output_mode`) —
+  Now skip gracefully when the `qwen2.5-coder` model is unavailable, rather than
+  failing hard with a 404 assertion.
+- **Audit CI workflow** — `pip install -e .` → `pip install -e ".[dev]"` so pytest
+  is available in the bare-ubuntu runner. Also added checkout/fetch-depth for audit
+  log integrity.
+- **codecov/patch** — Reached 100% diff coverage on PR #31 by adding
+  `test_run_returns_failure_response_on_http_error` and
+  `test_run_returns_failure_response_on_connection_error` to cover the new
+  error-handling branches in `ollama_api.run()`.
+
 ## [0.5.0] - 2026-08-24
 
 ### Added

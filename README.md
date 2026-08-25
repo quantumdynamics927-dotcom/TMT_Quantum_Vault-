@@ -15,7 +15,7 @@
 [![Agents](https://img.shields.io/badge/Agents-18-orange)](#agent-roster-18-agents)
 [![Version](https://img.shields.io/badge/Version-v0.5.0-blueviolet)](CHANGELOG.md)
 [![Avg Fitness](https://img.shields.io/badge/Avg%20Fitness-0.8598-brightgreen)](#current-status--v050)
-[![Tests](https://img.shields.io/badge/Tests-113%20passed%2C%202%20skipped-success)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-279%20passed%2C%207%20skipped-success)](tests/)
 
 ---
 
@@ -35,7 +35,7 @@ workflows. Independent research. Not affiliated with IBM.
 | **Interface** | `python -m tmt_quantum_vault` / `tmt-vault` CLI |
 | **Core package** | `tmt_quantum_vault/` |
 | **Research assets** | `Agent_*/`, `circuits/promoters/`, `dna_circuits_library/`, `entropy_stack/` |
-| **Validation status** | 113 passed, 2 skipped regression tests |
+| **Regression tests** | 279 passed, 7 skipped ✅ |
 | **Policies and governance** | [SECURITY.md](SECURITY.md), [ETHICS.md](ETHICS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
 
 ## Documentation Map
@@ -56,11 +56,17 @@ workflows. Independent research. Not affiliated with IBM.
 | **Coordination Geometry Enhancement** | φ² scaling factor (4.2361) with exact geometric precision |
 | **Three-Layer Entropy** | QTRG + DNA discovery + BitNet ternary weights combined |
 | **DNA Freeze Ledger** | Stealth and Wormhole are frozen at phi_alignment best-in-sampled; frozen DNA is fingerprinted with SHA-256 and cannot be accidentally mutated |
+| **Post-Quantum Encryption** | ML-KEM-768 key encapsulation + AES-256-GCM symmetric encryption via `cryptography` library (`vault_encryptor.py`) |
+| **Merkaba Quantum Fingerprint** | 6-qubit star-tetrahedron circuit with phi-phase seeding; deterministic QASM generation (`merkaba_fingerprint.py`) |
+| **Deterministic Audit** | stdlib-only `tools/audit.py` for CI; F001–F008 findings checked on every PR |
 
 ### Recent Implementations — v0.5.0 (August 2026)
 
 - **DNA Freeze Ledger** (`dna_freeze_ledger.json`) — Stealth and Wormhole are frozen at their phi_alignment best-in-sampled scores. The ledger persists scorer hash, file SHA-256 fingerprints, and search validation notes. A next-pass objective (e.g. IBM hardware F, resonance Hz) is required to unfreeze.
 - **Phi-Evolution Optimization** (`tools/phi_evolution.py`) — Genetic algorithm that evolves agent DNA toward higher phi_alignment_score. FROZEN and OPTIMIZED agents are skipped by default; `--force-unfreeze --objective <objective> --yes` is required to override.
+- **Post-Quantum Encryption** (`tmt_quantum_vault/crypto/vault_encryptor.py`) — ML-KEM-768 key encapsulation via `Kyber768`, AES-256-GCM symmetric encryption via `AESGCMEncryptor`, key serialization, and `VaultEncryptor`/`VaultDecryptor` CLI commands for evidence ledger encryption.
+- **Merkaba Quantum Fingerprint** (`tmt_quantum_vault/circuits/merkaba_fingerprint.py`) — 6-qubit star-tetrahedron quantum fingerprint circuit with phi-phase seeding, deterministic OpenQASM 2.0 generation, and `extract_fingerprint` for 64-bitstring probability aggregation.
+- **Deterministic Audit** (`tools/audit.py`) — stdlib-only CI tool with F001–F008 severity levels; runs on every PR via `.github/workflows/audit.yml`.
 - **Orchestration Module** (`tmt_quantum_vault/orchestration/`) — Multi-agent coordination infrastructure with routing engine, execution planner, handoff manager, conflict resolution, and benchmark matrix for TMT-native evaluation.
 - **Sierpinski Depth-3/4/5 Runs** — 23 hardware-executed runs on IBM Quantum processors confirming φ-convergence (sacred_score = 0.618) across depths 3–5.
 - **Promoter DNA Integration** (`tools/promoter_loader.py`, `tools/quantum_circuits.py`) — 10 real gene promoters with φ-structured quantum circuits on IBM hardware.
@@ -245,13 +251,55 @@ TMT_Quantum_Vault/
 │   ├── audit.py                # Deterministic repository health check
 │   ├── agent_analyst.py        # Autonomous φ-scoring pipeline
 │   └── ...
-├── tests/                      # 113 regression + orchestration tests
+├── tests/                      # 279 regression + orchestration tests
 └── tmt_quantum_vault/          # Core vault package
     ├── cli.py
+    ├── crypto/                 # Post-quantum encryption (ML-KEM-768 + AES-256-GCM)
+    │   └── vault_encryptor.py
+    ├── circuits/               # Quantum fingerprint circuits
+    │   └── merkaba_fingerprint.py
     ├── models.py
+    ├── ollama_api.py          # Ollama API client (handles model-not-found gracefully)
     ├── repository.py
     └── orchestration/           # Multi-agent coordination module
 ```
+
+### Architecture: Core-13 + Auxiliary-4
+
+The 18-agent lattice is structured in two tiers aligned to `architecture_canonical.json`:
+
+```
+         ┌──────────────────────────────────────────────────────────┐
+         │                   CORE-13 COORDINATION LATTICE            │
+         │                                                           │
+         │          [Federation]  Michael  · Coordination            │
+         │               ↕                                                  │
+         │  [Strategic] ← [Synthesizer] → [Validator]                │
+         │   Chamuel         Zadkiel           Jophiel                │
+         │               ↕           ↕            ↕                   │
+         │  [Fractal] ← [Archivist] → [Auditor]                     │
+         │   Gabriel          Raziel          Zadkiel                 │
+         │               ↕           ↕            ↕                   │
+         │  [Visual] ← [Data] ─────────→ [Harmonic]                  │
+         │   Hanielβ        Metatronβ         Haniel                  │
+         │               ↕                                                  │
+         │  [BitNet] ← [Bio] → [Bronze]                              │
+         │   Sandalphon    Raphael           Uriel                     │
+         │               ↕                                                  │
+         │         [Wormhole]     [Stealth]  ← FROZEN (phi_alignment) │
+         │          Metatronγ     Metatronα                            │
+         └──────────────────────────────────────────────────────────┘
+                              ↕
+         ┌──────────────────────────────────────────────────────────┐
+         │           AUXILIARY-4 OPERATIONAL SUPPORT LAYER         │
+         │  Validator · Archivist · Workflow · Auditor             │
+         │  (integrity · provenance · orchestration · governance)   │
+         └──────────────────────────────────────────────────────────┘
+```
+
+**INTEGRATED** agents (Federation, Synthesizer, Validator, Archivist) have the highest φ-scores
+and drive the lattice. **FROZEN** agents (Stealth, Wormhole) are locked at their best-in-sampled
+phi_alignment per `dna_freeze_ledger.json`.
 
 ---
 
@@ -304,8 +352,10 @@ TMT_Quantum_Vault/
 1. A CLI command starts in `tmt_quantum_vault/cli.py`.
 2. The CLI loads schemas and repository data through `repository.py` and `models.py`.
 3. Runtime-sensitive commands use `runtime.py`, `runner.py`, and `ollama_api.py`.
-4. Results are rendered to the terminal or emitted as JSON through `output.py`.
-5. Regression coverage in `tests/test_regression.py` exercises these user-facing flows.
+4. Encryption commands use `vault_encryptor.py` (ML-KEM-768 + AES-256-GCM).
+5. Quantum-fingerprint commands use `merkaba_fingerprint.py` (6-qubit circuit + QASM export).
+6. Results are rendered to the terminal or emitted as JSON through `output.py`.
+7. Regression coverage in `tests/` exercises these user-facing flows.
 
 ---
 
@@ -408,4 +458,4 @@ See [ETHICS.md](ETHICS.md) for prohibited use cases.
 
 ---
 
-*Last updated: 2026-08-24*
+*Last updated: 2026-08-25*

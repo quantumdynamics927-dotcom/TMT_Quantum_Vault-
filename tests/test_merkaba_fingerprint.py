@@ -3,10 +3,10 @@
 Tests for tmt_quantum_vault.circuits.merkaba_fingerprint — the Merkaba
 6-qubit star-tetrahedron quantum fingerprint circuit.
 """
+
 from __future__ import annotations
 
 import pytest
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Data classes

@@ -9,6 +9,7 @@ These tests cover:
 - No-XOR-fallback regression test (catches F-004 coming back).
 - ImportError behavior when the `cryptography` package is unavailable.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -110,7 +111,7 @@ def test_kyber768_keygen_short_seed_pads_to_32() -> None:
     assert len(sk) == 2400
 
 
-
+def test_kyber768_keygen_returns_padded_secret_key() -> None:
     """keygen() returns a keypair; the public key is the seed (32 bytes) and
     the secret key is padded to KYBER_SECRET_KEY_SIZE.
 
@@ -139,7 +140,9 @@ def test_kyber768_round_trip_encaps_decaps() -> None:
     pk, sk = Kyber768.keygen()
     ct, shared_enc = Kyber768.encaps(pk)
     shared_dec = Kyber768.decaps(ct, sk)
-    assert shared_enc == shared_dec, "decaps did not recover the encapsulated shared key"
+    assert (
+        shared_enc == shared_dec
+    ), "decaps did not recover the encapsulated shared key"
     assert len(shared_enc) == 32  # 256-bit shared key
 
 
@@ -283,7 +286,7 @@ def test_encrypt_directory(tmp_path: Path) -> None:
     assert len(results) == 2
 
     dec = VaultDecryptor()
-    for (enc_path, sk), orig_name in zip(results, ["a.json", "b.json"]):
+    for (enc_path, sk), orig_name in zip(results, ["a.json", "b.json"], strict=True):
         out = tmp_path / f"dec_{orig_name}"
         dec.decrypt_file(enc_path, sk, out)
         assert out.read_text(encoding="utf-8") in ['{"a":1}', '{"b":2}']
@@ -313,7 +316,9 @@ def test_evidence_ledger_round_trip(tmp_path: Path) -> None:
 
     repo_root = Path(__file__).resolve().parent.parent
     plain_path = repo_root / "evidence_ledger" / "hardware_evidence_ledger_v2.json"
-    original = plain_path.read_bytes() if plain_path.is_file() else b'{"synthetic": true}\n'
+    original = (
+        plain_path.read_bytes() if plain_path.is_file() else b'{"synthetic": true}\n'
+    )
 
     input_p = tmp_path / "input.json"
     input_p.write_bytes(original)
@@ -325,9 +330,10 @@ def test_evidence_ledger_round_trip(tmp_path: Path) -> None:
     out_path = tmp_path / "input.dec.json"
     dec.decrypt_file(enc_path, sk, out_path)
 
-    assert hashlib.sha256(original).hexdigest() == hashlib.sha256(
-        out_path.read_bytes()
-    ).hexdigest()
+    assert (
+        hashlib.sha256(original).hexdigest()
+        == hashlib.sha256(out_path.read_bytes()).hexdigest()
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -356,15 +362,17 @@ def test_kyber_encaps_raises_clear_error_without_cryptography(
     fake_module_name = "cryptography.hazmat.primitives.ciphers.aead"
 
     saved = sys.modules.get(fake_module_name)
-    sys.modules[fake_module_name] = None  # forces ImportError on `from ... import AESGCM`
+    sys.modules[fake_module_name] = (
+        None  # forces ImportError on `from ... import AESGCM`
+    )
     try:
         pk, _sk = ve.Kyber768.keygen()
         with pytest.raises(ImportError) as exc_info:
             ve.Kyber768.encaps(pk)
         msg = str(exc_info.value)
-        assert "cryptography" in msg.lower(), (
-            f"ImportError message should mention 'cryptography'; got: {msg!r}"
-        )
+        assert (
+            "cryptography" in msg.lower()
+        ), f"ImportError message should mention 'cryptography'; got: {msg!r}"
     finally:
         if saved is not None:
             sys.modules[fake_module_name] = saved
@@ -388,9 +396,9 @@ def test_kyber_decaps_raises_clear_error_without_cryptography(
         with pytest.raises(ImportError) as exc_info:
             ve.Kyber768.decaps(ct, sk)
         msg = str(exc_info.value)
-        assert "cryptography" in msg.lower(), (
-            f"ImportError message should mention 'cryptography'; got: {msg!r}"
-        )
+        assert (
+            "cryptography" in msg.lower()
+        ), f"ImportError message should mention 'cryptography'; got: {msg!r}"
     finally:
         if saved is not None:
             sys.modules[fake_module_name] = saved

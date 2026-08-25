@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
 
 import pytest
@@ -37,7 +38,7 @@ SIGNIFICANT_DIR = REPO_ROOT / "circuits" / "ingested" / "SIGNIFICANT"
 # Windows drive-letter pattern. We deliberately don't try to be clever
 # about UNC paths or forward-slash variants here — the regression we are
 # guarding against is "absolute Windows paths leaked into tracked JSON."
-_DRIVE_LETTER_RE = re.compile(r'^[A-Za-z]:[\\/]')
+_DRIVE_LETTER_RE = re.compile(r"^[A-Za-z]:[\\/]")
 
 
 def _significant_files() -> list[Path]:
@@ -95,7 +96,7 @@ def test_no_drive_letter_paths_in_significant(
 
     assert not offenders, (
         "Found SIGNIFICANT JSON files with absolute Windows paths in "
-        f"source_file. Run `python tools/migrate_significant_paths.py --apply` "
+        "source_file. Run `python tools/migrate_significant_paths.py --apply` "
         "to rewrite them. Offenders (first 5):\n  "
         + "\n  ".join(f"{n}: {s}" for n, s in offenders[:5])
     )
@@ -123,8 +124,7 @@ def test_source_file_is_portable_prefix(
 
     assert not bad, (
         "SIGNIFICANT source_file fields must start with 'circuits/results/'. "
-        "Offenders (first 5):\n  "
-        + "\n  ".join(f"{n}: {s}" for n, s in bad[:5])
+        "Offenders (first 5):\n  " + "\n  ".join(f"{n}: {s}" for n, s in bad[:5])
     )
 
 
@@ -156,10 +156,7 @@ def test_source_file_matches_job_id(
     assert not mismatches, (
         "source_file basename must equal '<job_id>-result.json'. "
         "Mismatches (first 5):\n  "
-        + "\n  ".join(
-            f"{n}: expected {e}, got {a}"
-            for n, e, a in mismatches[:5]
-        )
+        + "\n  ".join(f"{n}: expected {e}, got {a}" for n, e, a in mismatches[:5])
     )
 
 
@@ -167,7 +164,6 @@ def test_source_file_matches_job_id(
 # Migration script behaviour (unit tests on the script's pure helpers).
 # ---------------------------------------------------------------------------
 
-import sys
 sys.path.insert(0, str(REPO_ROOT))
 
 from tools.migrate_significant_paths import _target_path  # noqa: E402
@@ -204,7 +200,5 @@ from tools.migrate_significant_paths import _target_path  # noqa: E402
         ("", None),
     ],
 )
-def test_target_path_recognises_legacy_prefixes(
-    raw: str, expected: str | None
-) -> None:
+def test_target_path_recognises_legacy_prefixes(raw: str, expected: str | None) -> None:
     assert _target_path(raw) == expected

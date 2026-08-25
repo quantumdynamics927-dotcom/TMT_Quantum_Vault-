@@ -6,12 +6,12 @@ These tests use tmp_path to build synthetic micro-repos, so they do not
 depend on the real repository state and will keep working as the real repo
 evolves.
 """
+
 from __future__ import annotations
 
 import json
 import re
 import subprocess
-import sys
 from pathlib import Path
 
 import pytest
@@ -34,7 +34,6 @@ from tools.audit import (
     run_audit,
     totals,
 )
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FIXTURES
@@ -86,7 +85,9 @@ def test_audit_is_stdlib_only() -> None:
     for pkg in forbidden:
         # Match `import pkg`, `from pkg import ...`, and `from pkg.sub import ...`
         pattern = rf"(^|\n)\s*(import|from)\s+{re.escape(pkg)}\b"
-        assert not re.search(pattern, src), f"tools/audit.py imports forbidden package: {pkg}"
+        assert not re.search(
+            pattern, src
+        ), f"tools/audit.py imports forbidden package: {pkg}"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -178,9 +179,9 @@ def test_F008_does_not_fire_on_real_file() -> None:
     repo_root = Path(__file__).resolve().parent.parent
     ctx = build_context(repo_root)
     findings = check_F008_zero_default_seed(ctx)
-    assert not findings, (
-        f"F-008 should NOT fire on the real cli.py. Findings: {findings}"
-    )
+    assert (
+        not findings
+    ), f"F-008 should NOT fire on the real cli.py. Findings: {findings}"
 
 
 def test_F013_detects_missing_lockfile(fake_repo: Path) -> None:
@@ -335,7 +336,7 @@ def test_render_markdown_grouped_by_category() -> None:
     assert "### [WARNING] F-A" in md
     assert "### [SUGGESTION] F-B" in md
     # Evidence block as fenced JSON
-    assert '```json' in md
+    assert "```json" in md
     assert '"k": 1' in md
 
 
@@ -347,7 +348,9 @@ def test_render_markdown_grouped_by_category() -> None:
 def test_main_exits_zero_on_clean_repo(tmp_path: Path, monkeypatch, capsys) -> None:
     """A clean fake repo produces no CRITICAL findings → exit 0."""
     (tmp_path / "tmt_quantum_vault" / "cli.py").parent.mkdir(parents=True)
-    (tmp_path / "tmt_quantum_vault" / "cli.py").write_text("# no findings here\n", encoding="utf-8")
+    (tmp_path / "tmt_quantum_vault" / "cli.py").write_text(
+        "# no findings here\n", encoding="utf-8"
+    )
     (tmp_path / "tests").mkdir()
     (tmp_path / ".gitignore").write_text("# empty\n", encoding="utf-8")
     (tmp_path / "requirements.txt").write_text("pydantic>=2.11\n", encoding="utf-8")
@@ -357,9 +360,12 @@ def test_main_exits_zero_on_clean_repo(tmp_path: Path, monkeypatch, capsys) -> N
 
     code = main(
         [
-            "--repo-root", str(tmp_path),
-            "--output-dir", str(tmp_path / "audit_reports"),
-            "--severity-floor", "CRITICAL",
+            "--repo-root",
+            str(tmp_path),
+            "--output-dir",
+            str(tmp_path / "audit_reports"),
+            "--severity-floor",
+            "CRITICAL",
             "--quiet",
         ]
     )
@@ -388,9 +394,12 @@ def test_main_exits_one_on_critical(tmp_path: Path) -> None:
 
     code = main(
         [
-            "--repo-root", str(tmp_path),
-            "--output-dir", str(tmp_path / "audit_reports"),
-            "--severity-floor", "CRITICAL",
+            "--repo-root",
+            str(tmp_path),
+            "--output-dir",
+            str(tmp_path / "audit_reports"),
+            "--severity-floor",
+            "CRITICAL",
             "--quiet",
         ]
     )
@@ -410,9 +419,12 @@ def test_main_idempotent(tmp_path: Path) -> None:
     (tmp_path / "requirements.lock").write_text("# locked\n", encoding="utf-8")
 
     args = [
-        "--repo-root", str(tmp_path),
-        "--output-dir", str(tmp_path / "audit_reports"),
-        "--severity-floor", "CRITICAL",
+        "--repo-root",
+        str(tmp_path),
+        "--output-dir",
+        str(tmp_path / "audit_reports"),
+        "--severity-floor",
+        "CRITICAL",
         "--quiet",
     ]
     code1 = main(args)
@@ -442,7 +454,9 @@ def test_run_audit_returns_findings_sorted_by_severity(fake_repo: Path) -> None:
         "    ct = bytes(a ^ b for a, b in zip(plaintext, key))\n",
         encoding="utf-8",
     )
-    (fake_repo / "tmt_quantum_vault" / "cli.py").write_text("# stub\n", encoding="utf-8")
+    (fake_repo / "tmt_quantum_vault" / "cli.py").write_text(
+        "# stub\n", encoding="utf-8"
+    )
 
     ctx = build_context(fake_repo)
     findings = run_audit(ctx)

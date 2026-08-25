@@ -138,17 +138,9 @@ jobs:
           pip install -e ".[dev,qiskit]"
 
       - name: Run merkaba and crypto tests
-        run: pytest tests/test_merkaba_fingerprint.py tests/test_crypto_vault_encryptor.py -v --tb=short --cov=tmt_quantum_vault.circuits.merkaba_fingerprint,tmt_quantum_vault.crypto.vault_encryptor --cov-branch -o junit_family=legacy
+        run: pytest tests/test_merkaba_fingerprint.py tests/test_crypto_vault_encryptor.py -v --tb=short -o junit_family=legacy
         env:
           PYTHONPATH: .
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.xml
-          fail_ci_if_error: false
-        continue-on-error: true
 
   build:
     name: Build Package

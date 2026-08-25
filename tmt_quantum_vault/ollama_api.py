@@ -55,7 +55,9 @@ def run(
         # Return a failure response so callers can check returncode.
         return OllamaResponse(
             model=model,
-            response=extract_error_message(e.response) if e.response is not None else str(e),
+            response=(
+                extract_error_message(e.response) if e.response is not None else str(e)
+            ),
             done=False,
             returncode=e.response.status_code if e.response is not None else 1,
         )

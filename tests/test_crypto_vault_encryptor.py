@@ -74,7 +74,43 @@ def test_cryptography_is_a_hard_dependency_in_pyproject() -> None:
 # ══════════════════════════════════════════════════════════════════════════════
 
 
-def test_kyber768_keygen_produces_correctly_sized_keys() -> None:
+# ══════════════════════════════════════════════════════════════════════════════
+# KeyPair
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+def test_keypair_save_and_load(tmp_path: Path) -> None:
+    """KeyPair.save/load round-trips the keypair correctly."""
+    from tmt_quantum_vault.crypto.vault_encryptor import KeyPair
+
+    pk = b"pk" * 16
+    sk = b"sk" * 800
+    kp = KeyPair(public_key=pk, secret_key=sk)
+
+    pub_path = tmp_path / "pub.key"
+    sec_path = tmp_path / "sec.key"
+    kp.save(pub_path, sec_path)
+
+    loaded = KeyPair.load(pub_path, sec_path)
+    assert loaded.public_key == pk
+    assert loaded.secret_key == sk
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Kyber round-trip
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+def test_kyber768_keygen_short_seed_pads_to_32() -> None:
+    """seed shorter than 32 bytes is left-padded with zeros to reach 32."""
+    from tmt_quantum_vault.crypto.vault_encryptor import Kyber768
+
+    pk, sk = Kyber768.keygen(seed=b"short")
+    assert len(pk) == 32
+    assert len(sk) == 2400
+
+
+
     """keygen() returns a keypair; the public key is the seed (32 bytes) and
     the secret key is padded to KYBER_SECRET_KEY_SIZE.
 
@@ -133,11 +169,142 @@ def test_aesgcm_rejects_wrong_key(tmp_path: Path) -> None:
         AESGCMEncryptor.decrypt(b"\x99" * 32, ciphertext, nonce)
 
 
-def test_evidence_ledger_round_trip() -> None:
-    """End-to-end: encrypt the evidence ledger and decrypt back to the same bytes.
+def test_aesgcm_rejects_wrong_nonce_length() -> None:
+    """Wrong nonce length → ValueError."""
+    from tmt_quantum_vault.crypto.vault_encryptor import AESGCMEncryptor
 
-    Uses the real plaintext at evidence_ledger/hardware_evidence_ledger_v2.json
-    when present; otherwise uses a small synthetic payload.
+    key = b"\x01" * 32
+    plaintext = b"secret"
+    with pytest.raises(ValueError, match="Nonce must be"):
+        AESGCMEncryptor.encrypt(key, plaintext, nonce=b"too-short")  # type: ignore[arg-type]
+
+
+def test_aesgcm_decrypt_rejects_wrong_nonce_length() -> None:
+    """Wrong nonce length on decrypt → ValueError."""
+    from tmt_quantum_vault.crypto.vault_encryptor import AESGCMEncryptor
+
+    key = b"\x01" * 32
+    nonce = b"\x02" * 12
+    ciphertext = AESGCMEncryptor.encrypt(key, b"plaintext", nonce)
+    with pytest.raises(ValueError, match="Nonce must be"):
+        AESGCMEncryptor.decrypt(key, ciphertext, nonce=b"too-short")  # type: ignore[arg-type]
+
+
+def test_aesgcm_encrypt_generates_nonce_when_none_provided() -> None:
+    """Passing nonce=None causes encrypt to generate a random nonce."""
+    from tmt_quantum_vault.crypto.vault_encryptor import AESGCMEncryptor
+
+    key = b"\x01" * 32
+    ct1 = AESGCMEncryptor.encrypt(key, b"msg", nonce=None)
+    ct2 = AESGCMEncryptor.encrypt(key, b"msg", nonce=None)
+    # Two calls produce different ciphertexts (different nonces).
+    assert ct1 != ct2
+
+
+def test_qrng_seed_fallback_when_entropy_file_missing(tmp_path: Path) -> None:
+    """When entropy_stack does not exist, _load_qrng_seed falls back to secrets.token_bytes."""
+    from tmt_quantum_vault.crypto.vault_encryptor import VaultEncryptor
+
+    enc = VaultEncryptor(tmp_path)
+    seed = enc._load_qrng_seed()
+    assert len(seed) == 32
+    assert isinstance(seed, bytes)
+
+
+def test_qrng_seed_fallback_when_entropy_file_empty(tmp_path: Path) -> None:
+    """When entropy_stack/three_layer_entropy_stack.json exists but has no bits."""
+    from tmt_quantum_vault.crypto.vault_encryptor import VaultEncryptor
+
+    (tmp_path / "entropy_stack").mkdir()
+    (tmp_path / "entropy_stack" / "three_layer_entropy_stack.json").write_text(
+        '{"layer_1_casablanca_qtrg": {}}', encoding="utf-8"
+    )
+    enc = VaultEncryptor(tmp_path)
+    seed = enc._load_qrng_seed()
+    assert len(seed) == 32
+
+
+def test_encrypt_file_round_trip(tmp_path: Path) -> None:
+    """encrypt_file + decrypt_file recovers the original bytes."""
+    from tmt_quantum_vault.crypto.vault_encryptor import (
+        VaultDecryptor,
+        VaultEncryptor,
+    )
+
+    input_p = tmp_path / "plain.json"
+    input_p.write_text('{"test": true}', encoding="utf-8")
+
+    enc = VaultEncryptor(tmp_path)
+    enc_path, sk = enc.encrypt_file(input_p)
+    # Output is written as JSON with leading newline.
+    content = enc_path.read_text(encoding="utf-8")
+    assert '"ciphertext"' in content
+
+    dec = VaultDecryptor()
+    out_path = tmp_path / "decrypted.json"
+    dec.decrypt_file(enc_path, sk, out_path)
+
+    assert out_path.read_text(encoding="utf-8") == '{"test": true}'
+
+
+def test_encrypt_file_custom_output_path(tmp_path: Path) -> None:
+    """output_path parameter overrides the default .enc.json suffix."""
+    from tmt_quantum_vault.crypto.vault_encryptor import VaultEncryptor
+
+    input_p = tmp_path / "plain.json"
+    input_p.write_text('{"custom": true}', encoding="utf-8")
+    custom_out = tmp_path / "my_output.enc.json"
+
+    enc = VaultEncryptor(tmp_path)
+    enc_path, _sk = enc.encrypt_file(input_p, output_path=custom_out)
+    assert enc_path == custom_out
+    assert '"ciphertext"' in enc_path.read_text(encoding="utf-8")
+
+
+def test_encrypt_evidence_ledger_raises_when_missing(tmp_path: Path) -> None:
+    """encrypt_evidence_ledger raises FileNotFoundError when ledger is absent."""
+    from tmt_quantum_vault.crypto.vault_encryptor import VaultEncryptor
+
+    enc = VaultEncryptor(tmp_path)
+    with pytest.raises(FileNotFoundError, match="Evidence ledger not found"):
+        enc.encrypt_evidence_ledger()
+
+
+def test_encrypt_directory(tmp_path: Path) -> None:
+    """encrypt_directory encrypts all matching files in a directory."""
+    from tmt_quantum_vault.crypto.vault_encryptor import VaultDecryptor, VaultEncryptor
+
+    (tmp_path / "a.json").write_text('{"a":1}', encoding="utf-8")
+    (tmp_path / "b.json").write_text('{"b":2}', encoding="utf-8")
+    (tmp_path / "c.txt").write_text("not json", encoding="utf-8")
+
+    enc = VaultEncryptor(tmp_path)
+    results = enc.encrypt_directory(tmp_path, pattern="*.json")
+    assert len(results) == 2
+
+    dec = VaultDecryptor()
+    for (enc_path, sk), orig_name in zip(results, ["a.json", "b.json"]):
+        out = tmp_path / f"dec_{orig_name}"
+        dec.decrypt_file(enc_path, sk, out)
+        assert out.read_text(encoding="utf-8") in ['{"a":1}', '{"b":2}']
+
+
+def test_decrypt_file_unknown_format_raises(tmp_path: Path) -> None:
+    """decrypt_file raises when the JSON does not contain required fields."""
+    from tmt_quantum_vault.crypto.vault_encryptor import VaultDecryptor
+
+    bad = tmp_path / "bad.json"
+    bad.write_text('{"wrong": "structure"}', encoding="utf-8")
+
+    dec = VaultDecryptor()
+    with pytest.raises((KeyError, TypeError)):
+        dec.decrypt_file(bad, b"x" * 2400, tmp_path / "out.json")
+
+
+def test_evidence_ledger_round_trip(tmp_path: Path) -> None:
+    """End-to-end: encrypt and decrypt back to the same bytes.
+
+    Uses the real evidence ledger when present; otherwise uses synthetic payload.
     """
     from tmt_quantum_vault.crypto.vault_encryptor import (
         VaultDecryptor,
@@ -146,44 +313,21 @@ def test_evidence_ledger_round_trip() -> None:
 
     repo_root = Path(__file__).resolve().parent.parent
     plain_path = repo_root / "evidence_ledger" / "hardware_evidence_ledger_v2.json"
-    if plain_path.is_file():
-        original = plain_path.read_bytes()
-    else:
-        original = b'{"synthetic": true}\n'
+    original = plain_path.read_bytes() if plain_path.is_file() else b'{"synthetic": true}\n'
 
-    tmp = repo_root / "tests" / "_tmp_round_trip"
-    tmp.mkdir(exist_ok=True)
-    try:
-        enc = VaultEncryptor(tmp)
-        enc_path, sk = enc.encrypt_evidence_ledger.__self__.encrypt_file(  # type: ignore[attr-defined]
-            tmp / "input.json", tmp / "input.enc.json"
-        ) if False else (None, None)
-        # Use the public encrypt_file method directly.
-        input_p = tmp / "input.json"
-        input_p.write_bytes(original)
-        enc = VaultEncryptor(tmp)
-        enc_path, sk = enc.encrypt_file(input_p)
+    input_p = tmp_path / "input.json"
+    input_p.write_bytes(original)
 
-        # Decrypt
-        dec = VaultDecryptor()
-        out_path = tmp / "input.dec.json"
-        dec.decrypt_file(enc_path, sk, out_path)
+    enc = VaultEncryptor(tmp_path)
+    enc_path, sk = enc.encrypt_file(input_p)
 
-        recovered = out_path.read_bytes()
-        assert hashlib.sha256(original).hexdigest() == hashlib.sha256(recovered).hexdigest()
-    finally:
-        # Cleanup
-        for child in tmp.iterdir():
-            if child.name == "_tmp_round_trip" or child.is_dir():
-                continue
-            try:
-                child.unlink()
-            except OSError:
-                pass
-        try:
-            tmp.rmdir()
-        except OSError:
-            pass
+    dec = VaultDecryptor()
+    out_path = tmp_path / "input.dec.json"
+    dec.decrypt_file(enc_path, sk, out_path)
+
+    assert hashlib.sha256(original).hexdigest() == hashlib.sha256(
+        out_path.read_bytes()
+    ).hexdigest()
 
 
 # ══════════════════════════════════════════════════════════════════════════════

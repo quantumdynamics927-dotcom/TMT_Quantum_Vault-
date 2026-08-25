@@ -41,14 +41,32 @@ def run(
     if system:
         payload["system"] = system
 
-    response = requests.post(
-        f"{base_url.rstrip('/')}/api/generate",
-        json=payload,
-        headers=headers,
-        timeout=timeout,
-    )
-    response.raise_for_status()
-    data = response.json()
+    try:
+        response = requests.post(
+            f"{base_url.rstrip('/')}/api/generate",
+            json=payload,
+            headers=headers,
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except requests.HTTPError as e:
+        # Server is reachable but returned an error (e.g. model not found).
+        # Return a failure response so callers can check returncode.
+        return OllamaResponse(
+            model=model,
+            response=extract_error_message(e.response) if e.response is not None else str(e),
+            done=False,
+            returncode=e.response.status_code if e.response is not None else 1,
+        )
+    except requests.RequestException as e:
+        # Connection-level failure.
+        return OllamaResponse(
+            model=model,
+            response=str(e),
+            done=False,
+            returncode=1,
+        )
     return OllamaResponse(
         model=model,
         response=data.get("response", "").strip(),
